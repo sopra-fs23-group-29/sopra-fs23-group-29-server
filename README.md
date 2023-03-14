@@ -1,5 +1,14 @@
 # SoPra RESTful Service Template FS23
 
+## UML Diagramm with draw.io
+- Open draw.io
+- Change storage
+- Github
+- Open existing diagram or create a new one
+- If open existing, choose the diagram
+- Work on it
+- Save as -> automatically commits changes
+
 ## Getting started with Spring Boot
 -   Documentation: https://docs.spring.io/spring-boot/docs/current/reference/html/index.html
 -   Guides: http://spring.io/guides
