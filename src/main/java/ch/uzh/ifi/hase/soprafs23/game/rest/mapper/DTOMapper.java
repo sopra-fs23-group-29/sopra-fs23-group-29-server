@@ -1,9 +1,9 @@
-package ch.uzh.ifi.hase.soprafs23.rest.mapper;
+package ch.uzh.ifi.hase.soprafs23.game.rest.mapper;
 
-import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 

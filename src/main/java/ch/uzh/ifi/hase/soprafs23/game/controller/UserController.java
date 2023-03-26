@@ -1,11 +1,11 @@
-package ch.uzh.ifi.hase.soprafs23.controller;
+package ch.uzh.ifi.hase.soprafs23.game.controller;
 
-import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
-import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
