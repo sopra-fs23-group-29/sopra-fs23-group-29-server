@@ -13,7 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 /**
  * User Service
@@ -35,14 +38,193 @@ public class UserService {
     this.userRepository = userRepository;
   }
 
+  /**
+   * Set STATUS to UserStatus.ONLINE
+   * @param id The id of the user to change status to ONLINE
+   * @return The user changed status to ONLINE
+   */
+  public User setUserOnline(Long id) {
+    User userToUpdate = getUserById(id);
+
+    userToUpdate.setStatus(UserStatus.ONLINE);
+
+    // save entry back to db
+    this.userRepository.save(userToUpdate);
+    userRepository.flush();
+
+    return userToUpdate;
+
+  }
+
+  /**
+   * Set STATUS to UserStatus.ONLINE
+   * @param id The id of the user to change status to ONLINE
+   * @return The user changed status to ONLINE
+   */
+  public User setUserOffline(Long id) {
+    User userToUpdate = getUserById(id);
+
+    userToUpdate.setStatus(UserStatus.OFFLINE);
+
+    // save entry back to db
+    this.userRepository.save(userToUpdate);
+    userRepository.flush();
+
+    return userToUpdate;
+
+  }
+
   public List<User> getUsers() {
     return this.userRepository.findAll();
   }
 
+  /**
+  * Check if a user exists and if his password is correct
+  * Check for existence is based on
+  * username
+  *
+  * Check for password is based on
+  * password
+  *
+  * Return the user if found
+  *
+  * @param userToCheck
+  * @thorows org.springframework.web.server.ResponseStatusException
+  * @return User
+  */
+  public User checkLogin(User userToCheck) {
+
+    String usernameToCheck = userToCheck.getUsername();
+    String passwordToCheck = userToCheck.getPassword();
+
+    User userSearched = this.userRepository.findByUsername(usernameToCheck);
+
+    // check if the username exists in the db
+    if (userSearched == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with username %s not found", usernameToCheck));
+    }
+
+    // fetch the password
+    String userSearchedPassword = userSearched.getPassword();
+
+    // compare to the supplied password
+    if (!Objects.equals(passwordToCheck, userSearchedPassword)) {
+      throw new ResponseStatusException(
+        HttpStatus.UNAUTHORIZED,
+        String.format("Correct: %s , Supplied: %s", userSearchedPassword, passwordToCheck)
+      );
+    }
+
+    User userToReturn = setUserOnline(userSearched.getId());
+
+    return userToReturn;
+
+  }
+
+  /**
+   * Update a user in the db. Always updates both
+   * username
+   * birthday
+   *
+   * Throws error NOT_FOUND if user is not found in db
+   * Throws error CONFLICT if new username is already in use
+   *
+   * @param idToUpdate The id of the user to fetch if exists which will be updated
+   * @param newUsername The new username to set on the user entity
+   * @param newBirthday The new birthday to set on the user entity
+   * @throws org.springframework.web.server.ResponseStatusException
+   */
+  public User updateUser(Long idToUpdate, String newUsername, String newBirthday) {
+
+    // find the user to update, throw error if id does not exist
+    User userToUpdate = getUserById(idToUpdate);
+
+    // compare the new username to all existing usernames, throw error if already taken
+    // only if the newUsername parameter is not NULL
+    if (newUsername != null) {
+      List<User> allUsers = getUsers();
+      for (User user : allUsers) {
+        if (user.getUsername().equals(newUsername)) {
+          throw new ResponseStatusException(
+                  HttpStatus.CONFLICT,
+                  String.format("Username %s is already in use, cannot create duplicated usernames", newUsername)
+          );
+        }
+      }
+    }
+
+    // if any of the new attributes is null, use the old one
+    if (newUsername == null) {
+      newUsername = userToUpdate.getUsername();
+    }
+
+    if (newBirthday == null) {
+      newBirthday = userToUpdate.getBirthday();
+    }
+
+    // update the user attributes
+    userToUpdate.setUsername(newUsername);
+    userToUpdate.setBirthday(newBirthday);
+
+    // save entry back to db
+    this.userRepository.save(userToUpdate);
+    userRepository.flush();
+
+    return userToUpdate;
+
+  }
+
+  /**
+   * Get a single user object by
+   * id
+   *
+   * @param id Number of the user ID to be retrieved
+   * @thorows org.springframework.web.server.ResponseStatusException
+   * @return User
+   */
+  public User getUserById(Long id) {
+    User userSearched = this.userRepository.findById(id)
+      .orElseThrow(() -> new ResponseStatusException(
+        HttpStatus.NOT_FOUND,
+        String.format("User with ID %s not found", id)
+        )
+      );
+
+    return userSearched;
+  }
+
+  /**
+   * Get a single user object by
+   * token
+   *
+   * @param token String Token of the user to be fetched
+   * @thorows org.springframework.web.server.ResponseStatusException
+   * @return User
+   */
+  public User getUserByToken(String token) {
+    User userSearched = this.userRepository.findByToken(token);
+
+    if (userSearched == null) {
+      throw new ResponseStatusException(
+              HttpStatus.NOT_FOUND,
+              String.format("User with Token %s not found", token)
+      );
+    }
+
+    return userSearched;
+  }
+
   public User createUser(User newUser) {
+
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    LocalDateTime now = LocalDateTime.now();
+
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
-    checkIfUserExists(newUser);
+    newUser.setStatus(UserStatus.ONLINE); // set a new user online by default
+    newUser.setCreationDate(dtf.format(now));
+    newUser.setBirthday(""); // set the birthday for new user to an empty string
+    
+    checkIfUserDuplicated(newUser);
     // saves the given entity but data is only persisted in the database once
     // flush() is called
     newUser = userRepository.save(newUser);
@@ -54,7 +236,7 @@ public class UserService {
 
   /**
    * This is a helper method that will check the uniqueness criteria of the
-   * username and the name
+   * username
    * defined in the User entity. The method will do nothing if the input is unique
    * and throw an error otherwise.
    *
@@ -62,18 +244,43 @@ public class UserService {
    * @throws org.springframework.web.server.ResponseStatusException
    * @see User
    */
-  private void checkIfUserExists(User userToBeCreated) {
+  private void checkIfUserDuplicated(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
 
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
+    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created or username changed!";
+    if (userByUsername != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format(baseErrorMessage, "username", "is"));
     }
+  }
+
+  /**
+   * Check if a user with the token tokenToCheck exists in the database, throw error otherwise
+   * If idtoCheck is supplied, further check if the user returned by tokenToCheck
+   * matches the user returned by idToChieck, throw error otherwise
+   *
+   * @param tokenToCheck
+   * @param idToCheck
+   * @throws ResponseStatusException if token does not return user or if token and id don't match
+   * @return True if succesfull.
+   */
+  public boolean checkToken(String tokenToCheck, Long idToCheck) {
+
+    User userByToken = getUserByToken(tokenToCheck);
+
+    // check if the token returns any user
+    if (userByToken == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+      String.format("User not authorized\nToken %s", tokenToCheck));
+    }
+
+    // optional, if idtoCheck != null, check if that token matches the user id
+    if (idToCheck != null) {
+      if (userByToken.getId() != idToCheck) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+        String.format("User not authorized\nToken %s", tokenToCheck));
+      }
+    }
+
+    return true;
   }
 }

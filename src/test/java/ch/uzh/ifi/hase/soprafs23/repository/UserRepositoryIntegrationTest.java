@@ -20,25 +20,56 @@ public class UserRepositoryIntegrationTest {
   private UserRepository userRepository;
 
   @Test
-  public void findByName_success() {
+  public void findByUsername_success() {
     // given
     User user = new User();
-    user.setName("Firstname Lastname");
+    user.setPassword("Password");
     user.setUsername("firstname@lastname");
     user.setStatus(UserStatus.OFFLINE);
     user.setToken("1");
+    user.setCreationDate("1990-01-01");
+    user.setBirthday("1990-01-01");
 
     entityManager.persist(user);
     entityManager.flush();
 
     // when
-    User found = userRepository.findByName(user.getName());
+    User found = userRepository.findByUsername(user.getUsername());
 
     // then
     assertNotNull(found.getId());
-    assertEquals(found.getName(), user.getName());
+    assertEquals(found.getPassword(), user.getPassword());
     assertEquals(found.getUsername(), user.getUsername());
     assertEquals(found.getToken(), user.getToken());
     assertEquals(found.getStatus(), user.getStatus());
+    assertEquals(found.getCreationDate(), user.getCreationDate());
+    assertEquals(found.getBirthday(), user.getBirthday());
+  }
+
+  @Test
+  public void findByToken_success() {
+    // given
+    User user = new User();
+    user.setPassword("Password");
+    user.setUsername("firstname@lastname");
+    user.setStatus(UserStatus.OFFLINE);
+    user.setToken("1");
+    user.setCreationDate("1990-01-01");
+    user.setBirthday("1990-01-01");
+
+    entityManager.persist(user);
+    entityManager.flush();
+
+    // when
+    User found = userRepository.findByToken(user.getToken());
+
+    // then
+    assertNotNull(found.getId());
+    assertEquals(found.getPassword(), user.getPassword());
+    assertEquals(found.getUsername(), user.getUsername());
+    assertEquals(found.getToken(), user.getToken());
+    assertEquals(found.getStatus(), user.getStatus());
+    assertEquals(found.getCreationDate(), user.getCreationDate());
+    assertEquals(found.getBirthday(), user.getBirthday());
   }
 }
