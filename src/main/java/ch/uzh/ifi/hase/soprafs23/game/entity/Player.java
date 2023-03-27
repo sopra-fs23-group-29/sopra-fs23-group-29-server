@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 
 /**
@@ -16,7 +17,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "PLAYER")
-public class Player {
+public class Player implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -33,6 +34,11 @@ public class Player {
   @Column(nullable = false)
   private PlayerColor playercolor;
 
+//  @ManyToOne
+//  private Game game;
+//
+//  @ManyToOne
+//  private Lobby lobby;
 
   public Long getId() {
     return id;
@@ -58,14 +64,34 @@ public class Player {
     this.token = token;
   }
 
-  public String getPlayercolor() {
+  public PlayerColor getPlayercolor() {
     return playercolor;
   }
 
-  public void setPlayercolor(String playercolor) {
+  public void setPlayercolor(PlayerColor playercolor) {
     this.playercolor = playercolor;
   }
 
+//  public Game getGame() {
+//    return game;
+//  }
+//
+//  public void setGame(Game game) {
+//    this.game = game;
+//  }
+//
+//  public Lobby getLobby() {
+//    return lobby;
+//  }
+//
+//  public void setLobby(Lobby lobby) {
+//    this.lobby = lobby;
+//  }
 
+
+
+  public String toString() {
+    return "Player: " + this.getPlayername() + " ID: " + this.getId();
+  }
 
 }
