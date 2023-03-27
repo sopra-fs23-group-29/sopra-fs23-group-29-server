@@ -34,8 +34,8 @@ public class Player implements Serializable {
   @Column(nullable = false)
   private PlayerColor playercolor;
 
-//  @ManyToOne
-//  private Game game;
+  @ManyToOne
+  private Game game;
 //
 //  @ManyToOne
 //  private Lobby lobby;
@@ -72,13 +72,13 @@ public class Player implements Serializable {
     this.playercolor = playercolor;
   }
 
-//  public Game getGame() {
-//    return game;
-//  }
-//
-//  public void setGame(Game game) {
-//    this.game = game;
-//  }
+  public Game getGame() {
+    return game;
+  }
+
+  public void setGame(Game game) {
+    this.game = game;
+  }
 //
 //  public Lobby getLobby() {
 //    return lobby;

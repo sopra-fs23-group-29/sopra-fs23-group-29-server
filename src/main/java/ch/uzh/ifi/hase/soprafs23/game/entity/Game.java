@@ -24,7 +24,6 @@ import java.util.*;
 public class Game implements Serializable {
 
   private static final long serialVersionUID = 1L;
-
   @Id
   @GeneratedValue
   private Long id;
@@ -51,8 +50,8 @@ public class Game implements Serializable {
   private int maxturns;
 
 
-//  @OneToMany(mappedBy = "game")
-//  private final List<Player> players = new ArrayList<Player>();
+  @OneToMany(mappedBy = "game")
+  private final List<Player> players = new ArrayList<Player>();
 
   // private Turn currentTurn;
 
@@ -130,11 +129,11 @@ public class Game implements Serializable {
    *
    * @return  An unmodifiable list object containing all current players of the game
    */
-//  public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
-//
-//  public void addPlayer(Player player) {this.players.add(player);}
-//
-//  public void removePlayer(Player player) {this.players.remove(player);}
+  public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
+
+  public void addPlayer(Player player) {this.players.add(player);}
+
+  public void removePlayer(Player player) {this.players.remove(player);}
 
 
 }
