@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs23.controller;
+package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
@@ -412,7 +412,7 @@ public class UserControllerTest {
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
    * Input will look like this: {"name": "Test User", "username": "testUsername"}
-   * 
+   *
    * @param object
    * @return string
    */

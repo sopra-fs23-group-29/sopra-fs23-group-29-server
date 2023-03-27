@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs23.service;
+package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
