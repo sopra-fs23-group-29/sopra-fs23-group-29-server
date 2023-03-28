@@ -26,7 +26,6 @@ public class Game implements Serializable {
   private static final long serialVersionUID = 1L;
   @Id
   @GeneratedValue
-  @Column(unique = true, nullable = false)
   private Long id;
 
   @Column(nullable = false)
@@ -50,11 +49,17 @@ public class Game implements Serializable {
   @Column(nullable = false)
   private int maxturns;
 
-
+  // no cascade -> default nothing will be cascaded
+  // cascade = CascadeType.PERSIS -> Player will be created when game is created with players
   @OneToMany(mappedBy = "game")
   private final List<Player> players = new ArrayList<Player>();
 
   // private Turn currentTurn;
+
+  /**
+   * The constructor always needs a list of players
+   * @return
+   */
 
 
 

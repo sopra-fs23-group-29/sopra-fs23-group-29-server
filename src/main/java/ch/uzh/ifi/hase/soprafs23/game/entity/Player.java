@@ -91,7 +91,7 @@ public class Player implements Serializable {
 
 
   public String toString() {
-    return "Player: " + this.getPlayername() + " ID: " + this.getId();
+    return "Player: " + this.getPlayername() + " ID: " + this.getId() + " Token:" + this.getToken();
   }
 
 }
