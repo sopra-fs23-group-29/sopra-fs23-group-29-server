@@ -51,7 +51,7 @@ public class Game implements Serializable {
 
   // no cascade -> default nothing will be cascaded
   // cascade = CascadeType.PERSIS -> Player will be created when game is created with players
-  @OneToMany(mappedBy = "game")
+  @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
   private final List<Player> players = new ArrayList<Player>();
 
   // private Turn currentTurn;

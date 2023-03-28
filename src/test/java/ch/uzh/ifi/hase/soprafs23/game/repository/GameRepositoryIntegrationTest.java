@@ -195,4 +195,33 @@ class GameRepositoryIntegrationTest {
     assertFalse(players_found.isEmpty());
     assertEquals(players_to_find, players_found);
   }
+
+  @Test
+  void whenGameDeleted_PlayersDeleted() {
+    // given - players are persisted
+    entityManager.persist(p1);
+    entityManager.flush();
+    entityManager.persist(p2);
+    entityManager.flush();
+
+    // given - a game with players is persisted
+    entityManager.persist(g1);
+
+    // given - find all players associated with the game
+    Game g1_repository = gameRepository.findByGamename("g1");
+    List<Player> g1_players = g1_repository.getPlayers();
+
+    // when - the players are still present
+    List<Player> players_found = playerRepository.findAll();
+    assertEquals(players_found.size(), g1_players.size());
+
+    // when - the game is deleted
+    entityManager.remove(g1);
+
+    // then - the players are deleted as well
+    List<Player> players_left = playerRepository.findAll();
+
+    assertTrue(players_left.isEmpty());
+
+  }
 }
