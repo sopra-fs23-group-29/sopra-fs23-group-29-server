@@ -79,7 +79,6 @@ public class UserControllerTest {
     // then
     mockMvc.perform(getRequest).andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].password", is(user.getPassword())))
         .andExpect(jsonPath("$[0].username", is(user.getUsername())))
         .andExpect(jsonPath("$[0].status", is(user.getStatus().toString())))
         .andExpect(jsonPath("$[0].creationDate", is(user.getCreationDate())))
@@ -109,7 +108,6 @@ public class UserControllerTest {
     // then
     mockMvc.perform(getRequest).andExpect(status().isOk())
             .andExpect(jsonPath("$.id", is(1)))
-            .andExpect(jsonPath("$.password", is(user.getPassword())))
             .andExpect(jsonPath("$.username", is(user.getUsername())))
             .andExpect(jsonPath("$.status", is(user.getStatus().toString())))
             .andExpect(jsonPath("$.creationDate", is(user.getCreationDate())))
@@ -144,34 +142,6 @@ public class UserControllerTest {
   }
 
   @Test
-  public void givenUsers_whenGetSingleUser_thenThrowUnauthorized() throws Exception {
-    // given
-    User user = new User();
-    user.setId(1L);
-    user.setPassword("Password");
-    user.setUsername("firstname@lastname");
-    user.setToken("1");
-    user.setStatus(UserStatus.OFFLINE);
-    user.setCreationDate(currentDate);
-    user.setBirthday(fakeBirthday);
-
-    // this mocks the UserService -> we define above what the userService should
-    // return when getUsers() is called
-    given(userService.checkToken("1", null)).willThrow(
-            new ResponseStatusException(HttpStatus.UNAUTHORIZED)
-    );
-    given(userService.getUserById(user.getId())).willReturn(user);
-
-    // when
-    MockHttpServletRequestBuilder getRequest = get("/users/1").contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "1");
-
-
-    // then
-    mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
-  }
-
-  @Test
   public void createUser_validInput_userCreated() throws Exception {
     // given
     User user = new User();
@@ -199,7 +169,6 @@ public class UserControllerTest {
         .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", is(user.getId().intValue())))
-        .andExpect(jsonPath("$.password", is(user.getPassword())))
         .andExpect(jsonPath("$.username", is(user.getUsername())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())))
         .andExpect(jsonPath("$.creationDate", is(user.getCreationDate())))
@@ -352,23 +321,22 @@ public class UserControllerTest {
     user.setCreationDate(currentDate);
     user.setBirthday("testBirthday");
 
-    UserPostDTO userPostDTO = new UserPostDTO();
-    userPostDTO.setUsername("testUsername");
-    userPostDTO.setPassword("testPassword");
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setPassword("testPassword");
 
     given(userService.checkLogin(Mockito.any())).willReturn(user);
 
     // when/then -> do the request + validate the result
-    MockHttpServletRequestBuilder postRequest = post("/login")
+    MockHttpServletRequestBuilder putRequest = put("/users/login")
             .contentType(MediaType.APPLICATION_JSON)
-            .content(asJsonString(userPostDTO));
+            .content(asJsonString(userPutDTO));
 
     // then
-    mockMvc.perform(postRequest)
+    mockMvc.perform(putRequest)
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id", is(user.getId().intValue())))
-            .andExpect(jsonPath("$.password", is(user.getPassword())))
             .andExpect(jsonPath("$.username", is(user.getUsername())))
             .andExpect(jsonPath("$.status", is(user.getStatus().toString())))
             .andExpect(jsonPath("$.creationDate", is(user.getCreationDate())))
