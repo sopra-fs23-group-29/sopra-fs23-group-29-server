@@ -51,6 +51,7 @@ public class Game implements Serializable {
 
   // no cascade -> default nothing will be cascaded
   // cascade = CascadeType.PERSIS -> Player will be created when game is created with players
+  // cascade = CascadeType.ALL -> Every change will be propagated to players
   @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
   private final List<Player> players = new ArrayList<Player>();
 
@@ -140,6 +141,12 @@ public class Game implements Serializable {
   public void addPlayer(Player player) {this.players.add(player);}
 
   public void removePlayer(Player player) {this.players.remove(player);}
+
+
+
+  public String toString() {
+    return "Game: " + this.getGamename();
+  }
 
 
 }

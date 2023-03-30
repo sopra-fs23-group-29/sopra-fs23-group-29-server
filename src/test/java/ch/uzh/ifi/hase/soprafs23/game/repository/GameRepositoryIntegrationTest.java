@@ -147,7 +147,7 @@ class GameRepositoryIntegrationTest {
     // List to find
     List<Player> players_to_find = Arrays.asList(p1, p2);
     System.out.println("players_to_find");
-    players_to_find.forEach((p) -> System.out.println(p));
+    players_to_find.forEach(System.out::println);
 
     // given - Game saved
     entityManager.persist(g1);
@@ -163,10 +163,10 @@ class GameRepositoryIntegrationTest {
     // check player repository
     List<Player> players_repository = playerRepository.findAll();
     System.out.println("players_repository");
-    players_repository.forEach((p) -> System.out.println(p));
+    players_repository.forEach(System.out::println);
 
     System.out.println("players_found from game in gameRepository");
-    players_found.forEach((p) -> System.out.println(p));
+    players_found.forEach(System.out::println);
 
     assertFalse(players_found.isEmpty());
     assertEquals(players_to_find, players_found);

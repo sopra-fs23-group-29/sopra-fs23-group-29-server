@@ -36,9 +36,6 @@ public class Player implements Serializable {
 
   @ManyToOne
   private Game game;
-//
-//  @ManyToOne
-//  private Lobby lobby;
 
   public Long getId() {
     return id;
@@ -91,7 +88,7 @@ public class Player implements Serializable {
 
 
   public String toString() {
-    return "Player: " + this.getPlayername() + " ID: " + this.getId() + " Token:" + this.getToken();
+    return "Player: " + this.getPlayername() + " ID: " + this.getId() + " Token:" + this.getToken() + " GameID:" + this.getGame();
   }
 
 }
