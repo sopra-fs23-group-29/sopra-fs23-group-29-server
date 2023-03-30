@@ -89,7 +89,7 @@ public class UserService {
   * Return the user if found
   *
   * @param userToCheck
-  * @thorows org.springframework.web.server.ResponseStatusException
+  * @throws org.springframework.web.server.ResponseStatusException
   * @return User
   */
   public User checkLogin(User userToCheck) {
@@ -174,12 +174,40 @@ public class UserService {
 
   }
 
+  public void deleteUser(Long userId, String reqUsername, String reqPassword, String token) {
+    User userToDelete = getUserById(userId);
+
+    // check that usernames match
+    if (!userToDelete.getUsername().equals(reqUsername)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              "The usernames do not match");
+    }
+
+    // check that the passwords match
+    if (!userToDelete.getPassword().equals(reqPassword)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              "The passwords do not match");
+    }
+
+    // check if the token provided authorizes to delete the user with the given id
+    if (!userToDelete.getToken().equals(token)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              "The given token does not authorize to delete this user.");
+    }
+
+    // user exists and will be deleted
+    userRepository.delete(userToDelete);
+    userRepository.flush();
+
+    log.debug("Deleted Information for User: {}", userToDelete);
+  }
+
   /**
    * Get a single user object by
    * id
    *
    * @param id Number of the user ID to be retrieved
-   * @thorows org.springframework.web.server.ResponseStatusException
+   * @throws org.springframework.web.server.ResponseStatusException
    * @return User
    */
   public User getUserById(Long id) {
@@ -198,7 +226,7 @@ public class UserService {
    * token
    *
    * @param token String Token of the user to be fetched
-   * @thorows org.springframework.web.server.ResponseStatusException
+   * @throws org.springframework.web.server.ResponseStatusException
    * @return User
    */
   public User getUserByToken(String token) {

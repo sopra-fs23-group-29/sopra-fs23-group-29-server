@@ -4,10 +4,12 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserDeleteDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,11 +57,7 @@ public class UserController {
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserGetDTO> getAllUsers(@RequestHeader("Authorization") String auth_token) {
-
-    // check the auth_token
-    userService.checkToken(auth_token, null);
-
+  public List<UserGetDTO> getAllUsers() {
     // fetch all users in the internal representation
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
@@ -138,5 +136,28 @@ public class UserController {
     // update the user
     User updatedUser = userService.updateUser(id, newUsername, newBirthday);
 
+  }
+
+  @DeleteMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseBody
+  public void deleteUser(@PathVariable("userId") Long userId,
+                         @RequestHeader(value="Authorization") String token,
+                         @RequestBody UserDeleteDTO userDeleteDTO) {
+    // check if token was provided
+    if (token == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "A token is required for deleting a user!");
+    }
+
+    // convert DTO object to internal representation
+    User userInput = DTOMapper.INSTANCE.convertUserDeleteDTOtoEntity(userDeleteDTO);
+
+    // extract the new attributes
+    String reqUsername = userInput.getUsername();
+    String reqPassword = userInput.getPassword();
+
+    // letting userService handle the deletion
+    userService.deleteUser(userId, reqUsername, reqPassword, token);
   }
 }

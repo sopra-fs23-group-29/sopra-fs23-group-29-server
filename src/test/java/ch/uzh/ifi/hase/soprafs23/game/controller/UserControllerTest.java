@@ -87,34 +87,6 @@ public class UserControllerTest {
   }
 
   @Test
-  public void givenUsers_whenGetUsers_throwUnauthorized() throws Exception {
-    // given
-    User user = new User();
-    user.setPassword("Password");
-    user.setUsername("firstname@lastname");
-    user.setStatus(UserStatus.OFFLINE);
-    user.setCreationDate(currentDate);
-    user.setBirthday(fakeBirthday);
-    user.setToken("1");
-
-    List<User> allUsers = Collections.singletonList(user);
-
-    // this mocks the UserService -> we define above what the userService should
-    // return when getUsers() is called
-    given(userService.checkToken("1", null)).willThrow(
-      new ResponseStatusException(HttpStatus.UNAUTHORIZED)
-    );
-    given(userService.getUsers()).willReturn(allUsers);
-
-    // when
-    MockHttpServletRequestBuilder getRequest = get("/users").contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "1");
-
-    // then
-    mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
-  }
-
-  @Test
   public void givenUsers_whenGetSingleUser_thenReturnJsonArray() throws Exception {
     // given
     User user = new User();

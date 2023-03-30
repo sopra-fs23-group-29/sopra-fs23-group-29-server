@@ -5,7 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
-import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserDeleteDTO;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,5 +65,20 @@ public class DTOMapperTest {
     assertEquals(userPutDTO.getBirthday(), user.getBirthday());
     assertEquals(userPutDTO.getUsername(), user.getUsername());
 
+  }
+
+  @Test
+  public void testCreateUser_fromUserDeleteDTO_toUser_success() {
+    // create UserPostDTO
+    UserDeleteDTO userDeleteDTO = new UserDeleteDTO();
+    userDeleteDTO.setUsername("username");
+    userDeleteDTO.setPassword("password");
+
+    // MAP -> Create user
+    User user = DTOMapper.INSTANCE.convertUserDeleteDTOtoEntity(userDeleteDTO);
+
+    // check content
+    assertEquals(userDeleteDTO.getUsername(), user.getUsername());
+    assertEquals(userDeleteDTO.getPassword(), user.getPassword());
   }
 }
