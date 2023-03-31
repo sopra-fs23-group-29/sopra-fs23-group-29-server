@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.repository;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
@@ -15,19 +17,30 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-class PlayerRepositoryIntegrationTest {
+public class PlayerRepositoryIntegrationTest {
 
   @Autowired
   private TestEntityManager entityManager;
-
+  @Autowired
+  private GameRepository gameRepository;
   @Autowired
   private PlayerRepository playerRepository;
 
+  public Game g1;
   public Player p1;
   public Player p2;
 
   @BeforeEach
   public void init() {
+
+    g1 = new Game();
+    g1.setGamename("g1");
+    g1.setToken("g1");
+    g1.setGamestatus(GameStatus.INPROGRESS);
+    g1.setGamemode(GameMode.PVP);
+    g1.setBoardsize(11);
+    g1.setMaxduration(11);
+    g1.setMaxturns(11);
 
     p1 = new Player();
     p1.setPlayername("player1");
@@ -39,21 +52,21 @@ class PlayerRepositoryIntegrationTest {
     p2.setToken("p2");
     p2.setPlayercolor(PlayerColor.BLUE);
 
+    p1.setGame(g1);
+    p2.setGame(g1);
   }
 
   @Test
-  void findByPlayername() {
+  void findByGame() {
 
-    entityManager.persist(p1);
+    List<Player> players_to_find = Arrays.asList(p1, p2);
+
+    entityManager.persist(g1);
     entityManager.flush();
 
-    Player p1_found = playerRepository.findByToken(p1.getPlayername());
+    List<Player> g1_players = playerRepository.findByGame(g1);
 
-    // then - Make sure game is there
-    assertNotNull(p1_found.getId());
-    assertEquals(p1_found.getPlayername(), p1.getPlayername());
-    assertEquals(p1_found.getToken(), p1.getToken());
-    assertEquals(p1_found.getPlayercolor(), p1.getPlayercolor());
+    assertEquals(players_to_find, g1_players);
+
   }
-
 }
