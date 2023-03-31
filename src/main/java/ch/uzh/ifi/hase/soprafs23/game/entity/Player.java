@@ -42,6 +42,9 @@ public class Player implements Serializable {
   @ManyToOne(cascade = CascadeType.PERSIST)
   private Game game;
 
+  @OneToOne
+  private User user;
+
   public Long getId() {
     return id;
   }
@@ -82,6 +85,12 @@ public class Player implements Serializable {
     this.game = game;
     // to keep it consistent, also add the player to the game
     game.addPlayer(this);
+  }
+
+  public User getUser() {return user;}
+
+  public void setUser(User user) {
+    this.user = user;
   }
 
 

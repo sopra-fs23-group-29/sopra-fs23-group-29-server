@@ -3,8 +3,10 @@ package ch.uzh.ifi.hase.soprafs23.game.repository;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
+import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ public class PlayerRepositoryIntegrationTest {
   public Game g1;
   public Player p1;
   public Player p2;
+  public User u1;
 
   @BeforeEach
   public void init() {
@@ -41,6 +44,12 @@ public class PlayerRepositoryIntegrationTest {
     g1.setBoardsize(11);
     g1.setMaxduration(11);
     g1.setMaxturns(11);
+
+    u1 = new User();
+    u1.setUsername("u1");
+    u1.setToken("u1");
+    u1.setPassword("u1");
+    u1.setStatus(UserStatus.ONLINE);
 
     p1 = new Player();
     p1.setPlayername("player1");
@@ -69,4 +78,27 @@ public class PlayerRepositoryIntegrationTest {
     assertEquals(players_to_find, g1_players);
 
   }
+
+  @Test
+  void findByUserToken() {
+
+    // given - set the user for a player
+    p1.setUser(u1);
+
+    // when - persist the player
+    entityManager.persist(u1);
+    entityManager.flush();
+    entityManager.persist(p1);
+    entityManager.flush();
+
+    // then - retrieved user matches
+    Player p1_found = playerRepository.findByUserToken("u1");
+
+    assertNotNull(p1_found.getId());
+    assertEquals(p1_found.getToken(), p1.getToken());
+    assertEquals(p1_found.getPlayername(), p1.getPlayername());
+
+  }
+
+
 }
