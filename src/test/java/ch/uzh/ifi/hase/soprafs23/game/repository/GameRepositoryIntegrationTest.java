@@ -68,6 +68,22 @@ class GameRepositoryIntegrationTest {
   }
 
   @Test
+  void duplicatedAdditionPlayer_doNothing() {
+
+    // given - The list of players of the game
+    List<Player> g1_players_before = g1.getPlayers();
+
+    // when - Adding a player a second time to a game
+    g1.addPlayer(p1);
+
+    // then - Nothing changed about the players list
+    List<Player> g1_players_after = g1.getPlayers();
+
+    assertEquals(g1_players_before, g1_players_after);
+
+  }
+
+  @Test
   void findByGamename() {
 
     entityManager.persist(g1);

@@ -139,10 +139,17 @@ public class Game implements Serializable {
    */
   public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
 
+  /**
+   * Add a Player to the list of players of the game
+   * Do nothing if the Player instance is already contained
+   * @param player Player to add
+   */
   public void addPlayer(Player player) {
-    this.players.add(player);
-    // To keep consistency, automatically set the game for the player
-    player.setGame(this);
+    if (!this.players.contains(player)) {
+      this.players.add(player);
+      // To keep consistency, automatically set the game for the player
+      player.setGame(this);
+    }
   }
 
   public void removePlayer(Player player) {this.players.remove(player);}

@@ -35,7 +35,7 @@ public class Player implements Serializable {
   private PlayerColor playercolor;
 
   /**
-   * Cascade: Player has PERSIST.
+   * Cascade: Player has CascadeType.PERSIST.
    * When the Player is persisted, the Game is persisted if not exist
    * However, the game lives on if all Players are deleted
    */
@@ -80,6 +80,8 @@ public class Player implements Serializable {
 
   public void setGame(Game game) {
     this.game = game;
+    // to keep it consistent, also add the player to the game
+    game.addPlayer(this);
   }
 
 
