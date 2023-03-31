@@ -199,6 +199,7 @@ class GameRepositoryIntegrationTest {
   @Test
   void whenGameDeleted_PlayersDeleted() {
     // given - players are persisted
+    // Would not be neccesary, due to CASCADE.ALL of Game
     entityManager.persist(p1);
     entityManager.flush();
     entityManager.persist(p2);
@@ -222,6 +223,38 @@ class GameRepositoryIntegrationTest {
     List<Player> players_left = playerRepository.findAll();
 
     assertTrue(players_left.isEmpty());
+
+  }
+
+  @Test
+  void whenAllPlayersDeleted_gameStillExists() {
+
+
+    // given - a game with players is persisted
+    // Due to CASCADE.ALL, the players are persisted as well
+    entityManager.persist(g1);
+
+    // when - All the players that reference the game are deleted
+    entityManager.remove(p1);
+    // when - Delete one player, will the game be deleted?
+    assertNotNull(gameRepository.findByGamename("g1"));
+    entityManager.remove(p2);
+
+    // then - Make sure players are gone
+    assertNull(playerRepository.findByPlayername("p1"));
+    assertNull(playerRepository.findByPlayername("p2"));
+
+    // then - Assert the game is still there
+    Game g1_found = gameRepository.findByGamename("g1");
+    assertNotNull(g1_found.getId());
+    assertEquals(g1_found.getGamename(), g1.getGamename());
+    assertEquals(g1_found.getToken(), g1.getToken());
+    assertEquals(g1_found.getGamestatus(), g1.getGamestatus());
+    assertEquals(g1_found.getGamemode(), g1.getGamemode());
+    assertEquals(g1_found.getBoardsize(), g1.getBoardsize());
+    assertEquals(g1_found.getMaxduration(), g1.getMaxduration());
+    assertEquals(g1_found.getMaxturns(), g1.getMaxturns());
+
 
   }
 }

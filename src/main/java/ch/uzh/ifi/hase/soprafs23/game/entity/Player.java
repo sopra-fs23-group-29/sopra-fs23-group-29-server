@@ -22,7 +22,7 @@ public class Player implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false, unique = true)
@@ -34,7 +34,12 @@ public class Player implements Serializable {
   @Column(nullable = false)
   private PlayerColor playercolor;
 
-  @ManyToOne
+  /**
+   * Cascade: Player has PERSIST.
+   * When the Player is persisted, the Game is persisted if not exist
+   * However, the game lives on if all Players are deleted
+   */
+  @ManyToOne(cascade = CascadeType.PERSIST)
   private Game game;
 
   public Long getId() {
@@ -76,15 +81,6 @@ public class Player implements Serializable {
   public void setGame(Game game) {
     this.game = game;
   }
-//
-//  public Lobby getLobby() {
-//    return lobby;
-//  }
-//
-//  public void setLobby(Lobby lobby) {
-//    this.lobby = lobby;
-//  }
-
 
 
   public String toString() {

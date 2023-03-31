@@ -25,7 +25,7 @@ public class Game implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false)
@@ -49,11 +49,12 @@ public class Game implements Serializable {
   @Column(nullable = false)
   private int maxturns;
 
-  // no cascade -> default nothing will be cascaded
-  // cascade = CascadeType.PERSIS -> Player will be created when game is created with players
-  // cascade = CascadeType.ALL -> Every change will be propagated to players
+  /**
+   * Cascade: Game has ALL. Meaning when the Game is persisted, the players are presisted if not exist
+   * When the game is deleted, all the players are deleted
+   */
   @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-  private final List<Player> players = new ArrayList<Player>();
+  private final List<Player> players = new ArrayList<>();
 
   // private Turn currentTurn;
 
@@ -138,7 +139,11 @@ public class Game implements Serializable {
    */
   public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
 
-  public void addPlayer(Player player) {this.players.add(player);}
+  public void addPlayer(Player player) {
+    this.players.add(player);
+    // To keep consistency, automatically set the game for the player
+    player.setGame(this);
+  }
 
   public void removePlayer(Player player) {this.players.remove(player);}
 
