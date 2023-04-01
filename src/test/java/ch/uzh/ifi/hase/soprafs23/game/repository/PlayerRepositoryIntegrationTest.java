@@ -40,6 +40,7 @@ public class PlayerRepositoryIntegrationTest {
     p2.setPlayercolor(PlayerColor.BLUE);
 
     g1 = new Game("g1", "g1", GameMode.PVP, p1);
+    g1.setGamestatus(GameStatus.INLOBBY);
     g1.setBoardsize(11);
     g1.setMaxduration(11);
     g1.setMaxturns(11);

@@ -62,6 +62,9 @@ public class Player implements Serializable {
     this.userToken = userToken;
   }
 
+  // default no args constructor - needed for test
+  public Player() {}
+
 
 
 

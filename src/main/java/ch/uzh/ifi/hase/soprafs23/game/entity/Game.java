@@ -66,7 +66,7 @@ public class Game implements Serializable {
    * @param gamename name of the game
    * @param token token of the game
    * @param gamemode Which mode to play
-   * @param owner The token of the player owning the game
+   * @param owner The Player owning the game
    */
   public Game(String gamename, String token, GameMode gamemode, Player owner) {
     this.gamename = gamename;
@@ -76,10 +76,10 @@ public class Game implements Serializable {
 
     // Add the owner to the list of players
     addPlayer(owner);
-
-    // When a game is created, set the GameStatus to INLOBBY
-    this.gamestatus = GameStatus.INLOBBY;
   }
+
+  // default no args constructor - needed for test
+  public Game() {}
 
 
 
