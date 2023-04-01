@@ -166,7 +166,6 @@ public class UserControllerTest {
 
     // then
     mockMvc.perform(postRequest)
-        .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", is(user.getId().intValue())))
         .andExpect(jsonPath("$.username", is(user.getUsername())))
@@ -202,7 +201,6 @@ public class UserControllerTest {
 
     // then
     mockMvc.perform(postRequest)
-            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isConflict());
   }
 
@@ -233,7 +231,6 @@ public class UserControllerTest {
 
     // then
     mockMvc.perform(putRequest)
-            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent());
 
   }
@@ -267,7 +264,6 @@ public class UserControllerTest {
 
     // then
     mockMvc.perform(putRequest)
-            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isConflict());
 
   }
@@ -334,7 +330,6 @@ public class UserControllerTest {
 
     // then
     mockMvc.perform(putRequest)
-            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id", is(user.getId().intValue())))
             .andExpect(jsonPath("$.username", is(user.getUsername())))

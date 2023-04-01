@@ -288,9 +288,6 @@ public class UserServiceIntegrationTest {
     User createdUser = userService.createUser(testUser);
     Long createdUserId = createdUser.getId();
 
-    System.out.println(createdUser.getToken());
-    System.out.println(createdUser.getId());
-
     // update the user, expect conflict since username cannot be duplicated
     userService.updateUser(createdUserId, null, "newBirthday");
 
@@ -318,9 +315,6 @@ public class UserServiceIntegrationTest {
     testUser.setPassword("testPassword");
     testUser.setUsername("testUsername");
     User createdUser = userService.createUser(testUser);
-
-    System.out.println(createdUser.getToken());
-    System.out.println(createdUser.getId());
 
     // check success of fetching by token
     userService.checkToken(createdUser.getToken(), createdUser.getId());
