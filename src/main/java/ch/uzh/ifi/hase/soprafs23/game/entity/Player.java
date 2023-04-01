@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 
 import javax.persistence.*;
@@ -34,6 +36,9 @@ public class Player implements Serializable {
   @Column(nullable = false)
   private PlayerColor playercolor;
 
+  @Column(nullable = false, unique = true)
+  private String userToken;
+
   /**
    * Cascade: Player has CascadeType.PERSIST.
    * When the Player is persisted, the Game is persisted if not exist
@@ -42,8 +47,25 @@ public class Player implements Serializable {
   @ManyToOne(cascade = CascadeType.PERSIST)
   private Game game;
 
-  @OneToOne
-  private User user;
+
+
+  /**
+   * The constructor always needs a playername, a token and a user reference
+   * A game reference is not needed
+   * @param playername Name of the player
+   * @param token Token of the player
+   * @param userToken The userToken this player belongs to
+   */
+  public Player(String playername, String token, String userToken) {
+    this.playername = playername;
+    this.token = token;
+    this.userToken = userToken;
+  }
+
+
+
+
+
 
   public Long getId() {
     return id;
@@ -87,10 +109,10 @@ public class Player implements Serializable {
     game.addPlayer(this);
   }
 
-  public User getUser() {return user;}
+  public String getUserToken() {return userToken;}
 
-  public void setUser(User user) {
-    this.user = user;
+  public void setUserToken(String userToken) {
+    this.userToken = userToken;
   }
 
 

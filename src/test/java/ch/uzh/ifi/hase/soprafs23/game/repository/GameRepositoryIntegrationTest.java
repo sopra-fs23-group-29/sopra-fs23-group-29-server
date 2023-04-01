@@ -3,8 +3,10 @@ package ch.uzh.ifi.hase.soprafs23.game.repository;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
+import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,22 +29,19 @@ class GameRepositoryIntegrationTest {
   @Autowired
   private PlayerRepository playerRepository;
 
+
   public Game g1;
   public Game g2;
   public Player p1;
   public Player p2;
 
+
   @BeforeEach
   public void init() {
 
-    p1 = new Player();
-    p1.setPlayername("player1");
-    p1.setToken("p1");
-    p1.setPlayercolor(PlayerColor.NOTSET);
-
-    p2 = new Player();
-    p2.setPlayername("player2");
-    p2.setToken("p2");
+    p1 = new Player("player1", "p1", "userToken1");
+    p1.setPlayercolor(PlayerColor.BLUE);
+    p2 = new Player("player2", "p2", "userToken2");
     p2.setPlayercolor(PlayerColor.BLUE);
 
     g1 = new Game("g1", "g1", GameMode.PVP, p1);
@@ -56,6 +55,7 @@ class GameRepositoryIntegrationTest {
     g2.setMaxturns(11);
 
     g1.addPlayer(p2);
+
   }
 
   @Test
@@ -187,6 +187,21 @@ class GameRepositoryIntegrationTest {
 
     assertFalse(players_found.isEmpty());
     assertEquals(players_to_find, players_found);
+  }
+
+  @Test
+  void whenPlayerPersisted_gameIsPersisted() {
+
+    // given - a player is persisted before the game is persisted
+    entityManager.persist(p1);
+    entityManager.flush();
+
+    // when - we try to find the game
+    Game g1_to_be_found = gameRepository.findByGamename("g1");
+
+    // then - game should be found
+    assertNotNull(g1_to_be_found);
+
   }
 
   @Test

@@ -50,7 +50,7 @@ public class Game implements Serializable {
   private int maxturns;
 
   /**
-   * Cascade: Game has ALL. Meaning when the Game is persisted, the players are presisted if not exist
+   * Cascade: Game has ALL. Meaning when the Game is persisted, the players are persisted if not exist
    * When the game is deleted, all the players are deleted
    */
   @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
