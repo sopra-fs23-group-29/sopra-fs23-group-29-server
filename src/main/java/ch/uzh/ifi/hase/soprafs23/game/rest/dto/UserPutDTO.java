@@ -4,7 +4,7 @@ public class UserPutDTO {
 
   private String username;
   private String birthday;
-
+  private String password;
 
 
 
@@ -20,4 +20,7 @@ public class UserPutDTO {
 
   public void setBirthday(String birthday) {this.birthday = birthday;}
 
+  public String getPassword() {return password;}
+
+  public void setPassword(String password) {this.password = password;}
 }

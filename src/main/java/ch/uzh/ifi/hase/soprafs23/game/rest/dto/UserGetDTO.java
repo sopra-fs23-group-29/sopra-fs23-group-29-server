@@ -7,7 +7,6 @@ public class UserGetDTO {
   private Long id;
   private String password;
   private String username;
-  private String token;
   private UserStatus status;
   private String creationDate;
   private String birthday;
@@ -20,7 +19,7 @@ public class UserGetDTO {
     this.id = id;
   }
 
-  public String getPassword() {return password;}
+  //public String getPassword() {return password;}
 
   public void setPassword(String password) {this.password = password;}
 
@@ -30,14 +29,6 @@ public class UserGetDTO {
 
   public void setUsername(String username) {
     this.username = username;
-  }
-
-  public String getToken() {
-    return token;
-  }
-
-  public void setToken(String token) {
-    this.token = token;
   }
 
   public UserStatus getStatus() {

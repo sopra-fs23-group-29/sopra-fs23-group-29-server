@@ -4,11 +4,14 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserDeleteDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,37 +32,10 @@ public class UserController {
   }
 
 
-  @GetMapping("/users/{id}")
-  @ResponseStatus(HttpStatus.OK)
-  @ResponseBody
-  public UserGetDTO getSingleUserByUsername(@PathVariable Long id, @RequestHeader("Authorization") String auth_token) {
-
-    // check the auth_token
-    userService.checkToken(auth_token, null);
-
-    // fetch the single user in the internal representation
-    User retrievedUser = userService.getUserById(id);
-
-    // remove token information if the retrieved user does not match the token
-    if (!retrievedUser.getToken().equals(auth_token)) {
-      retrievedUser.setToken("");
-    }
-
-    // convert user to the API representation
-    UserGetDTO retrievedUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(retrievedUser);
-
-    return retrievedUserDTO;
-  }
-
-
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserGetDTO> getAllUsers(@RequestHeader("Authorization") String auth_token) {
-
-    // check the auth_token
-    userService.checkToken(auth_token, null);
-
+  public List<UserGetDTO> getAllUsers() {
     // fetch all users in the internal representation
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
@@ -73,28 +49,50 @@ public class UserController {
     return userGetDTOs;
   }
 
+  @GetMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
+  public UserGetDTO getSingleUserByUsername(@PathVariable Long id) {
+    // fetch the single user in the internal representation
+    User retrievedUser = userService.getUserById(id);
+
+    // convert user to the API representation
+    UserGetDTO retrievedUserDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(retrievedUser);
+
+    return retrievedUserDTO;
+  }
+
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO,
+                               HttpServletResponse response) {
     // convert API user to internal representation
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
     // create user
     User createdUser = userService.createUser(userInput);
+
+    // returning the user token as a header
+    response.addHeader("Authorization", createdUser.getToken());
+
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
   }
 
-  @PostMapping("/login")
+  @PutMapping("/users/login")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public UserGetDTO checkLoginUser(@RequestBody UserPostDTO userPostDTO) {
+  public UserGetDTO checkLoginUser(@RequestBody UserPutDTO userPutDTO,
+                                   HttpServletResponse response) {
     // convert API user to internal representation
-    User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
+    User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
 
     // check login
     User checkedUser = userService.checkLogin(userInput);
+
+    // returning the user token as a header
+    response.addHeader("Authorization", checkedUser.getToken());
 
     // set status of user to ONLINE
     userService.setUserOnline(checkedUser.getId());
@@ -103,7 +101,8 @@ public class UserController {
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(checkedUser);
   }
 
-  @PutMapping("/logout")
+
+  @PutMapping("/users/logout")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
   public void logoutUser(@RequestHeader("Authorization") String auth_token) {
@@ -123,7 +122,9 @@ public class UserController {
   @PutMapping("/users/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ResponseBody
-  public void updateUser(@PathVariable long id, @RequestBody UserPutDTO userPutDTO, @RequestHeader("Authorization") String auth_token) {
+  public void updateUser(@PathVariable long id,
+                         @RequestBody UserPutDTO userPutDTO,
+                         @RequestHeader("Authorization") String auth_token) {
 
     // check the auth_token, the ID must match the token!
     userService.checkToken(auth_token, id);
@@ -138,5 +139,28 @@ public class UserController {
     // update the user
     User updatedUser = userService.updateUser(id, newUsername, newBirthday);
 
+  }
+
+  @DeleteMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseBody
+  public void deleteUser(@PathVariable("userId") Long userId,
+                         @RequestHeader(value="Authorization") String token,
+                         @RequestBody UserDeleteDTO userDeleteDTO) {
+    // check if token was provided
+    if (token == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "A token is required for deleting a user!");
+    }
+
+    // convert DTO object to internal representation
+    User userInput = DTOMapper.INSTANCE.convertUserDeleteDTOtoEntity(userDeleteDTO);
+
+    // extract the new attributes
+    String reqUsername = userInput.getUsername();
+    String reqPassword = userInput.getPassword();
+
+    // letting userService handle the deletion
+    userService.deleteUser(userId, reqUsername, reqPassword, token);
   }
 }
