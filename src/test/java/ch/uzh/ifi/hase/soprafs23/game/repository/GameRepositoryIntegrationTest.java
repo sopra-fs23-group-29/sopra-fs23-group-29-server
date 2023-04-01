@@ -35,24 +35,6 @@ class GameRepositoryIntegrationTest {
   @BeforeEach
   public void init() {
 
-    g1 = new Game();
-    g1.setGamename("g1");
-    g1.setToken("g1");
-    g1.setGamestatus(GameStatus.INPROGRESS);
-    g1.setGamemode(GameMode.PVP);
-    g1.setBoardsize(11);
-    g1.setMaxduration(11);
-    g1.setMaxturns(11);
-
-    g2 = new Game();
-    g2.setGamename("g2");
-    g2.setToken("g2");
-    g2.setGamestatus(GameStatus.INPROGRESS);
-    g2.setGamemode(GameMode.PVP);
-    g2.setBoardsize(11);
-    g2.setMaxduration(11);
-    g2.setMaxturns(11);
-
     p1 = new Player();
     p1.setPlayername("player1");
     p1.setToken("p1");
@@ -63,7 +45,16 @@ class GameRepositoryIntegrationTest {
     p2.setToken("p2");
     p2.setPlayercolor(PlayerColor.BLUE);
 
-    g1.addPlayer(p1);
+    g1 = new Game("g1", "g1", GameMode.PVP, p1);
+    g1.setBoardsize(11);
+    g1.setMaxduration(11);
+    g1.setMaxturns(11);
+
+    g2 = new Game("g2","g2", GameMode.PVP, p2);
+    g2.setBoardsize(11);
+    g2.setMaxduration(11);
+    g2.setMaxturns(11);
+
     g1.addPlayer(p2);
   }
 
@@ -143,21 +134,6 @@ class GameRepositoryIntegrationTest {
   }
 
   @Test
-  void findPlayers_empty() {
-    // given - empty repo
-    entityManager.persist(g2);
-    entityManager.flush();
-
-    Game g2_found = gameRepository.findByGamename("g2");
-
-    // when - players is empty, should return empty list
-    List<Player> emptyList = g2_found.getPlayers();
-
-    assertTrue(emptyList.isEmpty());
-
-  }
-
-  @Test
   void findPlayers() {
 
     // List to find
@@ -194,8 +170,9 @@ class GameRepositoryIntegrationTest {
     // List to find - only p1 should be found
     List<Player> players_to_find = Arrays.asList(p1);
 
-    // given - Remove p2 from g1
-    g1.removePlayer(p2);
+    // given - Remove p2 from g1, assert returns true
+    boolean removal_successful = g1.removePlayer(p2);
+    assertTrue(removal_successful);
 
     // given - Game saved
     entityManager.persist(g1);
@@ -273,4 +250,49 @@ class GameRepositoryIntegrationTest {
 
 
   }
+
+  @Test
+  void createGame_ownerPresent() {
+
+    // given - a game with only the owner
+    entityManager.persist(g2);
+    entityManager.flush();
+
+    Game g2_found = gameRepository.findByGamename("g2");
+
+    // when - only the owner should be there
+    List<Player> ownerList = g2_found.getPlayers();
+
+    assertEquals(1, ownerList.size());
+    assertEquals(ownerList.get(0), p2);
+
+  }
+
+  @Test
+  void createGame_findByOwnerToken() {
+
+    // given - a game with two players
+    entityManager.persist(g1);
+    entityManager.flush();
+
+    // when - search by owner token
+    Game g1_found = gameRepository.findByOwnerToken(p1.getToken());
+
+    // when - search by non-owner token
+    Game g1_should_be_null = gameRepository.findByOwnerToken(p2.getToken());
+
+    // then - game returned is the game owned by the player
+    assertNotNull(g1_found.getId());
+    assertEquals(g1_found.getGamename(), g1.getGamename());
+    assertEquals(g1_found.getToken(), g1.getToken());
+    assertEquals(g1_found.getGamestatus(), g1.getGamestatus());
+    assertEquals(g1_found.getGamemode(), g1.getGamemode());
+    assertEquals(g1_found.getBoardsize(), g1.getBoardsize());
+    assertEquals(g1_found.getMaxduration(), g1.getMaxduration());
+    assertEquals(g1_found.getMaxturns(), g1.getMaxturns());
+
+    // then - assert all the players are still in the game
+    assertTrue(g1_found.getPlayers().containsAll(Arrays.asList(p1,p2)));
+  }
+
 }

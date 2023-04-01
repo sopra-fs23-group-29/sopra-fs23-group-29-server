@@ -56,12 +56,30 @@ public class Game implements Serializable {
   @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
   private final List<Player> players = new ArrayList<>();
 
+  @OneToOne
+  private Player owner;
+
   // private Turn currentTurn;
 
   /**
-   * The constructor always needs a list of players
-   * @return
+   * The constructor always needs an owner
+   * @param gamename name of the game
+   * @param token token of the game
+   * @param gamemode Which mode to play
+   * @param owner The token of the player owning the game
    */
+  public Game(String gamename, String token, GameMode gamemode, Player owner) {
+    this.gamename = gamename;
+    this.token = token;
+    this.gamemode = gamemode;
+    this.owner = owner;
+
+    // Add the owner to the list of players
+    addPlayer(owner);
+
+    // When a game is created, set the GameStatus to INLOBBY
+    this.gamestatus = GameStatus.INLOBBY;
+  }
 
 
 
@@ -87,6 +105,14 @@ public class Game implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
+  }
+
+  public void setOwner(Player owner) {
+    this.owner = owner;
+  }
+
+  public Player getOwner() {
+    return owner;
   }
 
   public GameStatus getGamestatus() {
@@ -152,7 +178,12 @@ public class Game implements Serializable {
     }
   }
 
-  public void removePlayer(Player player) {this.players.remove(player);}
+  /**
+   * Remove the given player from the list of players
+   * @param player Player object to remove
+   * @return True if a matching instance has been found, False otherwise
+   */
+  public boolean removePlayer(Player player) {return this.players.remove(player);}
 
 
 

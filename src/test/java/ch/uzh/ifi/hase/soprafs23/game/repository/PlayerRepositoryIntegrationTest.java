@@ -36,15 +36,6 @@ public class PlayerRepositoryIntegrationTest {
   @BeforeEach
   public void init() {
 
-    g1 = new Game();
-    g1.setGamename("g1");
-    g1.setToken("g1");
-    g1.setGamestatus(GameStatus.INPROGRESS);
-    g1.setGamemode(GameMode.PVP);
-    g1.setBoardsize(11);
-    g1.setMaxduration(11);
-    g1.setMaxturns(11);
-
     u1 = new User();
     u1.setUsername("u1");
     u1.setToken("u1");
@@ -60,6 +51,11 @@ public class PlayerRepositoryIntegrationTest {
     p2.setPlayername("player2");
     p2.setToken("p2");
     p2.setPlayercolor(PlayerColor.BLUE);
+
+    g1 = new Game("g1", "g1", GameMode.PVP, p1);
+    g1.setBoardsize(11);
+    g1.setMaxduration(11);
+    g1.setMaxturns(11);
 
     p1.setGame(g1);
     p2.setGame(g1);
