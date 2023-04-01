@@ -25,7 +25,7 @@ public class Game implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false)
@@ -49,11 +49,37 @@ public class Game implements Serializable {
   @Column(nullable = false)
   private int maxturns;
 
+  /**
+   * Cascade: Game has ALL. Meaning when the Game is persisted, the players are persisted if not exist
+   * When the game is deleted, all the players are deleted
+   */
+  @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+  private final List<Player> players = new ArrayList<>();
 
-  @OneToMany(mappedBy = "game")
-  private final List<Player> players = new ArrayList<Player>();
+  @OneToOne
+  private Player owner;
 
   // private Turn currentTurn;
+
+  /**
+   * The constructor always needs an owner
+   * @param gamename name of the game
+   * @param token token of the game
+   * @param gamemode Which mode to play
+   * @param owner The Player owning the game
+   */
+  public Game(String gamename, String token, GameMode gamemode, Player owner) {
+    this.gamename = gamename;
+    this.token = token;
+    this.gamemode = gamemode;
+    this.owner = owner;
+
+    // Add the owner to the list of players
+    addPlayer(owner);
+  }
+
+  // default no args constructor - needed for test
+  public Game() {}
 
 
 
@@ -79,6 +105,14 @@ public class Game implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
+  }
+
+  public void setOwner(Player owner) {
+    this.owner = owner;
+  }
+
+  public Player getOwner() {
+    return owner;
   }
 
   public GameStatus getGamestatus() {
@@ -131,9 +165,31 @@ public class Game implements Serializable {
    */
   public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
 
-  public void addPlayer(Player player) {this.players.add(player);}
+  /**
+   * Add a Player to the list of players of the game
+   * Do nothing if the Player instance is already contained
+   * @param player Player to add
+   */
+  public void addPlayer(Player player) {
+    if (!this.players.contains(player)) {
+      this.players.add(player);
+      // To keep consistency, automatically set the game for the player
+      player.setGame(this);
+    }
+  }
 
-  public void removePlayer(Player player) {this.players.remove(player);}
+  /**
+   * Remove the given player from the list of players
+   * @param player Player object to remove
+   * @return True if a matching instance has been found, False otherwise
+   */
+  public boolean removePlayer(Player player) {return this.players.remove(player);}
+
+
+
+  public String toString() {
+    return "Game: " + this.getGamename();
+  }
 
 
 }
