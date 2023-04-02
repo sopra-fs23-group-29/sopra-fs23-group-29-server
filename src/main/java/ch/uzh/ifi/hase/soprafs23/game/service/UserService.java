@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.game.service;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.UserListDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,19 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
+  private final UserListDTO userListDTO;
 
   @Autowired
   public UserService(@Qualifier("userRepository") UserRepository userRepository) {
     this.userRepository = userRepository;
+    this.userListDTO = new UserListDTO();
+  }
+
+  /**
+   *
+   */
+  public String getUserListAsString() {
+    return userListDTO.buildUserList(userRepository.findAll());
   }
 
   /**
