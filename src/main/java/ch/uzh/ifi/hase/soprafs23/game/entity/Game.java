@@ -2,9 +2,9 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
+import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 
-import javax.persistence.*;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.*;
@@ -13,83 +13,32 @@ import java.util.*;
 /**
  * Internal Game Representation
  * This class represents a game
- * Every variable will be mapped into a database field with the @Column
- * annotation
- * - nullable = false -> this cannot be left empty
- * - unique = true -> this value must be unqiue across the database -> composes
- * the primary key
  */
-@Entity
-@Table(name = "GAME")
-public class Game implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Game {
 
-  @Column(nullable = false)
+  private UserRepository userRepository;
   private String gamename;
-
-  @Column(nullable = false, unique = true)
-  private String token;
-
-  @Column(nullable = false)
   private GameStatus gamestatus;
-
-  @Column(nullable = false)
   private GameMode gamemode;
-
-  @Column(nullable = false)
   private int boardsize;
-
-  @Column(nullable = false)
   private int maxduration;
-
-  @Column(nullable = false)
   private int maxturns;
-
-  /**
-   * Cascade: Game has ALL. Meaning when the Game is persisted, the players are persisted if not exist
-   * When the game is deleted, all the players are deleted
-   */
-  @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-  private final List<Player> players = new ArrayList<>();
-
-  @OneToOne
-  private Player owner;
-
-  // private Turn currentTurn;
 
   /**
    * The constructor always needs an owner
    * @param gamename name of the game
-   * @param token token of the game
    * @param gamemode Which mode to play
-   * @param owner The Player owning the game
    */
-  public Game(String gamename, String token, GameMode gamemode, Player owner) {
+  public Game(String gamename, GameMode gamemode, UserRepository userRepository) {
     this.gamename = gamename;
-    this.token = token;
     this.gamemode = gamemode;
-    this.owner = owner;
-
-    // Add the owner to the list of players
-    addPlayer(owner);
+    this.userRepository = userRepository;
   }
 
   // default no args constructor - needed for test
   public Game() {}
 
-
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
 
   public String getGamename() {
     return gamename;
@@ -97,22 +46,6 @@ public class Game implements Serializable {
 
   public void setGamename(String gamename) {
     this.gamename = gamename;
-  }
-
-  public String getToken() {
-    return token;
-  }
-
-  public void setToken(String token) {
-    this.token = token;
-  }
-
-  public void setOwner(Player owner) {
-    this.owner = owner;
-  }
-
-  public Player getOwner() {
-    return owner;
   }
 
   public GameStatus getGamestatus() {
@@ -163,18 +96,16 @@ public class Game implements Serializable {
    *
    * @return  An unmodifiable list object containing all current players of the game
    */
-  public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
+  public List<Long> getPlayersId() {return Collections.unmodifiableList(this.playersId);}
 
   /**
    * Add a Player to the list of players of the game
    * Do nothing if the Player instance is already contained
    * @param player Player to add
    */
-  public void addPlayer(Player player) {
-    if (!this.players.contains(player)) {
+  public void addPlayerId(Long playerId) {
+    if (!this.playersId.contains(playerId)) {
       this.players.add(player);
-      // To keep consistency, automatically set the game for the player
-      player.setGame(this);
     }
   }
 
