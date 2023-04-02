@@ -1,22 +1,18 @@
-package ch.uzh.ifi.hase.soprafs23.game.websockets;
+package ch.uzh.ifi.hase.soprafs23.game.controller;
 
-import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
+import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
-import java.io.IOException;
-
 @Controller
 public class WebSocketController {
     private final WebSocketService webSocketService;
-    private final GameService gameService;
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
-    public WebSocketController(GameService gameService, WebSocketService webSocketService) {
-        this.gameService = gameService;
+    public WebSocketController(WebSocketService webSocketService) {
         this.webSocketService = webSocketService;
     }
 
