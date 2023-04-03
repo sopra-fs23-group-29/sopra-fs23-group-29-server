@@ -27,7 +27,9 @@
   - Client 8, 9, 10 (only UI)
 
 - Nils
-  - Client 40 Websockets
+  - Client 84
+  - Client 85 
+  - (Polishing websockets in frontend)
 
 ### Week 14
 
