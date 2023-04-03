@@ -1,6 +1,6 @@
-package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
+package ch.uzh.ifi.hase.soprafs23.game.rest.dto;
 
-public class GameIdDTO {
+public class GameGetDTO {
     private int gameId;
 
     public int getGameId() {
@@ -11,4 +11,3 @@ public class GameIdDTO {
         this.gameId = gameId;
     }
 }
-

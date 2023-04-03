@@ -1,10 +1,13 @@
-package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
+package ch.uzh.ifi.hase.soprafs23.game.rest.dto;
 
-public class PlayerDTO {
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+
+public class PlayerGetDTO {
 
     private Long id;
-    private String token;
     private String playerName;
+    private PlayerColor playerColor;
+    private String token;
     private String userToken;
     private Long gameId;
 
@@ -16,20 +19,28 @@ public class PlayerDTO {
         this.id = id;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
     public String getPlayerName() {
         return playerName;
     }
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public PlayerColor getPlayerColor() {
+        return playerColor;
+    }
+
+    public void setPlayerColor(PlayerColor playerColor) {
+        this.playerColor = playerColor;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getUserToken() {

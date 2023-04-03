@@ -7,6 +7,8 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameJoinedDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.PlayerJoinedDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +28,23 @@ public class GameService {
   private final UserRepository userRepository;
   private final PlayerRepository playerRepository;
   private final PlayerService playerService;
+  private final WebSocketService webSocketService;
   private int gameCounter;
 
   @Autowired
   public GameService(
           @Qualifier("userRepository") UserRepository userRepository,
           @Qualifier("playerRepository") PlayerRepository playerRepository,
-          PlayerService playerService) {
+          PlayerService playerService,
+          WebSocketService webSocketService) {
     this.userRepository = userRepository;
     this.playerRepository = playerRepository;
     this.playerService = playerService;
+    this.webSocketService = webSocketService;
+  }
+
+  public Game getGameById(int gameId) {
+    return GameRepository.findByGameId(gameId);
   }
 
   /**
@@ -57,6 +66,13 @@ public class GameService {
       playerRepository.deleteById(player.getId());
     }
 
+  }
+
+  public void greetGames(Game game) {
+    GameJoinedDTO gameJoinedDTO = new GameJoinedDTO();
+    gameJoinedDTO.setGameName(game.getGamename());
+    gameJoinedDTO.setGameMode(game.getGamemode());
+    this.webSocketService.sendMessageToClients("/topic/games", gameJoinedDTO);
   }
 
 }
