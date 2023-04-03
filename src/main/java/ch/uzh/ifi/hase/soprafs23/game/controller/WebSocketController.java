@@ -17,7 +17,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class WebSocketController {
@@ -102,8 +102,19 @@ public class WebSocketController {
     // viewing the user list
     @MessageMapping("/users")
     public void showUsers() {
+        String destination = "/topic/users";
+        while(true) {
+            this.webSocketService.sendMessageToClients(destination, "hello user");
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        /*
         String userList = webSocketService.viewUsers();
-        this.webSocketService.sendMessageToClients("/users", userList);
+        this.webSocketService.sendMessageToClients(destination, userList);
+         */
     }
 
     // viewing a single user
