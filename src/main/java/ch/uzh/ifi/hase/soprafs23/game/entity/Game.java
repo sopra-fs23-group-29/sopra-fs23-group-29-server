@@ -18,6 +18,7 @@ import java.util.*;
 public class Game {
 
   private UserRepository userRepository;
+  private List<Player> players;
   private String gamename;
   private GameStatus gamestatus;
   private GameMode gamemode;
@@ -96,15 +97,15 @@ public class Game {
    *
    * @return  An unmodifiable list object containing all current players of the game
    */
-  public List<Long> getPlayersId() {return Collections.unmodifiableList(this.playersId);}
+  public List<Player> getPlayersId() {return Collections.unmodifiableList(this.players);}
 
   /**
    * Add a Player to the list of players of the game
    * Do nothing if the Player instance is already contained
    * @param player Player to add
    */
-  public void addPlayerId(Long playerId) {
-    if (!this.playersId.contains(playerId)) {
+  public void addPlayer(Player player) {
+    if (!this.players.contains(player)) {
       this.players.add(player);
     }
   }

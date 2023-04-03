@@ -31,59 +31,6 @@ public class PlayerService {
     this.userService = userService;
   }
 
-  /**
-   * Create and save a new Player from a UserToken
-   * @param userToken A valid UserToken
-   * @return Player created and saved
-   */
-  public Player createPlayer(String userToken) {
-
-    // fetch the user from the token
-    User fetchedUser = userService.getUserByToken(userToken);
-    String playername = fetchedUser.getUsername();
-
-    // Create token
-    String playerToken = UUID.randomUUID().toString();
-
-    // Create Player instance
-    Player newPlayer = new Player(playername, playerToken, userToken);
-
-    // Set PlayerColor to not set
-    newPlayer.setPlayercolor(PlayerColor.NOTSET);
-
-    // todo: Check if a player with that userToken already exists?
-
-    // Save Player
-    Player savedPlayer = playerRepository.save(newPlayer);
-    playerRepository.flush();
-
-    log.debug("Saved Player {}", savedPlayer);
-    return savedPlayer;
-
-  }
-
-  /**
-   * Save a new Player from an existing Player instance
-   * @param newPlayer
-   * @return Player created and saved
-   */
-  public Player createPlayer(Player newPlayer) {
-
-    // Create token
-    newPlayer.setToken(UUID.randomUUID().toString());
-
-    // Set PlayerColor to not set
-    newPlayer.setPlayercolor(PlayerColor.NOTSET);
-
-    // todo: Check for unique playername and game combination?
-
-    // Save Player
-    Player savedPlayer = playerRepository.save(newPlayer);
-    playerRepository.flush();
-
-    log.debug("Saved Player {}", savedPlayer);
-    return savedPlayer;
-  }
 
   public List<Player> getPlayers() {return this.playerRepository.findAll();}
 

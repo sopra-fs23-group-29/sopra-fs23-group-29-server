@@ -1,7 +1,10 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.UserListDTO;
 import org.slf4j.Logger;
@@ -33,11 +36,15 @@ public class UserService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
+  private final PlayerRepository playerRepository;
   private final UserListDTO userListDTO;
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  public UserService(
+    @Qualifier("userRepository") UserRepository userRepository,
+    @Qualifier("playerRepository") PlayerRepository playerRepository) {
     this.userRepository = userRepository;
+    this.playerRepository = playerRepository;
     this.userListDTO = new UserListDTO();
   }
 
@@ -320,5 +327,22 @@ public class UserService {
     }
 
     return true;
+  }
+
+  public Player addUserToGame(Long gameId, String userToken) {
+    User userToConvert = userRepository.findByToken(userToken);
+    Player newPlayer = new Player();
+
+    newPlayer.setGameId(gameId);
+    newPlayer.setPlayername(userToConvert.getUsername());
+    newPlayer.setUserToken(userToken);
+    newPlayer.setToken(UUID.randomUUID().toString());
+    newPlayer.setPlayercolor(PlayerColor.NOTSET);
+
+    playerRepository.save(newPlayer);
+    playerRepository.flush();
+
+    return newPlayer;
+
   }
 }
