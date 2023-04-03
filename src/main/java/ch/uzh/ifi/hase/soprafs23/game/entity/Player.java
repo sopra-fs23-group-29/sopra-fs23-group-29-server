@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 
 import javax.persistence.*;
@@ -22,7 +24,7 @@ public class Player implements Serializable {
   private static final long serialVersionUID = 1L;
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column(nullable = false, unique = true)
@@ -34,11 +36,39 @@ public class Player implements Serializable {
   @Column(nullable = false)
   private PlayerColor playercolor;
 
-  @ManyToOne
+  @Column(nullable = false, unique = true)
+  private String userToken;
+
+  /**
+   * Cascade: Player has CascadeType.PERSIST.
+   * When the Player is persisted, the Game is persisted if not exist
+   * However, the game lives on if all Players are deleted
+   */
+  @ManyToOne(cascade = CascadeType.PERSIST)
   private Game game;
-//
-//  @ManyToOne
-//  private Lobby lobby;
+
+
+
+  /**
+   * The constructor always needs a playername, a token and a user reference
+   * A game reference is not needed
+   * @param playername Name of the player
+   * @param token Token of the player
+   * @param userToken The userToken this player belongs to
+   */
+  public Player(String playername, String token, String userToken) {
+    this.playername = playername;
+    this.token = token;
+    this.userToken = userToken;
+  }
+
+  // default no args constructor - needed for test
+  public Player() {}
+
+
+
+
+
 
   public Long getId() {
     return id;
@@ -78,20 +108,19 @@ public class Player implements Serializable {
 
   public void setGame(Game game) {
     this.game = game;
+    // to keep it consistent, also add the player to the game
+    game.addPlayer(this);
   }
-//
-//  public Lobby getLobby() {
-//    return lobby;
-//  }
-//
-//  public void setLobby(Lobby lobby) {
-//    this.lobby = lobby;
-//  }
 
+  public String getUserToken() {return userToken;}
+
+  public void setUserToken(String userToken) {
+    this.userToken = userToken;
+  }
 
 
   public String toString() {
-    return "Player: " + this.getPlayername() + " ID: " + this.getId();
+    return "Player: " + this.getPlayername() + " ID: " + this.getId() + " Token:" + this.getToken() + " GameID:" + this.getGame();
   }
 
 }
