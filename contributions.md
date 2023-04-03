@@ -9,8 +9,10 @@
 
 - Dominik
 
-  - Server 28 (Game wird aber doch nicht persistiert)
-  - Server 29
+  - Server 26
+
+  * Server 28 (Game wird aber doch nicht persistiert)
+  * Server 29
 
 - Mark
 
