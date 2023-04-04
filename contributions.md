@@ -16,8 +16,9 @@
 
 - Mark
 
+  - Client 2, 3, 6, 15 (REST-specification refactoring)
   - WebSockets
-  - Server 33
+  - Client 87, 88
 
 - Mona
 
@@ -43,7 +44,7 @@
 
 - Mark
 
-  - 
+  - Client 24, 25, 22
 
 - Mona
 
