@@ -104,6 +104,9 @@ public class GameController {
 
         // todo: Convert playerJoining into a DTO entity with the mapper
         // return it
+
+        PlayerGetDTO dummy = new PlayerGetDTO();
+        return dummy;
     }
 
 }
