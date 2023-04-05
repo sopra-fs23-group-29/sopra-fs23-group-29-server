@@ -2,10 +2,8 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.*;
 
@@ -19,21 +17,23 @@ public class Game {
 
   private UserRepository userRepository;
   private List<Player> players;
-  private String gamename;
-  private GameStatus gamestatus;
-  private GameMode gamemode;
-  private int boardsize;
-  private int maxduration;
-  private int maxturns;
+  private Long gameId;
+  private String gameName;
+  private GameStatus gameStatus;
+  private GameMode gameMode;
+  private int boardSize;
+  private int maxDuration;
+  private int maxTurns;
 
   /**
    * The constructor always needs an owner
-   * @param gamename name of the game
-   * @param gamemode Which mode to play
+   * @param gameName name of the game
+   * @param gameMode Which mode to play
    */
-  public Game(String gamename, GameMode gamemode, UserRepository userRepository) {
-    this.gamename = gamename;
-    this.gamemode = gamemode;
+  public Game(Long gameId, String gameName, GameMode gameMode, UserRepository userRepository) {
+    this.gameId = gameId;
+    this.gameName = gameName;
+    this.gameMode = gameMode;
     this.userRepository = userRepository;
   }
 
@@ -41,52 +41,43 @@ public class Game {
   public Game() {}
 
 
-  public String getGamename() {
-    return gamename;
+  public void setGameId(Long gameId) {this.gameId = gameId;}
+  public Long getGameId() {return gameId;}
+  public String getGameName() {
+    return gameName;
   }
-
-  public void setGamename(String gamename) {
-    this.gamename = gamename;
+  public void setGameName(String gameName) {
+    this.gameName = gameName;
   }
-
-  public GameStatus getGamestatus() {
-    return gamestatus;
+  public GameStatus getGameStatus() {
+    return gameStatus;
   }
-
-  public void setGamestatus(GameStatus gamestatus) {
-    this.gamestatus = gamestatus;
+  public void setGameStatus(GameStatus gameStatus) {
+    this.gameStatus = gameStatus;
   }
-
-  public GameMode getGamemode() {
-    return gamemode;
+  public GameMode getGameMode() {
+    return gameMode;
   }
-
-  public void setGamemode(GameMode gamemode) {
-    this.gamemode = gamemode;
+  public void setGameMode(GameMode gameMode) {
+    this.gameMode = gameMode;
   }
-
-  public int getBoardsize() {
-    return boardsize;
+  public int getBoardSize() {
+    return boardSize;
   }
-
-  public void setBoardsize(int boardsize) {
-    this.boardsize = boardsize;
+  public void setBoardSize(int boardSize) {
+    this.boardSize = boardSize;
   }
-
-  public int getMaxduration() {
-    return maxduration;
+  public int getMaxDuration() {
+    return maxDuration;
   }
-
-  public void setMaxduration(int maxduration) {
-    this.maxduration = maxduration;
+  public void setMaxDuration(int maxDuration) {
+    this.maxDuration = maxDuration;
   }
-
-  public int getMaxturns() {
-    return maxturns;
+  public int getMaxTurns() {
+    return maxTurns;
   }
-
-  public void setMaxturns(int maxturns) {
-    this.maxturns = maxturns;
+  public void setMaxTurns(int maxTurns) {
+    this.maxTurns = maxTurns;
   }
 
 
@@ -120,7 +111,7 @@ public class Game {
 
 
   public String toString() {
-    return "Game: " + this.getGamename();
+    return "Game: " + this.getGameName();
   }
 
 

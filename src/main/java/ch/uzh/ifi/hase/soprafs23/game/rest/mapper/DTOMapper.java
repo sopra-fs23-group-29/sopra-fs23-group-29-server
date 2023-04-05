@@ -1,10 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
-import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
-import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserDeleteDTO;
+import ch.uzh.ifi.hase.soprafs23.game.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -44,4 +43,23 @@ public interface DTOMapper {
   @Mapping(source = "username", target = "username")
   @Mapping(source = "password", target = "password")
   User convertUserDeleteDTOtoEntity(UserDeleteDTO userDeleteDTO);
+
+  @Mapping(source = "userToken", target = "userToken")
+  Player convertPlayerPostDTOtoEntity(PlayerPostDTO playerPostDTO);
+
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "playerName", target = "playerName")
+  @Mapping(source = "playerColor", target = "playerColor")
+  @Mapping(source = "token", target = "token")
+  @Mapping(source = "userToken", target = "userToken")
+  @Mapping(source = "gameId", target = "gameId")
+  PlayerGetDTO convertEntityToPlayerGetDTO(Player player);
+
+  @Mapping(source = "gameName", target = "gameName")
+  @Mapping(source = "gameMode", target = "gameMode")
+  Game convertGamePostDTOToEntity(GamePostDTO gamePostDTO);
+
+  @Mapping(source = "gameId", target = "gameId")
+  GameGetDTO convertEntityToGameGetDTO(Game game);
+
 }

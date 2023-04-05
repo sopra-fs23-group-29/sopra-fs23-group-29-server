@@ -1,7 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 
 import javax.persistence.*;
@@ -34,13 +32,13 @@ public class Player implements Serializable {
   private Long gameId;
 
   @Column(nullable = false)
-  private String playername;
+  private String playerName;
 
   @Column(nullable = false, unique = true)
   private String token;
 
   @Column(nullable = false)
-  private PlayerColor playercolor;
+  private PlayerColor playerColor;
 
 
 
@@ -70,12 +68,12 @@ public class Player implements Serializable {
     this.gameId = gameId;
   }
 
-  public String getPlayername() {
-    return playername;
+  public String getPlayerName() {
+    return playerName;
   }
 
-  public void setPlayername(String playername) {
-    this.playername = playername;
+  public void setPlayerName(String playerName) {
+    this.playerName = playerName;
   }
 
   public String getToken() {
@@ -86,18 +84,18 @@ public class Player implements Serializable {
     this.token = token;
   }
 
-  public PlayerColor getPlayercolor() {
-    return playercolor;
+  public PlayerColor getPlayerColor() {
+    return playerColor;
   }
 
-  public void setPlayercolor(PlayerColor playercolor) {
-    this.playercolor = playercolor;
+  public void setPlayerColor(PlayerColor playerColor) {
+    this.playerColor = playerColor;
   }
 
 
 
   public String toString() {
-    return "Player: " + this.getPlayername() + " ID: " + this.getId() + " Token:" + this.getToken();
+    return "Player: " + this.getPlayerName() + " ID: " + this.getId() + " Token:" + this.getToken();
   }
 
 }

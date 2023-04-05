@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
@@ -51,18 +52,38 @@ public class GameController {
     @PostMapping("/games")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public GameGetDTO createGame(@RequestBody GamePostDTO gamePostDTO) {
+    public GameGetDTO createGame(
+            @RequestBody GamePostDTO gamePostDTO,
+            HttpServletRequest request
+    ) {
+
+        // fetch auth_token from request
+        String auth_token = request.getHeader("Authorization");
+
+        // check if token was provided
+        if (auth_token == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A token is required");
+        }
+
+        // check the auth_token, the ID must match the token! idToCheck is null, it just needs to be a valid userToken
+        // if the token does not apply to a valid user, throw UNAUTHORIZED
+        userService.checkToken(auth_token, null);
+
         log.info("Game {}: create game ...", gamePostDTO.getGameName());
 
         // GameService creates the game and writes to the gameRepository
         // get the gameId
-        int newGameId = gameService.createNewGame(gamePostDTO.getGameName(), gamePostDTO.getGameMode());
+        Long newGameId = gameService.createNewGame(gamePostDTO.getGameName(), gamePostDTO.getGameMode());
         // return object
         GameGetDTO newGameGetDTO = new GameGetDTO();
         newGameGetDTO.setGameId(newGameId);
 
         // let everybody know about the new game
         gameService.greetGames(gameService.getGameById(newGameId));
+
+        System.out.println("game created");
+        log.info("game created");
 
         log.info("Game {}: game created", gamePostDTO.getGameName());
         return newGameGetDTO;
@@ -72,10 +93,26 @@ public class GameController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public PlayerGetDTO createPlayer(
-        @PathVariable Long gameId,
-        @RequestHeader("Authorization") String auth_token,
+        @PathVariable int gameId,
+        HttpServletRequest request,
         HttpServletResponse response
     ) {
+
+        // fetch auth_token from request
+        String auth_token = request.getHeader("Authorization");
+
+        // check if token was provided
+        if (auth_token == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A token is required");
+        }
+
+        // check the auth_token, the ID must match the token! idToCheck is null, it just needs to be a valid userToken
+        // if the token does not apply to a valid user, throw UNAUTHORIZED
+        userService.checkToken(auth_token, null);
+
+        // check if the gameId exists, otherwise throw NOT_FOUND via GameRepository
+        gameService.getGameById((long) gameId);
 
         // Get the user from the auth_token
         // HTTPError is thrown if userToken is not an existing user
@@ -91,22 +128,20 @@ public class GameController {
             // if yes, just set his gameId
             log.info("Player already exists, set gameId");
             playerJoining = playerService.getPlayerByUserToken(auth_token);
-            playerJoining.setGameId(gameId);
+            playerJoining.setGameId((long) gameId);
             playerService.savePlayer(playerJoining);
         } else {
             // if no, create a new player through userService and add
             log.info("Player is created ...");
-            playerJoining = userService.addUserToGame(gameId, auth_token);
+            playerJoining = userService.addUserToGame((long) gameId, auth_token);
         }
 
         // let all players in the game know who joined
         playerService.greetPlayers(playerJoining);
 
-        // todo: Convert playerJoining into a DTO entity with the mapper
-        // return it
+        PlayerGetDTO playerGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerGetDTO(playerJoining);
+        return playerGetDTO;
 
-        PlayerGetDTO dummy = new PlayerGetDTO();
-        return dummy;
     }
 
 }

@@ -334,10 +334,10 @@ public class UserService {
     Player newPlayer = new Player();
 
     newPlayer.setGameId(gameId);
-    newPlayer.setPlayername(userToConvert.getUsername());
+    newPlayer.setPlayerName(userToConvert.getUsername());
     newPlayer.setUserToken(userToken);
     newPlayer.setToken(UUID.randomUUID().toString());
-    newPlayer.setPlayercolor(PlayerColor.NOTSET);
+    newPlayer.setPlayerColor(PlayerColor.NOTSET);
 
     playerRepository.save(newPlayer);
     playerRepository.flush();

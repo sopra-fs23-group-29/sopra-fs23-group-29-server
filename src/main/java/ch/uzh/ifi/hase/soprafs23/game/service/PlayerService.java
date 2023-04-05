@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
-import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.PlayerJoinedDTO;
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -57,7 +54,7 @@ public class PlayerService {
 
   public void greetPlayers(Player player) {
     PlayerJoinedDTO playerJoinDTO = new PlayerJoinedDTO();
-    playerJoinDTO.setPlayerName(player.getPlayername());
+    playerJoinDTO.setPlayerName(player.getPlayerName());
     this.webSocketService.sendMessageToClients("/topic/games/" + player.getGameId(), playerJoinDTO);
   }
 

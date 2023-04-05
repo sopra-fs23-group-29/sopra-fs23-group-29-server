@@ -1,13 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.game.rest.dto;
 
 public class GameGetDTO {
-    private int gameId;
+    private Long gameId;
 
-    public int getGameId() {
+    public Long getGameId() {
         return gameId;
     }
 
-    public void setGameId(int gameId) {
+    public void setGameId(Long gameId) {
         this.gameId = gameId;
     }
 }

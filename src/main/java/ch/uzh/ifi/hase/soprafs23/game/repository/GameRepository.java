@@ -7,12 +7,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 
 public class GameRepository {
-  private static final HashMap<Integer, Game> gameRepo = new HashMap<>();
+  private static final HashMap<Long, Game> gameRepo = new HashMap<>();
 
   private GameRepository() {
   }
 
-  public static void addGame(int gameId, Game game) {
+  public static void addGame(Long gameId, Game game) {
     gameRepo.put(gameId, game);
   }
 
@@ -20,7 +20,7 @@ public class GameRepository {
     gameRepo.remove(gameId);
   }
 
-  public static Game findByGameId(int gameId) {
+  public static Game findByGameId(Long gameId) {
     Game game = gameRepo.get(gameId);
     if (game == null) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "This game does not exist!");
