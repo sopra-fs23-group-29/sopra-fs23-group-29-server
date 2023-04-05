@@ -7,6 +7,8 @@ import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserDeleteDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.DummyDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,9 +28,11 @@ import java.util.List;
 public class UserController {
 
   private final UserService userService;
+  private final WebSocketService webSocketService;
 
-  UserController(UserService userService) {
+  UserController(UserService userService, WebSocketService webSocketService) {
     this.userService = userService;
+    this.webSocketService = webSocketService;
   }
 
 
@@ -75,6 +79,9 @@ public class UserController {
 
     // returning the user token as a header
     response.addHeader("Authorization", createdUser.getToken());
+
+    // Send a message to all WebSocket subscribers in channel /users
+    webSocketService.sendMessageToClients("/topic/users", new DummyDTO());
 
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);

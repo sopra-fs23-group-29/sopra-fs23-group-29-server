@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.DummyDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -47,7 +48,7 @@ public class WebSocketController {
     public void showUsers() {
         String destination = "/topic/users";
         while(true) {
-            this.webSocketService.sendMessageToClients(destination, "hello user");
+            this.webSocketService.sendMessageToClients(destination, new DummyDTO());
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
