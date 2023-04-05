@@ -31,10 +31,6 @@ public class WebSocketService {
 
     }
 
-    public String viewUsers() {
-        return userService.getUserListAsString();
-    }
-
     public String viewUser(long userId) {
         return userService.getUserById(userId).toString();
     }
