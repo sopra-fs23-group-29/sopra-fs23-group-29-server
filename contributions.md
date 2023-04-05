@@ -11,7 +11,7 @@
 
   - Server 26
 
-  * Server 28 (Game wird aber doch nicht persistiert)
+  * Server 28 (Game wird aber doch nicht persistiert, task angepasst)
   * Server 29
 
 - Mark
@@ -40,7 +40,7 @@
 
 - Dominik
 
-  - 
+  - Server 28, 29, 36, 37
 
 - Mark
 
