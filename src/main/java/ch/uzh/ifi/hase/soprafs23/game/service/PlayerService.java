@@ -44,22 +44,25 @@ public class PlayerService {
 
   public List<Player> getPlayers() {return this.playerRepository.findAll();}
 
-  private Player getPlayerByUserToken(String userToken) {
-    Player playerSearched = this.playerRepository.findByUserToken(userToken);
-
-    if (playerSearched == null) {
-      throw new ResponseStatusException(
-              HttpStatus.NOT_FOUND,
-              String.format("Player with userToken %s not found", userToken)
-      );
-    }
+  /**
+   * Get Player by ID
+   * @arg playerId The Id of the player
+   * @return Player
+   * @throws org.springframework.web.server.ResponseStatusException
+   */
+  public Player getPlayerById(Long playerId) {
+    Player playerSearched = this.playerRepository.findById(playerId)
+            .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            String.format("Player with ID %s not found", playerId)
+                    )
+            );
 
     return playerSearched;
   }
 
-  private boolean checkIfPlayerExistsByUserToken(String userToken) {
-    Player playerSearched = playerRepository.findByUserToken(userToken);
-    return playerSearched != null;
+  public Player getPlayerByUserToken(String userToken) {
+    return this.playerRepository.findByUserToken(userToken);
   }
 
   public void greetPlayers(Player player) {
@@ -68,36 +71,57 @@ public class PlayerService {
     this.webSocketService.sendMessageToClients("/topic/games/" + player.getGameId(), playerJoinDTO);
   }
 
-  public Player joinPlayer(String userTokenToJoin, int gameIdToJoin) {
-    Player playerJoining;
+  /**
+   * Given the userToken, either create a new player or return an existing player found by that userToken
+   * Throws NOT_FOUND if there is no user to that userToken
+   * @param userToken
+   * @return Player instance, either newly created or the existing one for that userToken
+   * @throws org.springframework.web.server.ResponseStatusException
+   */
+  public Player createPlayerFromUserToken(String userToken) {
 
+    // fetch the user
+    User userToCreateFrom = userService.getUserByToken(userToken);
+
+    Player playerFound = getPlayerByUserToken(userToken);
+
+    if (playerFound == null) {
+      // if player does not exist wiht userToken, create
+      log.info("No player with that userToken, create Player ...");
+      Player playerCreated = new Player();
+      playerCreated.setPlayerName(userToCreateFrom.getUsername());
+      playerCreated.setUserToken(userToCreateFrom.getToken());
+      playerCreated.setToken(UUID.randomUUID().toString());
+      playerCreated.setPlayerColor(PlayerColor.NOTSET);
+
+      // Save the new Player
+      savePlayer(playerCreated);
+      return playerCreated;
+
+    } else {
+      // if Player exists, just fetch him
+      log.info("Player already exists, fetch");
+      return playerFound;
+    }
+  }
+
+  public Player joinPlayer(String userTokenToJoin, int gameIdToJoin) {
     // Check if gameIdToJoin exists in GameRepository, throw NOT_FOUND otherwise
     Game gameToJoin = gameService.getGameById((long) gameIdToJoin);
 
     // Check if a user with userTokenToJoin exists, throw NOT_FOUND otherwise
     User userToJoin = userService.getUserByToken(userTokenToJoin);
+    
+    // Either fetch the Player associated with the userTokenToJoin, or create a new one
+    Player playerToJoin = createPlayerFromUserToken(userTokenToJoin);
 
-    // Check if the player already exists in playerRepository
-    if (checkIfPlayerExistsByUserToken(userTokenToJoin)) {
-      // if yes, just set his gameId
-      log.info("Player already exists, set gameId to {}", gameIdToJoin);
-      playerJoining = getPlayerByUserToken(userTokenToJoin);
-      playerJoining.setGameId((long) gameIdToJoin);
-      savePlayer(playerJoining);
-    } else {
-      // if no, create a new player through userService and add
-      log.info("Player is created ...");
-      playerJoining = new Player();
-      playerJoining.setGameId((long) gameIdToJoin);
-      playerJoining.setPlayerName(userToJoin.getUsername());
-      playerJoining.setUserToken(userToJoin.getToken());
-      playerJoining.setToken(UUID.randomUUID().toString());
-      playerJoining.setPlayerColor(PlayerColor.NOTSET);
+    // Set the gameId
+    playerToJoin.setGameId((long) gameIdToJoin);
 
-      savePlayer(playerJoining);
-    }
+    // Save the player
+    savePlayer(playerToJoin);
 
-    return playerJoining;
+    return playerToJoin;
   }
 
   private void savePlayer(Player playerToSave) {

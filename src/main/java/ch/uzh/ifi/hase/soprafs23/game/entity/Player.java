@@ -28,7 +28,7 @@ public class Player implements Serializable {
   @Column(nullable = false, unique = true)
   private String userToken;
 
-  @Column(nullable = false)
+  @Column
   private Long gameId;
 
   @Column(nullable = false)
