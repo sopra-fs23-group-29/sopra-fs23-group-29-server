@@ -328,21 +328,4 @@ public class UserService {
 
     return true;
   }
-
-  public Player addUserToGame(Long gameId, String userToken) {
-    User userToConvert = userRepository.findByToken(userToken);
-    Player newPlayer = new Player();
-
-    newPlayer.setGameId(gameId);
-    newPlayer.setPlayerName(userToConvert.getUsername());
-    newPlayer.setUserToken(userToken);
-    newPlayer.setToken(UUID.randomUUID().toString());
-    newPlayer.setPlayerColor(PlayerColor.NOTSET);
-
-    playerRepository.save(newPlayer);
-    playerRepository.flush();
-
-    return newPlayer;
-
-  }
 }

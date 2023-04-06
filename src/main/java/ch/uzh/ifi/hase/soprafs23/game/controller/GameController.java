@@ -86,6 +86,10 @@ public class GameController {
         log.info("game created");
 
         log.info("Game {}: game created", gamePostDTO.getGameName());
+
+        // Add the creator of the game as a player
+        Player playerJoined = playerService.joinPlayer(auth_token, newGameId.intValue());
+
         return newGameGetDTO;
     }
 
@@ -94,9 +98,8 @@ public class GameController {
     @ResponseBody
     public PlayerGetDTO createPlayer(
         @PathVariable int gameId,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
+        HttpServletRequest request
+        ) {
 
         // fetch auth_token from request
         String auth_token = request.getHeader("Authorization");
@@ -120,26 +123,21 @@ public class GameController {
 
         log.info("Game {}: User {} joining", gameId, userJoining.getUsername());
 
-        // Create an empty Player who is the player currently joining
-        Player playerJoining;
-
-        // Check if the player already exists in playerRepository
-        if (playerService.checkIfPlayerExistsByUserToken(auth_token)) {
-            // if yes, just set his gameId
-            log.info("Player already exists, set gameId");
-            playerJoining = playerService.getPlayerByUserToken(auth_token);
-            playerJoining.setGameId((long) gameId);
-            playerService.savePlayer(playerJoining);
-        } else {
-            // if no, create a new player through userService and add
-            log.info("Player is created ...");
-            playerJoining = userService.addUserToGame((long) gameId, auth_token);
-        }
+        // Join/create the user
+        Player playerJoining = playerService.joinPlayer(auth_token, gameId);
 
         // let all players in the game know who joined
         playerService.greetPlayers(playerJoining);
 
         PlayerGetDTO playerGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerGetDTO(playerJoining);
+
+        playerGetDTO.setId(playerJoining.getId());
+        playerGetDTO.setPlayerName(playerJoining.getPlayerName());
+        playerGetDTO.setToken(playerJoining.getToken());
+        playerGetDTO.setUserToken(playerJoining.getUserToken());
+        playerGetDTO.setPlayerColor(playerJoining.getPlayerColor());
+        playerGetDTO.setGameId(playerJoining.getGameId());
+
         return playerGetDTO;
 
     }

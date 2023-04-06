@@ -23,7 +23,6 @@ public class GameService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
   private final UserRepository userRepository;
   private final PlayerRepository playerRepository;
-  private final PlayerService playerService;
   private final WebSocketService webSocketService;
   private int gameCounter;
 
@@ -31,11 +30,9 @@ public class GameService {
   public GameService(
           @Qualifier("userRepository") UserRepository userRepository,
           @Qualifier("playerRepository") PlayerRepository playerRepository,
-          PlayerService playerService,
           WebSocketService webSocketService) {
     this.userRepository = userRepository;
     this.playerRepository = playerRepository;
-    this.playerService = playerService;
     this.webSocketService = webSocketService;
   }
 
