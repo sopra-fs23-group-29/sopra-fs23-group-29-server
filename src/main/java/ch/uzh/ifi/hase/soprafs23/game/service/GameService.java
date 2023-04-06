@@ -40,6 +40,7 @@ public class GameService {
   /**
    * Create a new game and return the corresponding int
    * @return gameId of the created game
+   * @throws org.springframework.web.server.ResponseStatusException
    */
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
