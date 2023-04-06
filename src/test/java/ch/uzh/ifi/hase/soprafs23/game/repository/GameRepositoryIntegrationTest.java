@@ -1,13 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.repository;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
-import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -15,7 +11,7 @@ import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GameRepositoryTest {
+class GameRepositoryIntegrationTest {
 
     private Game g1, g1dup, g2;
 
