@@ -206,7 +206,6 @@ public class UserControllerTest {
 
   @Test
   public void updateUser_validInput_userUpdated() throws Exception {
-
     // given
     User user = new User();
     user.setId(1L);
@@ -232,7 +231,6 @@ public class UserControllerTest {
     // then
     mockMvc.perform(putRequest)
             .andExpect(status().isNoContent());
-
   }
 
   @Test
@@ -269,7 +267,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void updateUser_wrongToken_thenThrowUnauthorized() throws Exception {
+  public void updateUser_wrongToken_thenThrowForbidden() throws Exception {
 
     // given
     User user = new User();
@@ -286,7 +284,7 @@ public class UserControllerTest {
     userPutDTO.setBirthday("testBirthday");
 
     given(userService.checkToken("1", 1L)).willThrow(
-            new ResponseStatusException(HttpStatus.UNAUTHORIZED)
+            new ResponseStatusException(HttpStatus.FORBIDDEN)
     );
     given(userService.updateUser(Mockito.any(), Mockito.any(), Mockito.any())).willThrow(
             new ResponseStatusException(HttpStatus.CONFLICT)
@@ -300,7 +298,7 @@ public class UserControllerTest {
 
     // then
     mockMvc.perform(putRequest)
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isForbidden());
 
   }
 
@@ -339,10 +337,6 @@ public class UserControllerTest {
 
   }
 
-
-
-
-
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
@@ -356,7 +350,7 @@ public class UserControllerTest {
       return new ObjectMapper().writeValueAsString(object);
     } catch (JsonProcessingException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format("The request body could not be created.%s", e.toString()));
+          String.format("The request body could not be created.%s", e));
     }
   }
 }

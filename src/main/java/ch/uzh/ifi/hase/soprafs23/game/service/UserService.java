@@ -302,20 +302,24 @@ public class UserService {
      * @return True if succesfull.
      */
     public boolean checkToken(String tokenToCheck, Long idToCheck) {
-
+        // check if a token has been provided
+        if (tokenToCheck == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "No token was provided.");
+        }
         User userByToken = getUserByToken(tokenToCheck);
 
         // check if the token returns any user
         if (userByToken == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    String.format("User not authorized\nToken %s", tokenToCheck));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("Token does not correspond to any user. \nToken %s", tokenToCheck));
         }
 
-        // optional, if idtoCheck != null, check if that token matches the user id
+        // optional, if idToCheck != null, check if that token matches the user id
         if (idToCheck != null) {
-            if (userByToken.getId() != idToCheck) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        String.format("User not authorized\nToken %s", tokenToCheck));
+            if (!userByToken.getId().equals(idToCheck)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        String.format("Wrong token provided\nToken %s", tokenToCheck));
             }
         }
 
