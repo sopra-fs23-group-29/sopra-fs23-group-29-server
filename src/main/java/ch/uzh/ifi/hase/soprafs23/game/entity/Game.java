@@ -15,7 +15,10 @@ import java.util.*;
 
 public class Game {
 
-  private UserRepository userRepository;
+  // todo: players should always update from playerRepository, never keep that internal!
+  // getPlayers should be a method calling playerRepository
+  // add/remove players should not exist, only go through playerRepository
+
   private List<Player> players;
   private Long gameId;
   private String gameName;
@@ -30,11 +33,10 @@ public class Game {
    * @param gameName name of the game
    * @param gameMode Which mode to play
    */
-  public Game(Long gameId, String gameName, GameMode gameMode, UserRepository userRepository) {
+  public Game(Long gameId, String gameName, GameMode gameMode) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
-    this.userRepository = userRepository;
   }
 
   // default no args constructor - needed for test
@@ -82,13 +84,6 @@ public class Game {
 
 
 
-  /**
-   * Returns the list of players as an unmodifiable list of the current players in the game.
-   * Modifications to the list of players should only be done through addPlayer and removePlayer
-   *
-   * @return  An unmodifiable list object containing all current players of the game
-   */
-  public List<Player> getPlayersId() {return Collections.unmodifiableList(this.players);}
 
   /**
    * Add a Player to the list of players of the game

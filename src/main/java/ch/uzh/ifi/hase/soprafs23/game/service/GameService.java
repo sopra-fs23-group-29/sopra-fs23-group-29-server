@@ -21,17 +21,14 @@ import java.util.List;
 public class GameService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
-  private final UserRepository userRepository;
   private final PlayerRepository playerRepository;
   private final WebSocketService webSocketService;
   private int gameCounter;
 
   @Autowired
   public GameService(
-          @Qualifier("userRepository") UserRepository userRepository,
           @Qualifier("playerRepository") PlayerRepository playerRepository,
           WebSocketService webSocketService) {
-    this.userRepository = userRepository;
     this.playerRepository = playerRepository;
     this.webSocketService = webSocketService;
   }
@@ -42,12 +39,12 @@ public class GameService {
 
   /**
    * Create a new game and return the corresponding int
-   * @return
+   * @return gameId of the created game
    */
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
     removeAllPlayersFromGame((long) gameCounter);
-    Game newGame = new Game((long) gameCounter, gameName, gameMode, userRepository);
+    Game newGame = new Game((long) gameCounter, gameName, gameMode);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
   }
