@@ -2,13 +2,11 @@ package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
-import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,9 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Game Controller
@@ -35,18 +30,15 @@ public class GameController {
     private final GameService gameService;
     private final UserService userService;
     private final PlayerService playerService;
-    private final WebSocketService webSocketService;
 
     GameController(
         UserService userService,
         GameService gameService,
-        WebSocketService webSocketService,
         PlayerService playerService
     ) {
         this.userService = userService;
         this.playerService = playerService;
         this.gameService = gameService;
-        this.webSocketService = webSocketService;
     }
 
     @PostMapping("/games")
