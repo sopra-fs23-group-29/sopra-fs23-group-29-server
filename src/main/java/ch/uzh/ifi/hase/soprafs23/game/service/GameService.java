@@ -1,12 +1,17 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Dummy;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
+import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameJoinedDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +19,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -59,11 +65,53 @@ public class GameService {
 
   }
 
-  public void greetGames(Game game) {
-    GameJoinedDTO gameJoinedDTO = new GameJoinedDTO();
-    gameJoinedDTO.setGameName(game.getGameName());
-    gameJoinedDTO.setGameMode(game.getGameMode());
-    this.webSocketService.sendMessageToClients("/topic/games", gameJoinedDTO);
+  /**
+   * Update all subscribers in /topics/games
+   */
+  public void greetGames() {
+    // fetch all games
+    List<Game> games = GameRepository.getAllGames();
+    List<GameUpdateDTO> tmpGames = new ArrayList<>();
+
+    // Copy the user object, remove token and password before sending
+    for (Game game : games) {
+
+      // Create a temporary copy of the game, without the playerRepository
+      GameUpdateDTO tmpGame = new GameUpdateDTO(game);
+
+      // Add temporary User to list
+      tmpGames.add(tmpGame);
+
+    }
+
+    String gamesString = new Gson().toJson(tmpGames);
+    webSocketService.sendMessageToClients("/topic/games", gamesString);
+  }
+
+  /**
+   * Update all subscribers to that gameId in topics/games/{gameId}
+   * @param gameId ID of the game to update
+   */
+  public void updateGame(Long gameId) {
+    // fetch the game
+    Game gameToUpdate = GameRepository.findByGameId(gameId);
+
+//    Dummy dummy = new Dummy();
+//    String dummyResult = new Gson().toJson(dummy);
+//
+//    Player playerDummy = new Player();
+//    playerDummy.setId(1L);
+//    playerDummy.setGameId(1L);
+//    playerDummy.setPlayerName("asdf");
+//    playerDummy.setToken("asdf");
+//    playerDummy.setUserToken("asdf");
+//    playerDummy.setPlayerColor(PlayerColor.BLUE);
+//    String playerString = new Gson().toJson(playerDummy);
+
+    GameUpdateDTO gameUpdateDTO = new GameUpdateDTO(gameToUpdate);
+
+    String gameString = new Gson().toJson(gameUpdateDTO);
+    webSocketService.sendMessageToClients("/topic/games/" + gameId, gameString);
   }
 
 }

@@ -77,12 +77,6 @@ public class PlayerService {
     savePlayer(playerToUpdate);
   }
 
-  public void greetPlayers(Player player) {
-    PlayerJoinedDTO playerJoinDTO = new PlayerJoinedDTO();
-    playerJoinDTO.setPlayerName(player.getPlayerName());
-    this.webSocketService.sendMessageToClients("/topic/games/" + player.getGameId(), playerJoinDTO);
-  }
-
   /**
    * Given the userToken, either create a new player or return an existing player found by that userToken
    * Throws NOT_FOUND if there is no user to that userToken

@@ -97,6 +97,19 @@ public class Game {
   }
 
   /**
+   * Returns the list of players as an unmodifiable list of the current players in the game.
+   * Modifications to the list of players should only be done through the playerService/Repository
+   *
+   * @return  An unmodifiable list object containing all current players of the game
+   */
+  public List<Player> getPlayersView() {
+    if (this.players == null) {
+      return List.of();
+    }
+    return Collections.unmodifiableList(this.players);
+  }
+
+  /**
    * Assign PlayerColor for a given list of players
    */
 //  private HashMap<Player, PlayerColor> assignColors() {
@@ -122,14 +135,5 @@ public class Game {
 
 
   }
-
-
-
-
-
-  public String toString() {
-    return "Game: " + this.getGameName();
-  }
-
 
 }

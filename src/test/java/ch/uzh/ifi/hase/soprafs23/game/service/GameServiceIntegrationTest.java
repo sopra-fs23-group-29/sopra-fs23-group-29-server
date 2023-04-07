@@ -74,4 +74,24 @@ class GameServiceIntegrationTest {
         assertEquals(g_created.getGameName(), g1.getGameName());
         assertEquals(g_created.getGameMode(), g1.getGameMode());
     }
+
+    @Test
+    void updateGame() {
+        // given - adding a game via the service
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+
+        // then - call updateGame
+        gameService.updateGame(gameIdCreated);
+    }
+
+    @Test
+    void greetGames() {
+        // todo: Check that function runs
+
+        // given - adding a game via the service
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+
+        // then - call updateGame
+        gameService.greetGames();
+    }
 }
