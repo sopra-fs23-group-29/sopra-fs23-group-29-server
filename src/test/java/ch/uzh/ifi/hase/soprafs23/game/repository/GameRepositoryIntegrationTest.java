@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
@@ -13,13 +14,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameRepositoryIntegrationTest {
 
+
+    @Autowired
+    private PlayerRepository playerRepository;
+
     private Game g1, g1dup, g2;
 
     @BeforeEach
     void setUp() {
-        g1 = new Game(1L, "g1", GameMode.PVP);
-        g1dup = new Game(1L, "g1dup", GameMode.PVP);
-        g2 = new Game(2L, "g2", GameMode.PVP);
+        g1 = new Game(1L, "g1", GameMode.PVP, playerRepository);
+        g1dup = new Game(1L, "g1dup", GameMode.PVP, playerRepository);
+        g2 = new Game(2L, "g2", GameMode.PVP, playerRepository);
         GameRepository.clear();
     }
 

@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 
 import java.util.Collections;
@@ -22,6 +23,7 @@ public class Game {
   // add/remove players should not exist, only go through playerRepository
 
   private List<Player> players;
+  private PlayerRepository playerRepository;
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -31,14 +33,17 @@ public class Game {
   private int maxTurns;
 
   /**
-   * The constructor always needs an owner
+   * The constructor always needs a playerRepository to fetch its current players
+   * @param gameId id of the game
    * @param gameName name of the game
    * @param gameMode Which mode to play
+   * @param playerRepository PlayerRepository instance
    */
-  public Game(Long gameId, String gameName, GameMode gameMode) {
+  public Game(Long gameId, String gameName, GameMode gameMode, PlayerRepository playerRepository) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
+    this.playerRepository = playerRepository;
   }
 
   // default no args constructor - needed for test
@@ -85,7 +90,7 @@ public class Game {
 
 
   public void updatePlayers() {
-    
+
   }
 
 

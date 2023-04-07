@@ -33,7 +33,7 @@ class GameServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        g1 = new Game(1L, "g1", GameMode.PVP);
+        g1 = new Game(1L, "g1", GameMode.PVP, playerRepository);
         playerRepository.deleteAll();
         GameRepository.clear();
     }

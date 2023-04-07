@@ -45,7 +45,7 @@ public class GameService {
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
     removeAllPlayersFromGame((long) gameCounter);
-    Game newGame = new Game((long) gameCounter, gameName, gameMode);
+    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerRepository);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
   }
