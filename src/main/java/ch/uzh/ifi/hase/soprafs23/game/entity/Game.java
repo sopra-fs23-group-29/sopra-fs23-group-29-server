@@ -15,6 +15,8 @@ import java.util.*;
 
 public class Game {
 
+  public static final int MAXPLAYERS = 6;
+
   // todo: players should always update from playerRepository, never keep that internal!
   // getPlayers should be a method calling playerRepository
   // add/remove players should not exist, only go through playerRepository
@@ -41,7 +43,6 @@ public class Game {
 
   // default no args constructor - needed for test
   public Game() {}
-
 
   public void setGameId(Long gameId) {this.gameId = gameId;}
   public Long getGameId() {return gameId;}
@@ -83,25 +84,11 @@ public class Game {
   }
 
 
-
-
-  /**
-   * Add a Player to the list of players of the game
-   * Do nothing if the Player instance is already contained
-   * @param player Player to add
-   */
-  public void addPlayer(Player player) {
-    if (!this.players.contains(player)) {
-      this.players.add(player);
-    }
+  public void updatePlayers() {
+    
   }
 
-  /**
-   * Remove the given player from the list of players
-   * @param player Player object to remove
-   * @return True if a matching instance has been found, False otherwise
-   */
-  public boolean removePlayer(Player player) {return this.players.remove(player);}
+
 
 
 
