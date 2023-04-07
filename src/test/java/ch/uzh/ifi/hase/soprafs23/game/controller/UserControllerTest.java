@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.game.controller.UserController;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,9 @@ public class UserControllerTest {
 
   @MockBean
   private UserService userService;
+
+  @MockBean
+  private WebSocketService webSocketService;
 
   // current date
   private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");

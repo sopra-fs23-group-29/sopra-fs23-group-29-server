@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class WebSocketService {
 
     protected final PlayerRepository playerRepo;
-    private final PlayerService playerService;
     private final UserService userService;
 
     @Autowired // Automatic injection of beans
@@ -22,19 +21,14 @@ public class WebSocketService {
     Logger log = LoggerFactory.getLogger(WebSocketService.class);
 
     public WebSocketService(@Qualifier("playerRepository") PlayerRepository playerRepository,
-                            PlayerService playerService, UserService userService) {
+                            UserService userService) {
         this.playerRepo = playerRepository;
-        this.playerService = playerService;
         this.userService = userService;
     }
 
     public void sendMessageToClients(String destination, Object dto) {
         this.smesg.convertAndSend(destination, dto);
 
-    }
-
-    public String viewUsers() {
-        return userService.getUserListAsString();
     }
 
     public String viewUser(long userId) {

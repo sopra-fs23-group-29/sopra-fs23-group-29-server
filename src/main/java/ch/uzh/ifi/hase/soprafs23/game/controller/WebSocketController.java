@@ -1,6 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
+import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
+import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
+import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
+import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.DummyDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -12,38 +19,36 @@ import java.util.concurrent.TimeUnit;
 @Controller
 public class WebSocketController {
     private final WebSocketService webSocketService;
+    private final GameService gameService;
+    private final UserService userService;
+    private final PlayerService playerService;
+    private final UserRepository userRepository;
+    private final PlayerRepository playerRepository;
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
-    public WebSocketController(WebSocketService webSocketService) {
+    public WebSocketController(
+        WebSocketService webSocketService,
+        GameService gameService,
+        UserService userService,
+        PlayerService playerService,
+        UserRepository userRepository,
+        PlayerRepository playerRepository
+    ) {
         this.webSocketService = webSocketService;
+        this.gameService = gameService;
+        this.userService = userService;
+        this.playerService = playerService;
+        this.userRepository = userRepository;
+        this.playerRepository = playerRepository;
     }
 
-    private void sendConstantStream(String destination) {
-        while (true) {
-            this.webSocketService.sendMessageToClients(destination, "server is running");
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-    /*
-    @MessageMapping("/lobbies/{lobbyId}/end-round")
-    public void endRound(@DestinationVariable Long lobbyId) {
-        log.info("Lobby {}: round is over", lobbyId);
-        // GameService rüeft evaluator uf
-        LeaderboardDTO leaderboard = gameService.endRound(lobbyId);
-        this.webSocketService.sendMessageToClients(destination + lobbyId, leaderboard);
-    }
-     */
 
     // viewing the user list
     @MessageMapping("/users")
     public void showUsers() {
         String destination = "/topic/users";
         while(true) {
-            this.webSocketService.sendMessageToClients(destination, "hello user");
+            this.webSocketService.sendMessageToClients(destination, new DummyDTO());
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {

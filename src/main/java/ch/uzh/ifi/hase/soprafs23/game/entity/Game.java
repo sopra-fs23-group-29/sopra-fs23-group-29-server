@@ -2,10 +2,8 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 
-import javax.persistence.*;
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.*;
 
@@ -13,157 +11,79 @@ import java.util.*;
 /**
  * Internal Game Representation
  * This class represents a game
- * Every variable will be mapped into a database field with the @Column
- * annotation
- * - nullable = false -> this cannot be left empty
- * - unique = true -> this value must be unqiue across the database -> composes
- * the primary key
  */
-@Entity
-@Table(name = "GAME")
-public class Game implements Serializable {
 
-  private static final long serialVersionUID = 1L;
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+public class Game {
 
-  @Column(nullable = false)
-  private String gamename;
+  // todo: players should always update from playerRepository, never keep that internal!
+  // getPlayers should be a method calling playerRepository
+  // add/remove players should not exist, only go through playerRepository
 
-  @Column(nullable = false, unique = true)
-  private String token;
-
-  @Column(nullable = false)
-  private GameStatus gamestatus;
-
-  @Column(nullable = false)
-  private GameMode gamemode;
-
-  @Column(nullable = false)
-  private int boardsize;
-
-  @Column(nullable = false)
-  private int maxduration;
-
-  @Column(nullable = false)
-  private int maxturns;
-
-  /**
-   * Cascade: Game has ALL. Meaning when the Game is persisted, the players are persisted if not exist
-   * When the game is deleted, all the players are deleted
-   */
-  @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-  private final List<Player> players = new ArrayList<>();
-
-  @OneToOne
-  private Player owner;
-
-  // private Turn currentTurn;
+  private List<Player> players;
+  private Long gameId;
+  private String gameName;
+  private GameStatus gameStatus;
+  private GameMode gameMode;
+  private int boardSize;
+  private int maxDuration;
+  private int maxTurns;
 
   /**
    * The constructor always needs an owner
-   * @param gamename name of the game
-   * @param token token of the game
-   * @param gamemode Which mode to play
-   * @param owner The Player owning the game
+   * @param gameName name of the game
+   * @param gameMode Which mode to play
    */
-  public Game(String gamename, String token, GameMode gamemode, Player owner) {
-    this.gamename = gamename;
-    this.token = token;
-    this.gamemode = gamemode;
-    this.owner = owner;
-
-    // Add the owner to the list of players
-    addPlayer(owner);
+  public Game(Long gameId, String gameName, GameMode gameMode) {
+    this.gameId = gameId;
+    this.gameName = gameName;
+    this.gameMode = gameMode;
   }
 
   // default no args constructor - needed for test
   public Game() {}
 
 
-
-  public Long getId() {
-    return id;
+  public void setGameId(Long gameId) {this.gameId = gameId;}
+  public Long getGameId() {return gameId;}
+  public String getGameName() {
+    return gameName;
   }
-
-  public void setId(Long id) {
-    this.id = id;
+  public void setGameName(String gameName) {
+    this.gameName = gameName;
   }
-
-  public String getGamename() {
-    return gamename;
+  public GameStatus getGameStatus() {
+    return gameStatus;
   }
-
-  public void setGamename(String gamename) {
-    this.gamename = gamename;
+  public void setGameStatus(GameStatus gameStatus) {
+    this.gameStatus = gameStatus;
   }
-
-  public String getToken() {
-    return token;
+  public GameMode getGameMode() {
+    return gameMode;
   }
-
-  public void setToken(String token) {
-    this.token = token;
+  public void setGameMode(GameMode gameMode) {
+    this.gameMode = gameMode;
   }
-
-  public void setOwner(Player owner) {
-    this.owner = owner;
+  public int getBoardSize() {
+    return boardSize;
   }
-
-  public Player getOwner() {
-    return owner;
+  public void setBoardSize(int boardSize) {
+    this.boardSize = boardSize;
   }
-
-  public GameStatus getGamestatus() {
-    return gamestatus;
+  public int getMaxDuration() {
+    return maxDuration;
   }
-
-  public void setGamestatus(GameStatus gamestatus) {
-    this.gamestatus = gamestatus;
+  public void setMaxDuration(int maxDuration) {
+    this.maxDuration = maxDuration;
   }
-
-  public GameMode getGamemode() {
-    return gamemode;
+  public int getMaxTurns() {
+    return maxTurns;
   }
-
-  public void setGamemode(GameMode gamemode) {
-    this.gamemode = gamemode;
-  }
-
-  public int getBoardsize() {
-    return boardsize;
-  }
-
-  public void setBoardsize(int boardsize) {
-    this.boardsize = boardsize;
-  }
-
-  public int getMaxduration() {
-    return maxduration;
-  }
-
-  public void setMaxduration(int maxduration) {
-    this.maxduration = maxduration;
-  }
-
-  public int getMaxturns() {
-    return maxturns;
-  }
-
-  public void setMaxturns(int maxturns) {
-    this.maxturns = maxturns;
+  public void setMaxTurns(int maxTurns) {
+    this.maxTurns = maxTurns;
   }
 
 
 
-  /**
-   * Returns the list of players as an unmodifiable list of the current players in the game.
-   * Modifications to the list of players should only be done through addPlayer and removePlayer
-   *
-   * @return  An unmodifiable list object containing all current players of the game
-   */
-  public List<Player> getPlayers() {return Collections.unmodifiableList(this.players);}
 
   /**
    * Add a Player to the list of players of the game
@@ -173,8 +93,6 @@ public class Game implements Serializable {
   public void addPlayer(Player player) {
     if (!this.players.contains(player)) {
       this.players.add(player);
-      // To keep consistency, automatically set the game for the player
-      player.setGame(this);
     }
   }
 
@@ -188,7 +106,7 @@ public class Game implements Serializable {
 
 
   public String toString() {
-    return "Game: " + this.getGamename();
+    return "Game: " + this.getGameName();
   }
 
 

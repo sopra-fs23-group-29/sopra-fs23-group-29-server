@@ -1,11 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
-import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
@@ -15,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,54 +19,59 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class GameServiceIntegrationTest {
 
-  @Qualifier("gameRepository")
-  @Autowired
-  private GameRepository gameRepository;
+    @Qualifier("playerRepository")
+    @Autowired
+    private PlayerRepository playerRepository;
 
-  @Qualifier("playerRepository")
-  @Autowired
-  private PlayerRepository playerRepository;
+    @Autowired
+    private GameService gameService;
 
-  @Qualifier("userRepository")
-  @Autowired
-  private UserRepository userRepository;
+    @Autowired
+    private WebSocketService webSocketService;
 
-  @Autowired
-  private GameService gameService;
+    private Game g1;
 
-  private final User dummyUser = new User();
+    @BeforeEach
+    public void setup() {
+        g1 = new Game(1L, "g1", GameMode.PVP);
+        playerRepository.deleteAll();
+        GameRepository.clear();
+    }
 
-  @BeforeEach
-  public void setup() {
+    @Test
+    void getGameById() {
+        // given - add game to repo
+        GameRepository.addGame(g1.getGameId(), g1);
 
-    dummyUser.setUsername("userName");
-    dummyUser.setPassword("userPassword");
-    dummyUser.setToken("userToken");
-    dummyUser.setStatus(UserStatus.ONLINE);
+        // then - retrieve the game
+        Game g1_found = gameService.getGameById(g1.getGameId());
 
-    userRepository.deleteAll();
-    playerRepository.deleteAll();
-    gameRepository.deleteAll();
-  }
+        assertEquals(g1_found.getGameName(), g1.getGameName());
+        assertEquals(g1_found.getGameId(), g1.getGameId());
+        assertEquals(g1_found.getGameMode(), g1.getGameMode());
 
-  @Test
-  public void createGameFromUserToken_success() {
+    }
 
-    // given - empty
-    assertNull(playerRepository.findByPlayername("p1"));
-    assertNull(gameRepository.findByGamename("g1"));
+    @Test
+    void getGameById_throwsNOT_FOUND() {
+        // given - empty repo
+        // then - retrieve the game throws error
+        assertThrows(ResponseStatusException.class, () -> gameService.getGameById(1L));
+    }
 
-    // given - user is saved to repository
-    userRepository.save(dummyUser);
-    userRepository.flush();
+    @Test
+    void createNewGame() {
+        // given - adding a game via the service
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
 
-    // when - game is created
-    Game g1_created = gameService.createGame(dummyUser.getToken(), GameMode.PVP);
+        // then - assert one game exists
+        assertEquals(GameRepository.getSize(), 1);
 
-    // then - make sure game is there, including the player, and the owner is the player derived from the user
-    assertNotNull(g1_created.getToken());
-    assertEquals(g1_created.getOwner().getUserToken(), dummyUser.getToken());
+        // then - assert that game has been correctly created with ID gameIdCreated
+        Game g_created = gameService.getGameById(gameIdCreated);
 
-  }
-
+        assertEquals(g_created.getGameId(), gameIdCreated);
+        assertEquals(g_created.getGameName(), g1.getGameName());
+        assertEquals(g_created.getGameMode(), g1.getGameMode());
+    }
 }

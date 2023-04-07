@@ -9,9 +9,10 @@ import java.util.List;
 
 @Repository("playerRepository")
 public interface PlayerRepository extends JpaRepository<Player, Long> {
-  Player findByPlayername(String username);
+  Player findByPlayerName(String username);
   Player findByToken(String token);
-  List<Player> findByGame(Game game);
+  List<Player> findByGameId(Long gameId);
   Player findByUserToken(String userToken);
+  long deleteById(long playerId);
 
 }

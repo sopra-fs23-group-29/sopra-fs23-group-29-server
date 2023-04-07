@@ -1,7 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 
 import javax.persistence.*;
@@ -28,42 +26,20 @@ public class Player implements Serializable {
   private Long id;
 
   @Column(nullable = false, unique = true)
-  private String playername;
+  private String userToken;
+
+  @Column
+  private Long gameId;
+
+  @Column(nullable = false)
+  private String playerName;
 
   @Column(nullable = false, unique = true)
   private String token;
 
   @Column(nullable = false)
-  private PlayerColor playercolor;
+  private PlayerColor playerColor;
 
-  @Column(nullable = false, unique = true)
-  private String userToken;
-
-  /**
-   * Cascade: Player has CascadeType.PERSIST.
-   * When the Player is persisted, the Game is persisted if not exist
-   * However, the game lives on if all Players are deleted
-   */
-  @ManyToOne(cascade = CascadeType.PERSIST)
-  private Game game;
-
-
-
-  /**
-   * The constructor always needs a playername, a token and a user reference
-   * A game reference is not needed
-   * @param playername Name of the player
-   * @param token Token of the player
-   * @param userToken The userToken this player belongs to
-   */
-  public Player(String playername, String token, String userToken) {
-    this.playername = playername;
-    this.token = token;
-    this.userToken = userToken;
-  }
-
-  // default no args constructor - needed for test
-  public Player() {}
 
 
 
@@ -78,12 +54,26 @@ public class Player implements Serializable {
     this.id = id;
   }
 
-  public String getPlayername() {
-    return playername;
+  public String getUserToken() {return userToken;}
+
+  public void setUserToken(String userToken) {
+    this.userToken = userToken;
   }
 
-  public void setPlayername(String playername) {
-    this.playername = playername;
+  public Long getGameId() {
+    return gameId;
+  }
+
+  public void setGameId(Long gameId) {
+    this.gameId = gameId;
+  }
+
+  public String getPlayerName() {
+    return playerName;
+  }
+
+  public void setPlayerName(String playerName) {
+    this.playerName = playerName;
   }
 
   public String getToken() {
@@ -94,33 +84,18 @@ public class Player implements Serializable {
     this.token = token;
   }
 
-  public PlayerColor getPlayercolor() {
-    return playercolor;
+  public PlayerColor getPlayerColor() {
+    return playerColor;
   }
 
-  public void setPlayercolor(PlayerColor playercolor) {
-    this.playercolor = playercolor;
+  public void setPlayerColor(PlayerColor playerColor) {
+    this.playerColor = playerColor;
   }
 
-  public Game getGame() {
-    return game;
-  }
-
-  public void setGame(Game game) {
-    this.game = game;
-    // to keep it consistent, also add the player to the game
-    game.addPlayer(this);
-  }
-
-  public String getUserToken() {return userToken;}
-
-  public void setUserToken(String userToken) {
-    this.userToken = userToken;
-  }
 
 
   public String toString() {
-    return "Player: " + this.getPlayername() + " ID: " + this.getId() + " Token:" + this.getToken() + " GameID:" + this.getGame();
+    return "Player: " + this.getPlayerName() + " ID: " + this.getId() + " Token:" + this.getToken();
   }
 
 }
