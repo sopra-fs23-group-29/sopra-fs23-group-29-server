@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
@@ -44,10 +46,10 @@ public class GameController {
     @PostMapping("/games")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public GameGetDTO createGame(
+    public GameGetDTO createGame (
             @RequestBody GamePostDTO gamePostDTO,
             HttpServletRequest request
-    ) {
+    ) throws ResponseStatusException {
 
         // fetch auth_token from request
         String auth_token = request.getHeader("Authorization");
@@ -67,21 +69,22 @@ public class GameController {
         // GameService creates the game and writes to the gameRepository
         // get the gameId
         Long newGameId = gameService.createNewGame(gamePostDTO.getGameName(), gamePostDTO.getGameMode());
-        // return object
-        GameGetDTO newGameGetDTO = new GameGetDTO();
-        newGameGetDTO.setGameId(newGameId);
+
+        // fetch the game created
+        Game newGame = GameRepository.findByGameId(newGameId);
 
         // let everybody know about the new game
         // todo: Replace with gameService.updateGames
         // Should just send a list of all Game objects in GameRepository
         gameService.greetGames(gameService.getGameById(newGameId));
 
-        log.info("Game {}: game created", gamePostDTO.getGameName());
+        log.info("Game {}: game created", newGame.getGameName());
 
         // Add the creator of the game as a player
         Player playerJoined = playerService.joinPlayer(auth_token, newGameId.intValue());
 
-        return newGameGetDTO;
+        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(newGame);
+
     }
 
     @PostMapping("/games/{gameId}")
@@ -90,7 +93,7 @@ public class GameController {
     public PlayerGetDTO createPlayer(
         @PathVariable int gameId,
         HttpServletRequest request
-        ) {
+        ) throws ResponseStatusException {
 
         // fetch auth_token from request
         String auth_token = request.getHeader("Authorization");
