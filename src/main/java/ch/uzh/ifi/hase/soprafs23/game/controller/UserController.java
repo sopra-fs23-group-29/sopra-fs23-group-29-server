@@ -7,7 +7,6 @@ import ch.uzh.ifi.hase.soprafs23.game.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
-import com.google.gson.Gson;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,11 +26,9 @@ import java.util.List;
 public class UserController {
 
   private final UserService userService;
-  private final WebSocketService webSocketService;
 
-  UserController(UserService userService, WebSocketService webSocketService) {
+  UserController(UserService userService) {
     this.userService = userService;
-    this.webSocketService = webSocketService;
   }
 
 
@@ -80,8 +77,7 @@ public class UserController {
     response.addHeader("Authorization", createdUser.getToken());
 
     // Send a message to all WebSocket subscribers in channel /users
-    String userListAsString = new Gson().toJson(userService.getUsers());
-    webSocketService.sendMessageToClients("/topic/users", userListAsString);
+    userService.greetUsers();
 
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
@@ -104,6 +100,9 @@ public class UserController {
     // set status of user to ONLINE
     userService.setUserOnline(checkedUser.getId());
 
+    // Send a message to all WebSocket subscribers in channel /users
+    userService.greetUsers();
+
     // convert internal representation of user back to API
     return DTOMapper.INSTANCE.convertEntityToUserGetDTO(checkedUser);
   }
@@ -122,6 +121,9 @@ public class UserController {
 
     // set status of user to OFFLINE
     User userChanged = userService.setUserOffline(userToLogout.getId());
+
+    // Send a message to all WebSocket subscribers in channel /users
+    userService.greetUsers();
 
   }
 
@@ -145,6 +147,9 @@ public class UserController {
 
     // update the user
     User updatedUser = userService.updateUser(id, newUsername, newBirthday);
+
+    // Send a message to all WebSocket subscribers in channel /users
+    userService.greetUsers();
 
   }
 
@@ -174,5 +179,8 @@ public class UserController {
 
     // letting userService handle the deletion
     userService.deleteUser(userId, username, password, token);
+
+    // Send a message to all WebSocket subscribers in channel /users
+    userService.greetUsers();
   }
 }

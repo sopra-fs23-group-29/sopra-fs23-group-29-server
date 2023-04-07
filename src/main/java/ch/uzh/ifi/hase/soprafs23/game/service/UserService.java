@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.UserListDTO;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -33,11 +35,13 @@ public class UserService {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
+    private final WebSocketService webSocketService;
     private final UserListDTO userListDTO;
 
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, WebSocketService webSocketService) {
         this.userRepository = userRepository;
+        this.webSocketService = webSocketService;
         this.userListDTO = new UserListDTO();
     }
 
@@ -324,5 +328,35 @@ public class UserService {
         }
 
         return true;
+    }
+
+    public void greetUsers() {
+
+        // fetch all users in the internal representation
+        List<User> users = getUsers();
+        List<User> tmpUsers = new ArrayList<>();
+
+        log.info("getUsers() before greeting: {}", users);
+
+        // Copy the user object, remove token and password before sending
+        for (User user : users) {
+
+            // Create a temporary copy of the user, without password and token
+            User tmpUser = new User();
+            tmpUser.setId(user.getId());
+            tmpUser.setStatus(user.getStatus());
+            tmpUser.setUsername(user.getUsername());
+            tmpUser.setBirthday(user.getBirthday());
+            tmpUser.setCreationDate(user.getCreationDate());
+
+            // Add temporary User to list
+            tmpUsers.add(tmpUser);
+
+        }
+
+        log.info("getUsers() before greeting: {}", getUsers());
+
+        String tmpUserListAsString = new Gson().toJson(tmpUsers);
+        webSocketService.sendMessageToClients("/topic/users", tmpUserListAsString);
     }
 }

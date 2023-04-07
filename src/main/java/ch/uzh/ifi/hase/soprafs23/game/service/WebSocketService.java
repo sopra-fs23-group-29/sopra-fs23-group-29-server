@@ -13,25 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class WebSocketService {
 
-    protected final PlayerRepository playerRepo;
-    private final UserService userService;
-
     @Autowired // Automatic injection of beans
     protected SimpMessagingTemplate smesg;
     Logger log = LoggerFactory.getLogger(WebSocketService.class);
 
-    public WebSocketService(@Qualifier("playerRepository") PlayerRepository playerRepository,
-                            UserService userService) {
-        this.playerRepo = playerRepository;
-        this.userService = userService;
-    }
+    public WebSocketService() {}
 
     public void sendMessageToClients(String destination, Object dto) {
         this.smesg.convertAndSend(destination, dto);
-
     }
 
-    public String viewUser(long userId) {
-        return userService.getUserById(userId).toString();
-    }
 }
