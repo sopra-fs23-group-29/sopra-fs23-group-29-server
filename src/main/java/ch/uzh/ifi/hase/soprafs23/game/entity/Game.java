@@ -2,10 +2,9 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
-import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 
-import java.util.Collections;
 import java.util.*;
 
 
@@ -89,7 +88,38 @@ public class Game {
   }
 
 
-  public void updatePlayers() {
+  /**
+   * Fetch all current players from the playerRepository and update the internal players list
+   */
+  private void updatePlayers() {
+    // Fetch all Players
+    players = playerRepository.findByGameId(this.gameId);
+  }
+
+  /**
+   * Assign PlayerColor for a given list of players
+   */
+//  private HashMap<Player, PlayerColor> assignColors() {
+//    int lenIndex = players.size();
+//
+//  }
+
+  /**
+   * Start the game
+   * Set gameStatus = GameStatus.INPROGRESS
+   * Assign colours to all Players, based on the moment this method runs
+   */
+  public void initGame() {
+    // Update player list
+    updatePlayers();
+
+    // todo: Check if enough number of players?
+
+    // Set gameStatus
+    setGameStatus(GameStatus.INPROGRESS);
+
+    // Assign PlayerColor
+
 
   }
 

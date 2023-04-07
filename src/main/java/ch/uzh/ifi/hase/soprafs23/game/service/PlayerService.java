@@ -65,6 +65,18 @@ public class PlayerService {
     return this.playerRepository.findByUserToken(userToken);
   }
 
+  /**
+   * Update a Player with a given ID to the given PlayerColor
+   * Do nothing if Player has already assigned that PlayerColor
+   * @param playerId The ID of the Player to update
+   * @param playerColorToSet The PlayerColor to set
+   */
+  public void updatePlayerColor(Long playerId, PlayerColor playerColorToSet) {
+    Player playerToUpdate = getPlayerById(playerId);
+    playerToUpdate.setPlayerColor(playerColorToSet);
+    savePlayer(playerToUpdate);
+  }
+
   public void greetPlayers(Player player) {
     PlayerJoinedDTO playerJoinDTO = new PlayerJoinedDTO();
     playerJoinDTO.setPlayerName(player.getPlayerName());
