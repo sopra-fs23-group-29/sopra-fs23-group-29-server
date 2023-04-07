@@ -64,8 +64,8 @@ public class WebSocketController {
     // viewing a single user
     @MessageMapping("/users/{userId}")
     public void showUser(@DestinationVariable long userId) {
-        String user = webSocketService.viewUser(userId);
-        this.webSocketService.sendMessageToClients("/users/" + userId, user);
+        String userString = userService.getUserById(userId).toString();
+        this.webSocketService.sendMessageToClients("/users/" + userId, userString);
     }
 
 }

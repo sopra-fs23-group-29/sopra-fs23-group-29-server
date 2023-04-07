@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -399,6 +400,28 @@ public class UserServiceIntegrationTest {
 
         assertThrows(ResponseStatusException.class,
                 () -> userService.deleteUser(id, username, password, ""));
+    }
+
+    @Test
+    public void greetUsers() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
+
+        User testUser = new User();
+        testUser.setPassword("testPassword");
+        testUser.setUsername("testUsername");
+
+        User createdUser = userService.createUser(testUser);
+
+        // when greetUsers
+        userService.greetUsers();
+
+        // then - assert the original user is not affected
+        List<User> allUsers = userService.getUsers();
+
+        assertNotSame("", allUsers.get(0).getToken());
+        assertNotSame("", allUsers.get(0).getPassword());
+
     }
 
 }
