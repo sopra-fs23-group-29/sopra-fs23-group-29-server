@@ -1,10 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.UserListDTO;
 import org.slf4j.Logger;
@@ -35,90 +32,13 @@ public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
-  private final UserRepository userRepository;
-  private final PlayerRepository playerRepository;
-  private final UserListDTO userListDTO;
+    private final UserRepository userRepository;
+    private final UserListDTO userListDTO;
 
-  @Autowired
-  public UserService(
-    @Qualifier("userRepository") UserRepository userRepository,
-    @Qualifier("playerRepository") PlayerRepository playerRepository) {
-    this.userRepository = userRepository;
-    this.playerRepository = playerRepository;
-    this.userListDTO = new UserListDTO();
-  }
-
-  /**
-   *
-   */
-  public String getUserListAsString() {
-    return userListDTO.buildUserList(userRepository.findAll());
-  }
-
-  /**
-   * Set STATUS to UserStatus.ONLINE
-   * @param id The id of the user to change status to ONLINE
-   * @return The user changed status to ONLINE
-   */
-  public User setUserOnline(Long id) {
-    User userToUpdate = getUserById(id);
-
-    userToUpdate.setStatus(UserStatus.ONLINE);
-
-    // save entry back to db
-    this.userRepository.save(userToUpdate);
-    userRepository.flush();
-
-    return userToUpdate;
-
-  }
-
-  /**
-   * Set STATUS to UserStatus.ONLINE
-   * @param id The id of the user to change status to ONLINE
-   * @return The user changed status to ONLINE
-   */
-  public User setUserOffline(Long id) {
-    User userToUpdate = getUserById(id);
-
-    userToUpdate.setStatus(UserStatus.OFFLINE);
-
-    // save entry back to db
-    this.userRepository.save(userToUpdate);
-    userRepository.flush();
-
-    return userToUpdate;
-
-  }
-
-  public List<User> getUsers() {
-    return this.userRepository.findAll();
-  }
-
-  /**
-  * Check if a user exists and if his password is correct
-  * Check for existence is based on
-  * username
-  *
-  * Check for password is based on
-  * password
-  *
-  * Return the user if found
-  *
-  * @param userToCheck
-  * @throws org.springframework.web.server.ResponseStatusException
-  * @return User
-  */
-  public User checkLogin(User userToCheck) {
-
-    String usernameToCheck = userToCheck.getUsername();
-    String passwordToCheck = userToCheck.getPassword();
-
-    User userSearched = this.userRepository.findByUsername(usernameToCheck);
-
-    // check if the username exists in the db
-    if (userSearched == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with username %s not found", usernameToCheck));
+    @Autowired
+    public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+        this.userRepository = userRepository;
+        this.userListDTO = new UserListDTO();
     }
 
     /**

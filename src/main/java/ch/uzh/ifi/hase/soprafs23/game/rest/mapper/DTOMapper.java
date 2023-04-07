@@ -35,31 +35,27 @@ public interface DTOMapper {
     @Mapping(source = "birthday", target = "birthday")
     UserGetDTO convertEntityToUserGetDTO(User user);
 
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "birthday", target = "birthday")
-  @Mapping(source = "password", target = "password")
-  User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "birthday", target = "birthday")
+    @Mapping(source = "password", target = "password")
+    User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "password", target = "password")
-  User convertUserDeleteDTOtoEntity(UserDeleteDTO userDeleteDTO);
+    @Mapping(source = "userToken", target = "userToken")
+    Player convertPlayerPostDTOtoEntity(PlayerPostDTO playerPostDTO);
 
-  @Mapping(source = "userToken", target = "userToken")
-  Player convertPlayerPostDTOtoEntity(PlayerPostDTO playerPostDTO);
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "playerName", target = "playerName")
+    @Mapping(source = "playerColor", target = "playerColor")
+    @Mapping(source = "token", target = "token")
+    @Mapping(source = "userToken", target = "userToken")
+    @Mapping(source = "gameId", target = "gameId")
+    PlayerGetDTO convertEntityToPlayerGetDTO(Player player);
 
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "playerName", target = "playerName")
-  @Mapping(source = "playerColor", target = "playerColor")
-  @Mapping(source = "token", target = "token")
-  @Mapping(source = "userToken", target = "userToken")
-  @Mapping(source = "gameId", target = "gameId")
-  PlayerGetDTO convertEntityToPlayerGetDTO(Player player);
+    @Mapping(source = "gameName", target = "gameName")
+    @Mapping(source = "gameMode", target = "gameMode")
+    Game convertGamePostDTOToEntity(GamePostDTO gamePostDTO);
 
-  @Mapping(source = "gameName", target = "gameName")
-  @Mapping(source = "gameMode", target = "gameMode")
-  Game convertGamePostDTOToEntity(GamePostDTO gamePostDTO);
-
-  @Mapping(source = "gameId", target = "gameId")
-  GameGetDTO convertEntityToGameGetDTO(Game game);
+    @Mapping(source = "gameId", target = "gameId")
+    GameGetDTO convertEntityToGameGetDTO(Game game);
 
 }
