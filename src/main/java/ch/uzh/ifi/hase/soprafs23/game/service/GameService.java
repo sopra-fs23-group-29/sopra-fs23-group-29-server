@@ -96,18 +96,6 @@ public class GameService {
     // fetch the game
     Game gameToUpdate = GameRepository.findByGameId(gameId);
 
-//    Dummy dummy = new Dummy();
-//    String dummyResult = new Gson().toJson(dummy);
-//
-//    Player playerDummy = new Player();
-//    playerDummy.setId(1L);
-//    playerDummy.setGameId(1L);
-//    playerDummy.setPlayerName("asdf");
-//    playerDummy.setToken("asdf");
-//    playerDummy.setUserToken("asdf");
-//    playerDummy.setPlayerColor(PlayerColor.BLUE);
-//    String playerString = new Gson().toJson(playerDummy);
-
     GameUpdateDTO gameUpdateDTO = new GameUpdateDTO(gameToUpdate);
 
     String gameString = new Gson().toJson(gameUpdateDTO);
