@@ -2,9 +2,9 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 
-import java.util.Collections;
 import java.util.*;
 
 
@@ -15,11 +15,14 @@ import java.util.*;
 
 public class Game {
 
+  public static final int MAXPLAYERS = 6;
+
   // todo: players should always update from playerRepository, never keep that internal!
   // getPlayers should be a method calling playerRepository
   // add/remove players should not exist, only go through playerRepository
 
   private List<Player> players;
+  private PlayerRepository playerRepository;
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -29,19 +32,21 @@ public class Game {
   private int maxTurns;
 
   /**
-   * The constructor always needs an owner
+   * The constructor always needs a playerRepository to fetch its current players
+   * @param gameId id of the game
    * @param gameName name of the game
    * @param gameMode Which mode to play
+   * @param playerRepository PlayerRepository instance
    */
-  public Game(Long gameId, String gameName, GameMode gameMode) {
+  public Game(Long gameId, String gameName, GameMode gameMode, PlayerRepository playerRepository) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
+    this.playerRepository = playerRepository;
   }
 
   // default no args constructor - needed for test
   public Game() {}
-
 
   public void setGameId(Long gameId) {this.gameId = gameId;}
   public Long getGameId() {return gameId;}
@@ -83,31 +88,52 @@ public class Game {
   }
 
 
-
+  /**
+   * Fetch all current players from the playerRepository and update the internal players list
+   */
+  private void updatePlayers() {
+    // Fetch all Players
+    players = playerRepository.findByGameId(this.gameId);
+  }
 
   /**
-   * Add a Player to the list of players of the game
-   * Do nothing if the Player instance is already contained
-   * @param player Player to add
+   * Returns the list of players as an unmodifiable list of the current players in the game.
+   * Modifications to the list of players should only be done through the playerService/Repository
+   *
+   * @return  An unmodifiable list object containing all current players of the game
    */
-  public void addPlayer(Player player) {
-    if (!this.players.contains(player)) {
-      this.players.add(player);
+  public List<Player> getPlayersView() {
+    if (this.players == null) {
+      return List.of();
     }
+    return Collections.unmodifiableList(this.players);
   }
 
   /**
-   * Remove the given player from the list of players
-   * @param player Player object to remove
-   * @return True if a matching instance has been found, False otherwise
+   * Assign PlayerColor for a given list of players
    */
-  public boolean removePlayer(Player player) {return this.players.remove(player);}
+//  private HashMap<Player, PlayerColor> assignColors() {
+//    int lenIndex = players.size();
+//
+//  }
+
+  /**
+   * Start the game
+   * Set gameStatus = GameStatus.INPROGRESS
+   * Assign colours to all Players, based on the moment this method runs
+   */
+  public void initGame() {
+    // Update player list
+    updatePlayers();
+
+    // todo: Check if enough number of players?
+
+    // Set gameStatus
+    setGameStatus(GameStatus.INPROGRESS);
+
+    // Assign PlayerColor
 
 
-
-  public String toString() {
-    return "Game: " + this.getGameName();
   }
-
 
 }

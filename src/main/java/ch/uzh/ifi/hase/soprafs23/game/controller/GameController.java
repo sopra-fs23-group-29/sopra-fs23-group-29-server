@@ -74,9 +74,7 @@ public class GameController {
         Game newGame = GameRepository.findByGameId(newGameId);
 
         // let everybody know about the new game
-        // todo: Replace with gameService.updateGames
-        // Should just send a list of all Game objects in GameRepository
-        gameService.greetGames(gameService.getGameById(newGameId));
+        gameService.greetGames();
 
         log.info("Game {}: game created", newGame.getGameName());
 
@@ -121,9 +119,7 @@ public class GameController {
         Player playerJoining = playerService.joinPlayer(auth_token, gameId);
 
         // let all players in the game know who joined
-        // todo: Replace with playerService.updateGame
-        // Should fetch the gameId of the playerJoining and send that game object again
-        playerService.greetPlayers(playerJoining);
+        gameService.updateGame((long) gameId);
 
         PlayerGetDTO playerGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerGetDTO(playerJoining);
 

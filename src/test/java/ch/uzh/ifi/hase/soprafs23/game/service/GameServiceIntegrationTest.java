@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @WebAppConfiguration
@@ -33,7 +35,7 @@ class GameServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        g1 = new Game(1L, "g1", GameMode.PVP);
+        g1 = new Game(1L, "g1", GameMode.PVP, playerRepository);
         playerRepository.deleteAll();
         GameRepository.clear();
     }
@@ -73,5 +75,41 @@ class GameServiceIntegrationTest {
         assertEquals(g_created.getGameId(), gameIdCreated);
         assertEquals(g_created.getGameName(), g1.getGameName());
         assertEquals(g_created.getGameMode(), g1.getGameMode());
+    }
+
+    @Test
+    void updateGame() {
+        // given - adding a game via the service
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+
+        // then - call updateGame
+        gameService.updateGame(gameIdCreated);
+
+        // assert gameRepository was not affected
+        List<Game> allGames = GameRepository.getAllGames();
+        assertEquals(allGames.size(), 1);
+
+        Game gameToCheck = gameService.getGameById(gameIdCreated);
+        assertEquals(gameToCheck.getGameId(), gameIdCreated);
+        assertEquals(gameToCheck.getGameName(), g1.getGameName());
+        assertEquals(gameToCheck.getGameMode(), g1.getGameMode());
+    }
+
+    @Test
+    void greetGames() {
+        // given - adding a game via the service
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+
+        // then - call updateGame
+        gameService.greetGames();
+
+        // assert gameRepository was not affected
+        List<Game> allGames = GameRepository.getAllGames();
+        assertEquals(allGames.size(), 1);
+
+        Game gameToCheck = gameService.getGameById(gameIdCreated);
+        assertEquals(gameToCheck.getGameId(), gameIdCreated);
+        assertEquals(gameToCheck.getGameName(), g1.getGameName());
+        assertEquals(gameToCheck.getGameMode(), g1.getGameMode());
     }
 }
