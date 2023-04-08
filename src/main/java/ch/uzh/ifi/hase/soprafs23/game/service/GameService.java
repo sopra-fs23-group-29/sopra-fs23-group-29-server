@@ -1,15 +1,10 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Dummy;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
-import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
-import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameJoinedDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
