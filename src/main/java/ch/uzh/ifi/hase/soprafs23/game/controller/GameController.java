@@ -86,7 +86,7 @@ public class GameController {
     }
 
     @PostMapping("/games/{gameId}")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public PlayerGetDTO createPlayer(
         @PathVariable int gameId,
@@ -116,6 +116,7 @@ public class GameController {
         log.info("Game {}: User {} joining", gameId, userJoining.getUsername());
 
         // Join/create the user
+        // throw UNAUTORIZED if the game canont be joined, the player will not be created
         Player playerJoining = playerService.joinPlayer(auth_token, gameId);
 
         // let all players in the game know who joined

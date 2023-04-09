@@ -43,6 +43,8 @@ public class Game {
     this.gameName = gameName;
     this.gameMode = gameMode;
     this.playerRepository = playerRepository;
+    // upon creation, set gameStatus to INLOBBY
+    this.gameStatus = GameStatus.INLOBBY;
   }
 
   // default no args constructor - needed for test
@@ -95,6 +97,15 @@ public class Game {
     // Fetch all Players
     players = playerRepository.findByGameId(this.gameId);
   }
+
+  /**
+   * Determine if the game can be joined by a player
+   *
+   */
+   public boolean isJoinable() {
+      updatePlayers();
+      return players.size() < MAXPLAYERS && gameStatus == GameStatus.INLOBBY;
+   }
 
   /**
    * Returns the list of players as an unmodifiable list of the current players in the game.

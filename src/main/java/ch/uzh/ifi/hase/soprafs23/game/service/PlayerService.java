@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.PlayerJoinedDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +24,15 @@ public class PlayerService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final PlayerRepository playerRepository;
-  private final WebSocketService webSocketService;
   private final GameService gameService;
   private final UserService userService;
 
   @Autowired
   public PlayerService(
           @Qualifier("playerRepository") PlayerRepository playerRepository,
-          WebSocketService webSocketService,
           GameService gameService,
           UserService userService) {
     this.playerRepository = playerRepository;
-    this.webSocketService = webSocketService;
     this.gameService = gameService;
     this.userService = userService;
   }
@@ -114,6 +110,14 @@ public class PlayerService {
   public Player joinPlayer(String userTokenToJoin, int gameIdToJoin) {
     // Check if gameIdToJoin exists in GameRepository, throw NOT_FOUND otherwise
     Game gameToJoin = gameService.getGameById((long) gameIdToJoin);
+
+    // Check if the gameToJoin can be joined, throw 409 CONFLICT otherwise
+    if (!gameService.gameJoinable((long) gameIdToJoin)) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              String.format("Game ID %s cannot be joined, either full or not in lobby", gameIdToJoin)
+      );
+    }
 
     // Check if a user with userTokenToJoin exists, throw NOT_FOUND otherwise
     User userToJoin = userService.getUserByToken(userTokenToJoin);

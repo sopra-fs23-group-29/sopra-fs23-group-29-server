@@ -39,6 +39,20 @@ public class GameService {
   }
 
   /**
+   * Return if the game at gameId is joinable
+   * Not joinable if
+   * Full
+   * Not INLOBBY
+   * @param gameId
+   * @throws Http.NOT_FOUND if gameId does not exist
+   * @return True if joinable, False otherwise
+   */
+  public boolean gameJoinable(Long gameId) {
+    Game gameToJoin = GameRepository.findByGameId(gameId);
+    return gameToJoin.isJoinable();
+  }
+
+  /**
    * Create a new game and return the corresponding int
    * @return gameId of the created game
    * @throws org.springframework.web.server.ResponseStatusException
