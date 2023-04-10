@@ -4,8 +4,11 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
+import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 /**
@@ -21,8 +24,11 @@ public class Game {
   // getPlayers should be a method calling playerRepository
   // add/remove players should not exist, only go through playerRepository
 
+  // todo: replace playerRepository with playerService
+
   private List<Player> players;
   private PlayerRepository playerRepository;
+  private PlayerService playerService;
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -38,11 +44,17 @@ public class Game {
    * @param gameMode Which mode to play
    * @param playerRepository PlayerRepository instance
    */
-  public Game(Long gameId, String gameName, GameMode gameMode, PlayerRepository playerRepository) {
+  public Game(
+    Long gameId,String gameName,GameMode gameMode
+    ,PlayerRepository playerRepository
+    ,PlayerService playerService
+    ) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
     this.playerRepository = playerRepository;
+    this.playerService = playerService;
+
     // upon creation, set gameStatus to INLOBBY
     this.gameStatus = GameStatus.INLOBBY;
   }
@@ -95,7 +107,7 @@ public class Game {
    */
   private void updatePlayers() {
     // Fetch all Players
-    players = playerRepository.findByGameId(this.gameId);
+    players = playerService.all;
   }
 
   /**
@@ -122,11 +134,22 @@ public class Game {
 
   /**
    * Assign PlayerColor for a given list of players
+   * Persist into the PLAYER repository
    */
-//  private HashMap<Player, PlayerColor> assignColors() {
-//    int lenIndex = players.size();
-//
-//  }
+  private void assignColors() {
+
+    Set<PlayerColor> usedPlayerColors = new HashSet<>();
+
+    for (Player p : players) {
+      Long pId = p.getId();
+      for (PlayerColor pc : PlayerColor.values()) {
+        if (pc != PlayerColor.NOTSET && !usedPlayerColors.contains(pc)) {
+          usedPlayerColors.add(pc);
+
+        }
+      }
+    }
+  }
 
   /**
    * Start the game

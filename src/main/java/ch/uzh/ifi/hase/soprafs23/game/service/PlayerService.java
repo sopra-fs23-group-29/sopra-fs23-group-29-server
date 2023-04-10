@@ -41,6 +41,13 @@ public class PlayerService {
   public List<Player> getPlayers() {return this.playerRepository.findAll();}
 
   /**
+   * Get all Players with a given gameId
+   */
+  public List<Player> getPlayersByGameId(Long gameId) {
+    // todo
+  }
+
+  /**
    * Get Player by ID
    * @arg playerId The Id of the player
    * @return Player
