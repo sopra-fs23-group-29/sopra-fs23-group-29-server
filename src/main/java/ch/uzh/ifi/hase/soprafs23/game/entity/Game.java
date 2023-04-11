@@ -109,7 +109,7 @@ public class Game {
    * Determine if the game can be joined by a player
    *
    */
-   public boolean isJoinable() {
+  public boolean isJoinable() {
       updatePlayers();
       return players.size() < MAXPLAYERS && gameStatus == GameStatus.INLOBBY;
    }
@@ -121,6 +121,7 @@ public class Game {
    * @return  An unmodifiable list object containing all current players of the game
    */
   public List<Player> getPlayersView() {
+
     if (this.players == null) {
       return List.of();
     }
@@ -140,7 +141,7 @@ public class Game {
       for (PlayerColor pc : PlayerColor.values()) {
         if (pc != PlayerColor.NOTSET && !usedPlayerColors.contains(pc)) {
           usedPlayerColors.add(pc);
-
+          playerService.updatePlayerColor(pId, pc);
         }
       }
     }
@@ -161,7 +162,13 @@ public class Game {
     setGameStatus(GameStatus.INPROGRESS);
 
     // Assign PlayerColor
+    assignColors();
 
+    // update players
+    updatePlayers();
+
+    // Start turn
+    //nextTurn();
 
   }
 
