@@ -18,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @WebAppConfiguration
@@ -70,6 +72,119 @@ class PlayerServiceIntegrationTest {
     void getPlayers() {
         // given - empty repo
         assertEquals(playerService.getPlayers().size(), 0);
+
+        // given - creating a user
+        User u1_created = userService.createUser(u1);
+
+        // given - create a player from the user
+        Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
+
+        // then - fetching all players
+        List<Player> players_fetched = playerService.getPlayers();
+
+        // assert one player there
+        assertEquals(players_fetched.size(), 1);
+
+        // fetch the one player
+        Player player_fetched = players_fetched.get(0);
+
+        assertNotNull(player_fetched.getToken());
+        assertNotNull(player_fetched.getId());
+        assertEquals(player_fetched.getUserToken(), u1_created.getToken());
+        assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
+        assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
+        assertNull(player_fetched.getGameId());
+    }
+
+    @Test
+    void getPlayers_empty() {
+        // given - empty repo
+        assertEquals(playerService.getPlayers().size(), 0);
+
+        // then - fetching all players
+        List<Player> players_fetched = playerService.getPlayers();
+
+        // assert empty
+        assertTrue(players_fetched.isEmpty());
+    }
+
+    @Test
+    void getPlayersByGameId() {
+        // given - empty repo
+        assertEquals(playerService.getPlayers().size(), 0);
+
+        // given - creating a user
+        User u1_created = userService.createUser(u1);
+
+        // given - create a player from the user
+        Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
+
+        // create a game
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
+
+        // add a player to the game
+        Player player_joined = playerService.joinPlayer(u1.getToken(), gameId1.intValue());
+
+        // then - fetching all players
+        List<Player> players_fetched = playerService.getPlayersByGameId(gameId1);
+
+        // assert one player there
+        assertEquals(players_fetched.size(), 1);
+
+        // fetch the one player
+        Player player_fetched = players_fetched.get(0);
+
+        assertNotNull(player_fetched.getToken());
+        assertNotNull(player_fetched.getId());
+        assertEquals(player_fetched.getGameId(), gameId1);
+        assertEquals(player_fetched.getUserToken(), u1_created.getToken());
+        assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
+        assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
+    }
+
+    @Test
+    void getPlayersByGameId_empty() {
+        // given - empty repo
+        assertEquals(playerService.getPlayers().size(), 0);
+
+        // given game without players
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
+
+        // then - fetching all players
+        List<Player> players_fetched = playerService.getPlayersByGameId(gameId1);
+
+        // assert empty
+        assertTrue(players_fetched.isEmpty());
+    }
+
+    @Test
+    void getPlayerById() {
+        // given - creating a user
+        User u1_created = userService.createUser(u1);
+
+        // given - create a player from the user
+        Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
+
+        // then - fetch player
+        Player player_fetched = playerService.getPlayerById(player_created.getId());
+
+        // assert is there
+        assertNotNull(player_fetched.getToken());
+        assertNotNull(player_fetched.getId());
+        assertEquals(player_fetched.getUserToken(), u1_created.getToken());
+        assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
+        assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
+        assertNull(player_fetched.getGameId());
+    }
+
+    @Test
+    void getPlayerById_throwsNOT_FOUND() {
+        // given empty playerRepository
+        // given - create a player from user that does not exist
+        assertThrows(
+                ResponseStatusException.class,
+                () -> playerService.getPlayerById(1L)
+        );
     }
 
     @Test
@@ -260,5 +375,35 @@ class PlayerServiceIntegrationTest {
                 () -> playerService.joinPlayer(u7.getToken(), gameId1.intValue())
         );
 
+    }
+
+    @Test
+    void deletePlayer() {
+        // given - creating a user
+        User u1_created = userService.createUser(u1);
+
+        // given - create a player from the user
+        Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
+
+        // assert there is one player
+        List<Player> players_fetched = playerService.getPlayers();
+        assertEquals(players_fetched.size(), 1);
+
+        // then - delete the player
+        playerService.deletePlayerById(player_created.getId());
+
+        // assert there is no player
+        assertTrue(playerService.getPlayers().isEmpty());
+    }
+
+    @Test
+    void deletePlayer_throwsNOT_FOUND() {
+        // given empty playerRepository
+
+        // then - delete the player throws
+        assertThrows(
+                ResponseStatusException.class,
+                () -> playerService.deletePlayerById(1L)
+        );
     }
 }

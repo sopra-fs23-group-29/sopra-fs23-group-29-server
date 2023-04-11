@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class PlayerService {
   @Autowired
   public PlayerService(
           @Qualifier("playerRepository") PlayerRepository playerRepository,
-          GameService gameService,
+          @Lazy GameService gameService,
           UserService userService) {
     this.playerRepository = playerRepository;
     this.gameService = gameService;
@@ -44,7 +45,8 @@ public class PlayerService {
    * Get all Players with a given gameId
    */
   public List<Player> getPlayersByGameId(Long gameId) {
-    // todo
+    List<Player> allPlayersSearched = this.playerRepository.findByGameId(gameId);
+    return allPlayersSearched;
   }
 
   /**
@@ -144,6 +146,17 @@ public class PlayerService {
   private void savePlayer(Player playerToSave) {
     playerRepository.save(playerToSave);
     playerRepository.flush();
+  }
+
+  public void deletePlayerById(Long playerId) {
+    Player playerSearched = this.playerRepository.findById(playerId)
+            .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            String.format("Player with ID %s not found", playerId)
+                    )
+            );
+
+    playerRepository.deleteById(playerId);
   }
 
 }

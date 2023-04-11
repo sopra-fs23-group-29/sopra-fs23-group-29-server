@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +22,15 @@ import java.util.List;
 public class GameService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
-  private final PlayerRepository playerRepository;
+  private final PlayerService playerService;
   private final WebSocketService webSocketService;
   private int gameCounter;
 
   @Autowired
   public GameService(
-          @Qualifier("playerRepository") PlayerRepository playerRepository,
+          PlayerService playerService,
           WebSocketService webSocketService) {
-    this.playerRepository = playerRepository;
+    this.playerService = playerService;
     this.webSocketService = webSocketService;
   }
 
@@ -44,7 +44,7 @@ public class GameService {
    * Full
    * Not INLOBBY
    * @param gameId
-   * @throws Http.NOT_FOUND if gameId does not exist
+   * @throws ResponseStatusException if gameId does not exist
    * @return True if joinable, False otherwise
    */
   public boolean gameJoinable(Long gameId) {
@@ -60,16 +60,16 @@ public class GameService {
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
     removeAllPlayersFromGame((long) gameCounter);
-    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerRepository);
+    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
   }
 
   private void removeAllPlayersFromGame(Long gameId) {
-    List<Player> players = playerRepository.findByGameId(gameId);
+    List<Player> players = playerService.getPlayersByGameId(gameId);
     for (Player player : players) {
       log.info("Deleted Player: {}", player.getPlayerName());
-      playerRepository.deleteById(player.getId());
+      playerService.deletePlayerById(player.getId());
     }
 
   }

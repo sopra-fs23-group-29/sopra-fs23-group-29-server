@@ -7,8 +7,6 @@ import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 
 /**
@@ -27,7 +25,6 @@ public class Game {
   // todo: replace playerRepository with playerService
 
   private List<Player> players;
-  private PlayerRepository playerRepository;
   private PlayerService playerService;
   private Long gameId;
   private String gameName;
@@ -42,17 +39,15 @@ public class Game {
    * @param gameId id of the game
    * @param gameName name of the game
    * @param gameMode Which mode to play
-   * @param playerRepository PlayerRepository instance
+   * @param playerService PlayerService instance
    */
   public Game(
     Long gameId,String gameName,GameMode gameMode
-    ,PlayerRepository playerRepository
     ,PlayerService playerService
     ) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
-    this.playerRepository = playerRepository;
     this.playerService = playerService;
 
     // upon creation, set gameStatus to INLOBBY
@@ -103,11 +98,11 @@ public class Game {
 
 
   /**
-   * Fetch all current players from the playerRepository and update the internal players list
+   * Fetch all current players from the playerRepository via playerService and update the internal players list
    */
   private void updatePlayers() {
-    // Fetch all Players
-    players = playerService.all;
+    // Fetch all Players for the gameId
+    players = playerService.getPlayersByGameId(this.gameId);
   }
 
   /**
