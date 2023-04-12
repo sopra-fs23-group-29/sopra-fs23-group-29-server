@@ -119,6 +119,9 @@ public class Game {
     this.maxTurns = maxTurns;
   }
 
+  public Turn getTurn() {
+    return turn;
+  }
 
   /**
    * Fetch all current players from the playerRepository via playerService and update the internal players list
@@ -206,16 +209,14 @@ public class Game {
     // populate leaderboard and barrierLeaderboard
     players.forEach((p) -> leaderboard.putNewPlayer(p.getId()));
     players.forEach((p) -> barrierLeaderboard.putNewPlayer(p.getId()));
-
-    // Start turn
-    //nextTurn();
-
   }
 
   /**
    * Start a new turn, returning a Turn object
    */
   public Turn nextTurn() {
+
+    turnNumber++;
 
     // create ordered list of players, determining who's first
     List<Player> turnOrder = createTurnOrder();
@@ -229,7 +230,7 @@ public class Game {
     turnQuestion.buildDummyRankQuestion(6);
 
     // New Turn object
-    Turn turn = new Turn(turnOrder, turnQuestion);
+    Turn turn = new Turn(turnNumber, turnOrder, turnQuestion);
 
     return turn;
 
