@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 
 import java.util.*;
@@ -18,6 +19,7 @@ public class Game {
   public static final int MAXPLAYERS = 6;
 
   private List<Player> players;
+  private Turn turn;
   private PlayerService playerService;
   private Long gameId;
   private String gameName;
@@ -168,6 +170,20 @@ public class Game {
   }
 
   /**
+   * Given the players in the playerRepository, create a turn order
+   */
+  public List<Player> createTurnOrder() {
+    updatePlayers();
+
+    // shuffle randomly
+    List<Player> turnOrder = new ArrayList<>(players);
+    Collections.shuffle(turnOrder);
+    return turnOrder;
+
+    // todo: Keep track of who did how many turns, so that everybody can go first equally
+  }
+
+  /**
    * Start the game
    * Set gameStatus = GameStatus.INPROGRESS
    * Assign colours to all Players, based on the moment this method runs
@@ -195,5 +211,26 @@ public class Game {
     //nextTurn();
 
   }
+
+  /**
+   * Start a new turn, returning a Turn object
+   */
+  public Turn nextTurn() {
+
+    // create ordered list of players, determining who's first
+    List<Player> turnOrder = createTurnOrder();
+
+    // fetch a question
+    // todo: Needs a QuestionServiceType or similar, providing questions
+    // questionService.generateQuestion() -> returns a Question
+    RankQuestion turnQuestion = new RankQuestion();
+
+    // New Turn object
+    Turn turn = new Turn(turnOrder, turnQuestion);
+
+    return turn;
+
+  }
+
 
 }
