@@ -20,6 +20,7 @@ import java.util.List;
 
 import ch.uzh.ifi.hase.soprafs23.game.RestCountries.Country;
 import ch.uzh.ifi.hase.soprafs23.game.RestCountries.CountryService;
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
 
 /**
  * User Controller
