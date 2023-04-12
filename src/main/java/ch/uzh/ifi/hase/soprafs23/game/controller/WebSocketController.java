@@ -1,14 +1,18 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.DummyDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -60,5 +64,58 @@ public class WebSocketController {
         this.webSocketService.sendMessageToClients("/users/" + userId, userString);
     }
 
+    /**
+     * Start a game
+     * Returns a Turn object for the client to work with
+     */
+    @MessageMapping("/games/{gameId}/startGame")
+    public void startGame(@DestinationVariable long gameId) {
+        log.info("Start Game {}", gameId);
+        gameService.startGame(gameId);
+        log.info("Create Turn");
+        gameService.startNextTurn(gameId);
+        Turn nextTurn = gameService.getGameById(gameId).getTurn();
+        log.info("Created Turn {}", nextTurn.getTurnNumber());
 
+        TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
+
+        // send the new Turn to all subscribers
+        webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTO);
+    }
+
+    /**
+     * Save an answer from a player for a given turn in a given game
+     * Returns an updated Turn object for the client to work with
+     */
+    @MessageMapping("/games/{gameId}/turn/{turnNumber}/player/{playerId}/saveAnswer")
+    public void saveAnswer(
+            @DestinationVariable long gameId,
+            @DestinationVariable int turnNumber,
+            @DestinationVariable long playerId,
+            Answer answer
+    ) {
+        log.info("Update Game {} Turn {} with answer from Player {}", gameId, turnNumber, playerId);
+        TurnOutgoingDTO turnOutgoingDTO = gameService.processAnswer(answer, playerId, turnNumber, gameId);
+
+        // send the updated Turn to all subscribers
+        webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTO);
+
+    }
+
+    /**
+     * End a turn, send the new leaderboard with updated scores
+     *
+     * todo: Rather just send the delta? Or turnResults?
+     */
+    @MessageMapping("/games/{gameId}/endTurn")
+    public void endTurn(
+            @DestinationVariable long gameId
+    ) {
+        log.info("Game {} end current Turn", gameId);
+        LeaderboardDTO leaderboardDTO = gameService.endTurn(gameId);
+
+        // send the updated Leaderboard to all subscribers
+        webSocketService.sendMessageToClients("games/" + gameId, leaderboardDTO);
+
+    }
 }

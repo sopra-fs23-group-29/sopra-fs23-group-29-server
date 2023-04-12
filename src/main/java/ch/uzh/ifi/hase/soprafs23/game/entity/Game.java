@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 
 import java.util.*;
 
@@ -26,7 +27,7 @@ public class Game {
   private GameStatus gameStatus;
   private GameMode gameMode;
   private Leaderboard leaderboard;
-  private BarrierLeaderboard barrierLeaderboard;
+  private Leaderboard barrierLeaderboard;
   private int turnNumber;
   private int boardSize;
   private int maxDuration;
@@ -54,9 +55,9 @@ public class Game {
     // upon creation, set turnNumber to 0
     this.turnNumber = 0;
 
-    // upon creation, create empty leaderboard and barrierLeaderboard
+    // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
     this.leaderboard = new Leaderboard();
-    this.barrierLeaderboard = new BarrierLeaderboard();
+    this.barrierLeaderboard = new Leaderboard();
   }
 
   // default no args constructor - needed for test
@@ -94,10 +95,10 @@ public class Game {
   public void setLeaderboard(Leaderboard leaderboard) {
     this.leaderboard = leaderboard;
   }
-  public BarrierLeaderboard getBarrierLeaderboard() {
+  public Leaderboard getBarrierLeaderboard() {
     return barrierLeaderboard;
   }
-  public void setBarrierLeaderboard(BarrierLeaderboard barrierLeaderboard) {
+  public void setBarrierLeaderboard(Leaderboard barrierLeaderboard) {
     this.barrierLeaderboard = barrierLeaderboard;
   }
   public int getBoardSize() {
@@ -122,6 +123,7 @@ public class Game {
   public Turn getTurn() {
     return turn;
   }
+
 
   /**
    * Fetch all current players from the playerRepository via playerService and update the internal players list
@@ -214,7 +216,7 @@ public class Game {
   /**
    * Start a new turn, returning a Turn object
    */
-  public Turn nextTurn() {
+  public void nextTurn() {
 
     turnNumber++;
 
@@ -229,12 +231,48 @@ public class Game {
     RankQuestion turnQuestion = new RankQuestion();
     turnQuestion.buildDummyRankQuestion(6);
 
-    // New Turn object
-    Turn turn = new Turn(turnNumber, turnOrder, turnQuestion);
-
-    return turn;
+    // New Turn object is saved to game instance
+    this.turn = new Turn(turnNumber, turnOrder, turnQuestion);
 
   }
 
+  /**
+   * Update the turn object of the game
+   * @param answer The answer given from the client
+   */
+  public void updateTurn(Answer answer) {
+    // Extract answer and save in the current turn object
+    Player playerGuessed = playerService.getPlayerByUserToken(answer.getUserToken());
+    String countryCodeGuessed = answer.getCountryCode();
+    int guess = answer.getGuess();
+    PlayerColor colorGuessed = playerGuessed.getPlayerColor();
+
+    this.turn.saveGuess(playerGuessed, countryCodeGuessed, guess, colorGuessed);
+  }
+
+  /**
+   * Update the leaderboard object from the turn object
+   */
+  public void updateLeaderboard() {
+
+    // todo: Check that turn.turnPlayersDone is equal to turn.turnPlayers? Otherwise you shouldn't end the turn
+
+    // For each player in turn.turnPlayersDone, get his guess, evaluate and update the leaderboard
+
+    // For each player in turn.turnPlayersDone
+    for (Map.Entry<Player, String> entry : turn.getTurnPlayersDone().entrySet()) {
+      Player playerGuess = entry.getKey();
+      String countryCodeGuess = entry.getValue();
+
+      // Get the guess the player made for country countryCodeGuess
+      int guessMade = turn.getSavedGuesses().get(countryCodeGuess);
+
+      // Evaluate the score that guess scored the player
+      int playerScoreAdd = turn.evaluateGuess(countryCodeGuess, guessMade);
+
+      // Update the leaderboard
+      leaderboard.updateEntry(playerGuess.getId(), playerScoreAdd);
+    }
+  }
 
 }
