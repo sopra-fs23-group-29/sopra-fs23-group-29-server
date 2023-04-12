@@ -45,15 +45,14 @@ public class PlayerService {
    * Get all Players with a given gameId
    */
   public List<Player> getPlayersByGameId(Long gameId) {
-    List<Player> allPlayersSearched = this.playerRepository.findByGameId(gameId);
-    return allPlayersSearched;
+    return this.playerRepository.findByGameId(gameId);
   }
 
   /**
    * Get Player by ID
-   * @arg playerId The Id of the player
+   * @param playerId The ID of the player
    * @return Player
-   * @throws org.springframework.web.server.ResponseStatusException
+   * @throws org.springframework.web.server.ResponseStatusException Throws not found if playerId is not found
    */
   public Player getPlayerById(Long playerId) {
     Player playerSearched = this.playerRepository.findById(playerId)
