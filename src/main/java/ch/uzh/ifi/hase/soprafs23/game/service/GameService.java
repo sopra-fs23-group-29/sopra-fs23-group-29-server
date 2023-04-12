@@ -38,6 +38,10 @@ public class GameService {
     return GameRepository.findByGameId(gameId);
   }
 
+  public void updatePlayers(Long gameId) {
+    GameRepository.findByGameId(gameId).updatePlayers();
+  }
+
   /**
    * Return if the game at gameId is joinable
    * Not joinable if
@@ -63,6 +67,11 @@ public class GameService {
     Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
+  }
+
+  public void startGame(Long gameId) {
+    Game gameToStart = GameRepository.findByGameId(gameId);
+    gameToStart.initGame();
   }
 
   private void removeAllPlayersFromGame(Long gameId) {
@@ -95,6 +104,9 @@ public class GameService {
 
     String gamesString = new Gson().toJson(tmpGames);
     webSocketService.sendMessageToClients("/topic/games", gamesString);
+
+    // Debugging only, send message also to /users
+    webSocketService.sendMessageToClients("/topic/users", gamesString);
   }
 
   /**
@@ -109,6 +121,9 @@ public class GameService {
 
     String gameString = new Gson().toJson(gameUpdateDTO);
     webSocketService.sendMessageToClients("/topic/games/" + gameId, gameString);
+
+    // Debugging only, send message also to /users
+    webSocketService.sendMessageToClients("/topic/users", gameString);
   }
 
 }

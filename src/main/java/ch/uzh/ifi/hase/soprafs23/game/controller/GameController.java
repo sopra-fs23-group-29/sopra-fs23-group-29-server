@@ -73,13 +73,14 @@ public class GameController {
         // fetch the game created
         Game newGame = GameRepository.findByGameId(newGameId);
 
-        // let everybody know about the new game
-        gameService.greetGames();
-
         log.info("Game {}: game created", newGame.getGameName());
 
         // Add the creator of the game as a player
         Player playerJoined = playerService.joinPlayer(auth_token, newGameId.intValue());
+
+        // let everybody know about the new game
+        gameService.updatePlayers(newGameId);
+        gameService.greetGames();
 
         return DTOMapper.INSTANCE.convertEntityToGameGetDTO(newGame);
 
@@ -116,11 +117,8 @@ public class GameController {
         log.info("Game {}: User {} joining", gameId, userJoining.getUsername());
 
         // Join/create the user
-        // throw UNAUTORIZED if the game canont be joined, the player will not be created
+        // throw UNAUTHORIZED if the game cannot be joined, the player will not be created
         Player playerJoining = playerService.joinPlayer(auth_token, gameId);
-
-        // let all players in the game know who joined
-        gameService.updateGame((long) gameId);
 
         PlayerGetDTO playerGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerGetDTO(playerJoining);
 
@@ -130,6 +128,10 @@ public class GameController {
         playerGetDTO.setUserToken(playerJoining.getUserToken());
         playerGetDTO.setPlayerColor(playerJoining.getPlayerColor());
         playerGetDTO.setGameId(playerJoining.getGameId());
+
+        // let all players in the game know who joined
+        gameService.updatePlayers((long) gameId);
+        gameService.updateGame((long) gameId);
 
         return playerGetDTO;
 
