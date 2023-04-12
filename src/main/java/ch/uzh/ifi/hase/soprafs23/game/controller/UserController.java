@@ -18,10 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.Country;
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.CountryService;
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
-
 /**
  * User Controller
  * This class is responsible for handling all REST request that are related to
@@ -34,11 +30,9 @@ public class UserController {
 
   private final UserService userService;
 
-  private final CountryService countryService;
 
-  UserController(UserService userService, CountryService countryService) {
+  UserController(UserService userService) {
     this.userService = userService;
-    this.countryService = countryService;
   }
 
 
