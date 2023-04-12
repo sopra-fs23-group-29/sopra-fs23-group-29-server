@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.DummyDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +46,11 @@ public class WebSocketController {
 
     // viewing the user list
     @MessageMapping("/users")
-    public void showUsers() {
-        String destination = "/topic/users";
-        while(true) {
-            this.webSocketService.sendMessageToClients(destination, new DummyDTO());
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        /*
-        String userList = webSocketService.viewUsers();
-        this.webSocketService.sendMessageToClients(destination, userList);
-         */
+    public void receiveMessage(DummyIncomingDTO dummyIncomingDTO) {
+        System.out.println("Received dummyIncomingDTO");
+        log.info("Received dummyIncomingDTO");
+        System.out.println("Dummy message: " + dummyIncomingDTO.getMessage());
+        log.info("Dummy message: " + dummyIncomingDTO.getMessage());
     }
 
     // viewing a single user
@@ -67,5 +59,6 @@ public class WebSocketController {
         String userString = userService.getUserById(userId).toString();
         this.webSocketService.sendMessageToClients("/users/" + userId, userString);
     }
+
 
 }
