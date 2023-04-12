@@ -169,6 +169,7 @@ public class Game {
         if (pc != PlayerColor.NOTSET && !usedPlayerColors.contains(pc)) {
           usedPlayerColors.add(pc);
           playerService.updatePlayerColor(pId, pc);
+          break;
         }
       }
     }

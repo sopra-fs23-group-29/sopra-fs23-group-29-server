@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
@@ -75,8 +76,15 @@ public class GameService {
     return (long) gameCounter;
   }
 
+  /**
+   * Start a game with the gameId. If the game has already started, throw error
+   * @param gameId Game ID to start
+   */
   public void startGame(Long gameId) {
     Game gameToStart = GameRepository.findByGameId(gameId);
+    if (gameToStart.getGameStatus() != GameStatus.INLOBBY) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game %s is not in Lobby and cannot be started".formatted(gameId));
+    }
     gameToStart.initGame();
   }
 
