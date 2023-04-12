@@ -81,6 +81,10 @@ public class WebSocketController {
 
         // send the new Turn to all subscribers
         webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTO);
+
+        // Debugging, send message to /users as well
+        log.info("Debugging sending to /topic/users ...");
+        webSocketService.sendMessageToClients("/topic/users", nextTurnDTO);
     }
 
     /**
@@ -100,6 +104,9 @@ public class WebSocketController {
         // send the updated Turn to all subscribers
         webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTO);
 
+        // Debugging, send message to /users as well
+        webSocketService.sendMessageToClients("/topic/users", turnOutgoingDTO);
+
     }
 
     /**
@@ -116,6 +123,9 @@ public class WebSocketController {
 
         // send the updated Leaderboard to all subscribers
         webSocketService.sendMessageToClients("games/" + gameId, leaderboardDTO);
+
+        // Debugging, send message to /users as well
+        webSocketService.sendMessageToClients("/topic/users", leaderboardDTO);
 
     }
 }
