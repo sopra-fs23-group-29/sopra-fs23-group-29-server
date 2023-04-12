@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,20 +22,38 @@ import java.util.List;
 public class GameService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
-  private final PlayerRepository playerRepository;
+  private final PlayerService playerService;
   private final WebSocketService webSocketService;
   private int gameCounter;
 
   @Autowired
   public GameService(
-          @Qualifier("playerRepository") PlayerRepository playerRepository,
+          PlayerService playerService,
           WebSocketService webSocketService) {
-    this.playerRepository = playerRepository;
+    this.playerService = playerService;
     this.webSocketService = webSocketService;
   }
 
   public Game getGameById(Long gameId) {
     return GameRepository.findByGameId(gameId);
+  }
+
+  public void updatePlayers(Long gameId) {
+    GameRepository.findByGameId(gameId).updatePlayers();
+  }
+
+  /**
+   * Return if the game at gameId is joinable
+   * Not joinable if
+   * Full
+   * Not INLOBBY
+   * @param gameId
+   * @throws ResponseStatusException if gameId does not exist
+   * @return True if joinable, False otherwise
+   */
+  public boolean gameJoinable(Long gameId) {
+    Game gameToJoin = GameRepository.findByGameId(gameId);
+    return gameToJoin.isJoinable();
   }
 
   /**
@@ -46,16 +64,21 @@ public class GameService {
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
     removeAllPlayersFromGame((long) gameCounter);
-    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerRepository);
+    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
   }
 
+  public void startGame(Long gameId) {
+    Game gameToStart = GameRepository.findByGameId(gameId);
+    gameToStart.initGame();
+  }
+
   private void removeAllPlayersFromGame(Long gameId) {
-    List<Player> players = playerRepository.findByGameId(gameId);
+    List<Player> players = playerService.getPlayersByGameId(gameId);
     for (Player player : players) {
       log.info("Deleted Player: {}", player.getPlayerName());
-      playerRepository.deleteById(player.getId());
+      playerService.deletePlayerById(player.getId());
     }
 
   }
@@ -81,6 +104,9 @@ public class GameService {
 
     String gamesString = new Gson().toJson(tmpGames);
     webSocketService.sendMessageToClients("/topic/games", gamesString);
+
+    // Debugging only, send message also to /users
+    webSocketService.sendMessageToClients("/topic/users", gamesString);
   }
 
   /**
@@ -95,6 +121,9 @@ public class GameService {
 
     String gameString = new Gson().toJson(gameUpdateDTO);
     webSocketService.sendMessageToClients("/topic/games/" + gameId, gameString);
+
+    // Debugging only, send message also to /users
+    webSocketService.sendMessageToClients("/topic/users", gameString);
   }
 
 }

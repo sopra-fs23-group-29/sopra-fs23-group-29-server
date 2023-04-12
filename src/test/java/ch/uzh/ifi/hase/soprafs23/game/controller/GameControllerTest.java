@@ -125,14 +125,13 @@ class GameControllerTest {
         given(gameService.createNewGame("game1", GameMode.PVP)).willReturn(game.getGameId());
         given(userService.getUserByToken("dummy")).willReturn(user);
         given(playerService.joinPlayer("dummy", game.getGameId().intValue())).willReturn(player);
-
         // when
         MockHttpServletRequestBuilder postRequest = post("/games/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "dummy");
 
         // then
-        mockMvc.perform(postRequest).andExpect(status().isCreated())
+        mockMvc.perform(postRequest).andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$", notNullValue()))
