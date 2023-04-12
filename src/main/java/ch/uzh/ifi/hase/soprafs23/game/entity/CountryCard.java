@@ -1,12 +1,40 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 public class CountryCard {
+
+  private String countryCode;
   private String countryName;
   private int countryArea;
   private int countryPopulation;
   private int countryGini;
   private int nBorders;
   private boolean landlocked;
+
+  public CountryCard(
+    String countryCode,
+    String countryName,
+    int countryArea,
+    int countryPopulation,
+    int countryGini,
+    int nBorders,
+    boolean landlocked
+  ) {
+    this.countryCode = countryCode;
+    this.countryName = countryName;
+    this.countryArea = countryArea;
+    this.countryPopulation = countryPopulation;
+    this.countryGini = countryGini;
+    this.nBorders = nBorders;
+    this.landlocked = landlocked;
+  }
+
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
+
+  public String getCountryCode() {
+    return countryCode;
+  }
 
   public void setCountryName(String countryName) {
     this.countryName = countryName;

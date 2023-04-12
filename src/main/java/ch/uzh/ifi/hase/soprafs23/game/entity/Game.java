@@ -223,7 +223,10 @@ public class Game {
     // fetch a question
     // todo: Needs a QuestionServiceType or similar, providing questions
     // questionService.generateQuestion() -> returns a Question
+
+    // Dummy RankQuestion
     RankQuestion turnQuestion = new RankQuestion();
+    turnQuestion.buildDummyRankQuestion(6);
 
     // New Turn object
     Turn turn = new Turn(turnOrder, turnQuestion);
