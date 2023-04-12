@@ -11,9 +11,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.Country;
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.CountryService;
 
 /**
  * User Controller
@@ -27,8 +33,11 @@ public class UserController {
 
   private final UserService userService;
 
-  UserController(UserService userService) {
+  private final CountryService countryService;
+
+  UserController(UserService userService, CountryService countryService) {
     this.userService = userService;
+    this.countryService = countryService;
   }
 
 
@@ -183,4 +192,6 @@ public class UserController {
     // Send a message to all WebSocket subscribers in channel /users
     userService.greetUsers();
   }
+
+
 }
