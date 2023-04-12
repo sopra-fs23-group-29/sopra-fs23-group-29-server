@@ -5,11 +5,11 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.PlayerJoinedDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,24 +25,29 @@ public class PlayerService {
   private final Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final PlayerRepository playerRepository;
-  private final WebSocketService webSocketService;
   private final GameService gameService;
   private final UserService userService;
 
   @Autowired
   public PlayerService(
           @Qualifier("playerRepository") PlayerRepository playerRepository,
-          WebSocketService webSocketService,
-          GameService gameService,
+          @Lazy GameService gameService,
           UserService userService) {
     this.playerRepository = playerRepository;
-    this.webSocketService = webSocketService;
     this.gameService = gameService;
     this.userService = userService;
   }
 
 
   public List<Player> getPlayers() {return this.playerRepository.findAll();}
+
+  /**
+   * Get all Players with a given gameId
+   */
+  public List<Player> getPlayersByGameId(Long gameId) {
+    List<Player> allPlayersSearched = this.playerRepository.findByGameId(gameId);
+    return allPlayersSearched;
+  }
 
   /**
    * Get Player by ID
@@ -115,6 +120,14 @@ public class PlayerService {
     // Check if gameIdToJoin exists in GameRepository, throw NOT_FOUND otherwise
     Game gameToJoin = gameService.getGameById((long) gameIdToJoin);
 
+    // Check if the gameToJoin can be joined, throw 409 CONFLICT otherwise
+    if (!gameService.gameJoinable((long) gameIdToJoin)) {
+      throw new ResponseStatusException(
+              HttpStatus.CONFLICT,
+              String.format("Game ID %s cannot be joined, either full or not in lobby", gameIdToJoin)
+      );
+    }
+
     // Check if a user with userTokenToJoin exists, throw NOT_FOUND otherwise
     User userToJoin = userService.getUserByToken(userTokenToJoin);
     
@@ -133,6 +146,17 @@ public class PlayerService {
   private void savePlayer(Player playerToSave) {
     playerRepository.save(playerToSave);
     playerRepository.flush();
+  }
+
+  public void deletePlayerById(Long playerId) {
+    Player playerSearched = this.playerRepository.findById(playerId)
+            .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            String.format("Player with ID %s not found", playerId)
+                    )
+            );
+
+    playerRepository.deleteById(playerId);
   }
 
 }

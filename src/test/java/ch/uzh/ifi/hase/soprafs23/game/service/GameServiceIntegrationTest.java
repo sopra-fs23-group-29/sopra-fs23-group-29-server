@@ -26,6 +26,9 @@ class GameServiceIntegrationTest {
     private PlayerRepository playerRepository;
 
     @Autowired
+    private PlayerService playerService;
+
+    @Autowired
     private GameService gameService;
 
     @Autowired
@@ -35,7 +38,7 @@ class GameServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        g1 = new Game(1L, "g1", GameMode.PVP, playerRepository);
+        g1 = new Game(1L, "g1", GameMode.PVP, playerService);
         playerRepository.deleteAll();
         GameRepository.clear();
     }
