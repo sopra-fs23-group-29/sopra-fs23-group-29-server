@@ -18,12 +18,12 @@ public class RankingQuestion{
         "SYR", "TAN", "TGA", "THA", "TJK", "TKM", "TLS", "TOG", "TPE", "TTO", "TUN", "TUR", "TUV", "UAE", "UGA", "UKR", "URU", "USA", "UZB", "VAN", "VEN", "VIE", 
         "VIN", "YEM", "ZAM", "ZIM"};
 
-    private int playerCount;
-    private CountryService countryService;
-    private ArrayList<Country> countryList = new ArrayList<Country>();
-    private RankingQuestionEnum randomQuestion;
+    private final int playerCount;
+    private final CountryService countryService;
+    private final ArrayList<Country> countryList = new ArrayList<>();
+    private final RankingQuestionEnum randomQuestion;
 
-    public RankingQuestion(int playerCount, CountryService countryService) throws JsonMappingException, JsonProcessingException {
+    public RankingQuestion(int playerCount, CountryService countryService) {
        
         this.countryService = countryService;
         this.playerCount = playerCount;
@@ -58,11 +58,11 @@ public class RankingQuestion{
 
 
 
-    private void getRandomCountryList() throws JsonMappingException, JsonProcessingException {
+    private void getRandomCountryList() {
         if (this.playerCount > CIOC_CODES.length) {
             throw new IllegalArgumentException("Length of sublist cannot be greater than length of original list");
         }
-        ArrayList<String> CountryCodeList = new ArrayList<String>();
+        ArrayList<String> CountryCodeList = new ArrayList<>();
         for (int i = 0; i < this.playerCount; i++) {
             
             while (true) {

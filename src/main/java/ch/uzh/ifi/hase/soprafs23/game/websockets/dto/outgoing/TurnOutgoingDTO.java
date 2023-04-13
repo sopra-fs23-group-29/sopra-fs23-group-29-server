@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
 
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
@@ -12,7 +13,7 @@ public class TurnOutgoingDTO {
 
   private int turnNumber;
   private List<Player> turnPlayers;
-  private RankQuestion rankQuestion;
+  private RankingQuestion rankQuestion;
   private HashMap<Player, String> turnPlayersDone; // <Player that took the guess, CountryCode guessed>
   private HashMap<String, Integer> savedGuesses; // <CountryCode, Guess taken>
   private HashMap<String, PlayerColor> savedColors; // <CountryCode, PlayerColor the guess was taken>
@@ -36,10 +37,10 @@ public class TurnOutgoingDTO {
     return turnPlayers;
   }
   public void setTurnPlayers(List<Player> turnPlayers) {this.turnPlayers = turnPlayers;}
-  public RankQuestion getRankQuestion() {
+  public RankingQuestion getRankQuestion() {
     return rankQuestion;
   }
-  public void setRankQuestion(RankQuestion rankQuestion) {
+  public void setRankQuestion(RankingQuestion rankQuestion) {
     this.rankQuestion = rankQuestion;
   }
   public HashMap<Player, String> getTurnPlayersDone() {

@@ -3,7 +3,8 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.CountryService;
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 
@@ -22,6 +23,7 @@ public class Game {
   private List<Player> players;
   private Turn turn;
   private PlayerService playerService;
+
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -224,13 +226,12 @@ public class Game {
     // create ordered list of players, determining who's first
     List<Player> turnOrder = createTurnOrder();
 
-    // fetch a question
-    // todo: Needs a QuestionServiceType or similar, providing questions
-    // questionService.generateQuestion() -> returns a Question
+    // fetch a question object
+    RankingQuestion turnQuestion = new RankingQuestion(players.size(), new CountryService());
 
     // Dummy RankQuestion
-    RankQuestion turnQuestion = new RankQuestion();
-    turnQuestion.buildDummyRankQuestion(6);
+//    RankQuestion turnQuestion = new RankQuestion();
+//    turnQuestion.buildDummyRankQuestion(6);
 
     // New Turn object is saved to game instance
     this.turn = new Turn(turnNumber, turnOrder, turnQuestion);

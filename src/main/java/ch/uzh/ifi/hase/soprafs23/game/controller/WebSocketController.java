@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
-import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;

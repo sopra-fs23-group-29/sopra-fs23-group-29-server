@@ -1,22 +1,21 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Turn {
-  private int turnNumber;
+  private final int turnNumber;
   private final List<Player> turnPlayers;
-  private final RankQuestion rankQuestion;
+  private final RankingQuestion rankQuestion;
   private final HashMap<Player, String> turnPlayersDone; // <Player that took the guess, CountryCode guessed>
   private final HashMap<String, Integer> savedGuesses; // <CountryCode, Guess taken>
   private final HashMap<String, PlayerColor> savedColors; // <CountryCode, PlayerColor the guess was taken>
 
-  public Turn(int turnNumber, List<Player> turnPlayers, RankQuestion rankQuestion) {
+  public Turn(int turnNumber, List<Player> turnPlayers, RankingQuestion rankQuestion) {
     this.turnNumber = turnNumber;
     this.turnPlayers = turnPlayers;
     this.rankQuestion = rankQuestion;
@@ -33,7 +32,7 @@ public class Turn {
   public List<Player> getTurnPlayers() {
     return turnPlayers;
   }
-  public RankQuestion getRankQuestion() {
+  public RankingQuestion getRankQuestion() {
     return rankQuestion;
   }
   public HashMap<String, Integer> getSavedGuesses() {
