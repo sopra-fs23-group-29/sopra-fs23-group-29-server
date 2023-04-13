@@ -56,6 +56,10 @@
 
 ### Week 15
 
+- Dominik
+  - Server 36, 37, 26, 27
+
+
 ### Week 16
 
 ### Week 17

@@ -58,4 +58,5 @@ public interface DTOMapper {
     @Mapping(source = "gameId", target = "gameId")
     GameGetDTO convertEntityToGameGetDTO(Game game);
 
+
 }
