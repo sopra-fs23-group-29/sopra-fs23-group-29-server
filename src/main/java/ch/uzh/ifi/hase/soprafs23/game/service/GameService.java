@@ -123,13 +123,15 @@ public class GameService {
     }
 
     // Error if the player from playerId is not participating in the game/turn
+    // Compare ID, not player object!
     Turn turnToUpdate = gameToUpdate.getTurn();
-    if (!turnToUpdate.getTurnPlayers().contains(player)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player %s is not part of Game %s Turn %s".formatted(playerId, gameId, turnNumber));
+    if (!turnToUpdate.getTurnPlayersID().contains(playerId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player ID %s is not part of Game %s Turn %s".formatted(playerId, gameId, turnNumber));
     }
 
     // Error if the player has already answered this turn
-    if (turnToUpdate.getTurnPlayersDone().containsKey(player)) {
+    // Compare ID, not player object!
+    if (turnToUpdate.getTurnPlayersDoneID().contains(playerId)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player %s has already answered in Game %s Turn %s".formatted(playerId, gameId, turnNumber));
     }
 

@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Turn {
   private int turnNumber;
@@ -43,6 +44,17 @@ public class Turn {
   }
   public HashMap<Player, String> getTurnPlayersDone() {
     return turnPlayersDone;
+  }
+
+  /**
+   * For convenience, return a list with all IDs of players participating in the turn / have answered
+   * @return List with all playerIds from turnPlayers
+   */
+  public List<Long> getTurnPlayersID() {
+    return turnPlayers.stream().map(Player::getId).toList();
+  }
+  public List<Long> getTurnPlayersDoneID() {
+    return turnPlayersDone.keySet().stream().map(Player::getId).toList();
   }
 
   public int evaluateGuess(String countryCode, int guess) {

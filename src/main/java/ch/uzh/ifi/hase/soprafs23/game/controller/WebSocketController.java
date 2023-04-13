@@ -83,7 +83,7 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTO);
 
         // Debugging, send message to /users as well
-        log.info("Debugging sending to /topic/users ...");
+        log.info("Debugging sending startGame to /topic/users ...");
         webSocketService.sendMessageToClients("/topic/users", nextTurnDTO);
     }
 
@@ -105,6 +105,7 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTO);
 
         // Debugging, send message to /users as well
+        log.info("Debugging sending saveAnswer to /topic/users ...");
         webSocketService.sendMessageToClients("/topic/users", turnOutgoingDTO);
 
     }
@@ -125,6 +126,7 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("games/" + gameId, leaderboardDTO);
 
         // Debugging, send message to /users as well
+        log.info("Debugging sending endTurn to /topic/users ...");
         webSocketService.sendMessageToClients("/topic/users", leaderboardDTO);
 
     }
