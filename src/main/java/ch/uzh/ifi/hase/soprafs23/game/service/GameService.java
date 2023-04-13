@@ -88,17 +88,13 @@ public class GameService {
     gameToStart.initGame();
   }
 
-  public TurnOutgoingDTO startNextTurn(Long gameId) {
+  public void startNextTurn(Long gameId) {
     Game gameNextTurn = GameRepository.findByGameId(gameId);
 
     // todo: Update Players, drop not existing Players from Leaderboard
 
     gameNextTurn.nextTurn();
-    Turn nextTurn = gameNextTurn.getTurn();
 
-    TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
-
-    return nextTurnDTO;
   }
 
   /**

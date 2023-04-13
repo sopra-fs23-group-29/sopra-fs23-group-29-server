@@ -13,6 +13,7 @@ public class TurnOutgoingDTO {
   private int turnNumber;
   private List<Player> turnPlayers;
   private RankQuestion rankQuestion;
+  private HashMap<Player, String> turnPlayersDone; // <Player that took the guess, CountryCode guessed>
   private HashMap<String, Integer> savedGuesses; // <CountryCode, Guess taken>
   private HashMap<String, PlayerColor> savedColors; // <CountryCode, PlayerColor the guess was taken>
 
@@ -20,6 +21,7 @@ public class TurnOutgoingDTO {
     this.turnNumber = turn.getTurnNumber();
     this.turnPlayers = turn.getTurnPlayers();
     this.rankQuestion = turn.getRankQuestion();
+    this.turnPlayersDone = turn.getTurnPlayersDone();
     this.savedGuesses = turn.getSavedGuesses();
     this.savedColors = turn.getSavedColors();
   }
@@ -39,6 +41,12 @@ public class TurnOutgoingDTO {
   }
   public void setRankQuestion(RankQuestion rankQuestion) {
     this.rankQuestion = rankQuestion;
+  }
+  public HashMap<Player, String> getTurnPlayersDone() {
+    return turnPlayersDone;
+  }
+  public void setTurnPlayersDone(HashMap<Player, String> turnPlayersDone) {
+    this.turnPlayersDone = turnPlayersDone;
   }
   public HashMap<String, Integer> getSavedGuesses() {
     return savedGuesses;

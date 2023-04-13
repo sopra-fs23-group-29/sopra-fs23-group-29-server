@@ -10,16 +10,14 @@ import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.DummyDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-
-import java.util.concurrent.TimeUnit;
 
 @Controller
 public class WebSocketController {
@@ -79,12 +77,14 @@ public class WebSocketController {
 
         TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
 
+        String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
+
         // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTO);
+        webSocketService.sendMessageToClients("/games" + gameId, nextTurnDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending startGame to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", nextTurnDTO);
+        webSocketService.sendMessageToClients("/topic/users", nextTurnDTOasString);
     }
 
     /**
@@ -101,12 +101,14 @@ public class WebSocketController {
         log.info("Update Game {} Turn {} with answer from Player {}", gameId, turnNumber, playerId);
         TurnOutgoingDTO turnOutgoingDTO = gameService.processAnswer(answer, playerId, turnNumber, gameId);
 
+        String turnOutgoingDTOasString = new Gson().toJson(turnOutgoingDTO);
+
         // send the updated Turn to all subscribers
-        webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTO);
+        webSocketService.sendMessageToClients("/games" + gameId, turnOutgoingDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending saveAnswer to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", turnOutgoingDTO);
+        webSocketService.sendMessageToClients("/topic/users", turnOutgoingDTOasString);
 
     }
 
@@ -122,12 +124,14 @@ public class WebSocketController {
         log.info("Game {} end current Turn", gameId);
         LeaderboardDTO leaderboardDTO = gameService.endTurn(gameId);
 
+        String leaderboardDTOasString = new Gson().toJson(leaderboardDTO);
+
         // send the updated Leaderboard to all subscribers
-        webSocketService.sendMessageToClients("games/" + gameId, leaderboardDTO);
+        webSocketService.sendMessageToClients("/games" + gameId, leaderboardDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending endTurn to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", leaderboardDTO);
+        webSocketService.sendMessageToClients("/topic/users", leaderboardDTOasString);
 
     }
 }
