@@ -12,5 +12,6 @@ abstract public class Question {
   protected abstract int getScore(String cioc, int guess);
   protected abstract String getQuestionText();
   protected abstract List<Country> getCountries();
+  public abstract List<String> getCountryCodes();
 
 }

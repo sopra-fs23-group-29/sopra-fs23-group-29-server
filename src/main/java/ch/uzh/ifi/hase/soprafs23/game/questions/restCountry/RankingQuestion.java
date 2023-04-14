@@ -33,10 +33,13 @@ public class RankingQuestion extends Question {
     protected String getQuestionText() {
         return this.rankQuestionCategory.getQuestion();
     }
-
     @Override
     protected List<Country> getCountries() {
         return this.countryList;
+    }
+    @Override
+    public List<String> getCountryCodes() {
+        return this.countryList.stream().map(Country::getCioc).toList();
     }
 
     private void sortCountryList() {

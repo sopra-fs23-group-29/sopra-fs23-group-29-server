@@ -135,6 +135,11 @@ public class GameService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player %s has already answered in Game %s Turn %s".formatted(playerId, gameId, turnNumber));
     }
 
+    // Error if the supplied answer.countryCode is not one of the options in the turn question
+    if (!turnToUpdate.getRankQuestion().getCountryCodes().contains(answer.getCountryCode())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country Code %s is not one of the options in Game %s Turn %s".formatted(answer.getCountryCode(), gameId, turnNumber));
+    }
+
     // Process the answer
     gameToUpdate.updateTurn(answer);
 
