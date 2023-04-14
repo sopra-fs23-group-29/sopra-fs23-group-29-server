@@ -50,10 +50,10 @@ public class RankingQuestion {
         }
     }
 
-    protected String getQuestionText() {
+    public String getQuestionText() {
         return this.rankQuestionCategory.getQuestion();
     }
-    protected List<Country> getCountries() {
+    public List<Country> getCountries() {
         return this.countryList;
     }
     public List<String> getCountryCodes() {

@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.constant.QuestionServiceType;
 import ch.uzh.ifi.hase.soprafs23.constant.RankingQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
-import ch.uzh.ifi.hase.soprafs23.game.questions.Question;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import org.slf4j.Logger;
