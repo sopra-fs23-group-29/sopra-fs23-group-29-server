@@ -6,9 +6,9 @@ import ch.uzh.ifi.hase.soprafs23.constant.QuestionType;
 import ch.uzh.ifi.hase.soprafs23.constant.RankingQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
-import ch.uzh.ifi.hase.soprafs23.game.questions.Question;
 
-public class RankingQuestion extends Question {
+public class RankingQuestion {
+    private final QuestionType questionType;
     private final List<Country> countryList;
     private final RankingQuestionEnum rankQuestionCategory;
 
@@ -29,7 +29,6 @@ public class RankingQuestion extends Question {
      * @param guessedRank integer between 1 and Game.MAXPLAYER
      * @return Integer with the score
      */
-    @Override
     public int getScore(String cioc, int guessedRank) {
 
         assert(guessedRank > 0 && guessedRank <= Game.MAXPLAYERS);
@@ -51,15 +50,12 @@ public class RankingQuestion extends Question {
         }
     }
 
-    @Override
     protected String getQuestionText() {
         return this.rankQuestionCategory.getQuestion();
     }
-    @Override
     protected List<Country> getCountries() {
         return this.countryList;
     }
-    @Override
     public List<String> getCountryCodes() {
         return this.countryList.stream().map(Country::getCioc).toList();
     }
