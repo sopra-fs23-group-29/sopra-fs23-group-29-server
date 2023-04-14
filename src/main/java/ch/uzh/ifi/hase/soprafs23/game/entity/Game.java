@@ -250,9 +250,8 @@ public class Game {
     Player playerGuessed = playerService.getPlayerByUserToken(answer.getUserToken());
     String countryCodeGuessed = answer.getCountryCode();
     int guess = answer.getGuess();
-    PlayerColor colorGuessed = playerGuessed.getPlayerColor();
 
-    this.turn.saveGuess(playerGuessed, countryCodeGuessed, guess, colorGuessed);
+    this.turn.saveGuess(playerGuessed, countryCodeGuessed, guess);
   }
 
   /**
@@ -262,21 +261,13 @@ public class Game {
 
     // todo: Check that turn.turnPlayersDone is equal to turn.turnPlayers? Otherwise you shouldn't end the turn
 
-    // For each player in turn.turnPlayersDone, get his guess, evaluate and update the leaderboard
+    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the leaderboard
 
-    // For each player in turn.turnPlayersDone
-    for (Map.Entry<Player, String> entry : turn.getTurnPlayersDone().entrySet()) {
-      Player playerGuess = entry.getKey();
-      String countryCodeGuess = entry.getValue();
-
-      // Get the guess the player made for country countryCodeGuess
-      int guessMade = turn.getSavedGuesses().get(countryCodeGuess);
-
-      // Evaluate the score that guess scored the player
-      int playerScoreAdd = turn.evaluateGuess(countryCodeGuess, guessMade);
-
-      // Update the leaderboard
-      leaderboard.updateEntry(playerGuess.getId(), playerScoreAdd);
+    // For each player in turn.getTakenGuesses
+    for (Guess g : turn.getTakenGuesses()) {
+      // evaluate the guess
+      int playerScoreAdd = turn.evaluateGuess(g.guessCountryCode(), g.guess());
+      leaderboard.updateEntry(g.guessPlayerId(), playerScoreAdd);
     }
   }
 
