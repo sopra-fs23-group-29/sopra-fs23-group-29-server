@@ -181,6 +181,7 @@ public class Game {
 
   /**
    * Given the players in the playerRepository, create a turn order
+   * Returns a NEW LIST WITH NEW PLAYER OBJECTS
    */
   public List<Player> createTurnOrder() {
     updatePlayers();
