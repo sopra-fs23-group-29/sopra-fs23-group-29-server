@@ -40,9 +40,6 @@ public interface DTOMapper {
     @Mapping(source = "password", target = "password")
     User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
-    @Mapping(source = "userToken", target = "userToken")
-    Player convertPlayerPostDTOtoEntity(PlayerPostDTO playerPostDTO);
-
     @Mapping(source = "id", target = "id")
     @Mapping(source = "playerName", target = "playerName")
     @Mapping(source = "playerColor", target = "playerColor")

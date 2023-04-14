@@ -21,7 +21,7 @@ public class WebSocketController {
     private final WebSocketService webSocketService;
     private final GameService gameService;
     private final UserService userService;
-    private final IQuestionService questionService;
+//    private final IQuestionService questionService;
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
     public WebSocketController(
