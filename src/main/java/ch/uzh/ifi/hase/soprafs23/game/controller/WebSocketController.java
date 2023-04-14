@@ -1,12 +1,10 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
+import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
-import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
-import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
-import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
+import ch.uzh.ifi.hase.soprafs23.game.service.*;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
@@ -23,25 +21,18 @@ public class WebSocketController {
     private final WebSocketService webSocketService;
     private final GameService gameService;
     private final UserService userService;
-    private final PlayerService playerService;
-    private final UserRepository userRepository;
-    private final PlayerRepository playerRepository;
+    private final IQuestionService questionService;
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
     public WebSocketController(
         WebSocketService webSocketService,
         GameService gameService,
-        UserService userService,
-        PlayerService playerService,
-        UserRepository userRepository,
-        PlayerRepository playerRepository
+        UserService userService
     ) {
         this.webSocketService = webSocketService;
         this.gameService = gameService;
         this.userService = userService;
-        this.playerService = playerService;
-        this.userRepository = userRepository;
-        this.playerRepository = playerRepository;
+
     }
 
 
@@ -133,15 +124,16 @@ public class WebSocketController {
 
     }
 
-//    /**
-//     * Send a barrier question to the given game, for the player requested
-//     */
-//    @MessageMapping("/games/{gameId}/player/{playerId}/getBarrier")
-//    public void getBarrierQuestion(
-//      @DestinationVariable long gameId,
-//      @DestinationVariable long playerId
-//    ) {
-//        log.info("Game {} get BarrierQuestion for Player {}", gameId, playerId);
-//        gameService.getBarrierQuestion(gameId, playerId);
-//    }
+    /**
+     * Send a barrier question to the given game, for the player requested
+     */
+    @MessageMapping("/games/{gameId}/player/{playerId}/getBarrier")
+    public void getBarrierQuestion(
+      @DestinationVariable long gameId,
+      @DestinationVariable long playerId
+    ) {
+        log.info("Game {} get BarrierQuestion for Player {}", gameId, playerId);
+
+        // todo: Is a playerId needed at all? Or only send the barrierQuestion through QuestionService?
+    }
 }
