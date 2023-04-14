@@ -113,7 +113,6 @@ public class WebSocketController {
 
     /**
      * End a turn, send the new leaderboard with updated scores
-     *
      * todo: Rather just send the delta? Or turnResults?
      */
     @MessageMapping("/games/{gameId}/endTurn")
@@ -133,4 +132,16 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/topic/users", leaderboardDTOasString);
 
     }
+
+//    /**
+//     * Send a barrier question to the given game, for the player requested
+//     */
+//    @MessageMapping("/games/{gameId}/player/{playerId}/getBarrier")
+//    public void getBarrierQuestion(
+//      @DestinationVariable long gameId,
+//      @DestinationVariable long playerId
+//    ) {
+//        log.info("Game {} get BarrierQuestion for Player {}", gameId, playerId);
+//        gameService.getBarrierQuestion(gameId, playerId);
+//    }
 }

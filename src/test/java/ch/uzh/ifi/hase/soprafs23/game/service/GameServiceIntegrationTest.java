@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.game.service;
 import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.entity.*;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
@@ -58,6 +59,11 @@ class GameServiceIntegrationTest {
             List<Country> dummyList = new ArrayList<>();
             dummyList.add(countryService.getCountryData("GER"));
             return new RankingQuestion(RankingQuestionEnum.AREA, dummyList);
+        }
+
+        @Override
+        public BarrierQuestion generateBarrierQuestion() {
+            return null;
         }
     }
 

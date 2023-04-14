@@ -4,6 +4,8 @@ import java.util.Random;
 
 public enum BarrierQuestionEnum {
 
+  // todo: More categories need corresponding methods in Country!!
+
   NBORDERS("How many neighbouring countries?");
 
   private final String question;
