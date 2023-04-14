@@ -336,8 +336,6 @@ public class UserService {
         List<User> users = getUsers();
         List<User> tmpUsers = new ArrayList<>();
 
-        log.info("getUsers() before greeting: {}", users);
-
         // Copy the user object, remove token and password before sending
         for (User user : users) {
 
@@ -353,8 +351,6 @@ public class UserService {
             tmpUsers.add(tmpUser);
 
         }
-
-        log.info("getUsers() before greeting: {}", getUsers());
 
         String tmpUserListAsString = new Gson().toJson(tmpUsers);
         webSocketService.sendMessageToClients("/topic/users", tmpUserListAsString);

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RestTemplateConfig;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RestTemplateConfig;
 
 @RestController
 @SpringBootApplication

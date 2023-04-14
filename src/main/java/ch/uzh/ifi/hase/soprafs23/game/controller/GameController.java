@@ -70,17 +70,16 @@ public class GameController {
         // get the gameId
         Long newGameId = gameService.createNewGame(gamePostDTO.getGameName(), gamePostDTO.getGameMode());
 
-        // fetch the game created
-        Game newGame = GameRepository.findByGameId(newGameId);
-
-        log.info("Game {}: game created", newGame.getGameName());
-
         // Add the creator of the game as a player
         Player playerJoined = playerService.joinPlayer(auth_token, newGameId.intValue());
 
         // let everybody know about the new game
         gameService.updatePlayers(newGameId);
         gameService.greetGames();
+
+        // fetch the game created
+        Game newGame = GameRepository.findByGameId(newGameId);
+        log.info("Game {}: game created", newGame.getGameName());
 
         return DTOMapper.INSTANCE.convertEntityToGameGetDTO(newGame);
 

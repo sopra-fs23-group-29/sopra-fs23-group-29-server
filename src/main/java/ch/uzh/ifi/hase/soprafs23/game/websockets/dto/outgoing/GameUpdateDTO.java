@@ -22,7 +22,7 @@ public class GameUpdateDTO {
     private GameStatus gameStatus;
     private GameMode gameMode;
     private Leaderboard leaderboard;
-    private BarrierLeaderboard barrierLeaderboard;
+    private Leaderboard barrierLeaderboard;
     private int turnNumber;
     private int boardSize;
     private int maxDuration;
@@ -74,10 +74,10 @@ public class GameUpdateDTO {
     public void setLeaderboard(Leaderboard leaderboard) {
         this.leaderboard = leaderboard;
     }
-    public BarrierLeaderboard getBarrierLeaderboard() {
+    public Leaderboard getBarrierLeaderboard() {
         return barrierLeaderboard;
     }
-    public void setBarrierLeaderboard(BarrierLeaderboard barrierLeaderboard) {
+    public void setBarrierLeaderboard(Leaderboard barrierLeaderboard) {
         this.barrierLeaderboard = barrierLeaderboard;
     }
     public int getBoardSize() {

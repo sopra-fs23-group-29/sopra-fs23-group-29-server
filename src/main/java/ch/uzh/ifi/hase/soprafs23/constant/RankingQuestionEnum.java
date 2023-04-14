@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs23.game.RestCountries;
+package ch.uzh.ifi.hase.soprafs23.constant;
 
 import java.util.Random;
 

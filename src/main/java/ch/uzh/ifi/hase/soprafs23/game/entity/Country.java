@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs23.game.RestCountries;
+package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import java.util.Map;
 import java.util.List;

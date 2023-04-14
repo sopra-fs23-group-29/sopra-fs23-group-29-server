@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs23.game.RestCountries;
+package ch.uzh.ifi.hase.soprafs23.game.questions.restCountry;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
