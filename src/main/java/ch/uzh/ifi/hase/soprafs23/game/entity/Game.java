@@ -3,8 +3,9 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.CountryService;
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
+import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 
@@ -23,7 +24,7 @@ public class Game {
   private List<Player> players;
   private Turn turn;
   private PlayerService playerService;
-
+  private IQuestionService questionService;
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -45,11 +46,13 @@ public class Game {
   public Game(
     Long gameId,String gameName,GameMode gameMode
     ,PlayerService playerService
+    ,IQuestionService questionService
     ) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
     this.playerService = playerService;
+    this.questionService = questionService;
 
     // upon creation, set gameStatus to INLOBBY
     this.gameStatus = GameStatus.INLOBBY;
@@ -121,7 +124,6 @@ public class Game {
   public void setMaxTurns(int maxTurns) {
     this.maxTurns = maxTurns;
   }
-
   public Turn getTurn() {
     return turn;
   }
@@ -227,7 +229,7 @@ public class Game {
     List<Player> turnOrder = createTurnOrder();
 
     // fetch a question object
-    RankingQuestion turnQuestion = new RankingQuestion(players.size(), new CountryService());
+    RankingQuestion turnQuestion = questionService.generateRankQuestion(players.size());
 
     // Dummy RankQuestion
 //    RankQuestion turnQuestion = new RankQuestion();

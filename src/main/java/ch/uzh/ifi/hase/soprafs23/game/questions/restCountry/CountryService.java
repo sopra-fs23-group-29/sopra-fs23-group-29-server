@@ -1,4 +1,5 @@
-package ch.uzh.ifi.hase.soprafs23.game.RestCountries;
+package ch.uzh.ifi.hase.soprafs23.game.questions.restCountry;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class CountryService {
 
     private final Logger log = LoggerFactory.getLogger(CountryService.class);
     @Autowired
-    private RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Country getCountryData(String COICode) throws ResponseStatusException {

@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
+import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
@@ -30,14 +31,17 @@ public class GameService {
 
   private final Logger log = LoggerFactory.getLogger(UserService.class);
   private final PlayerService playerService;
+  private final IQuestionService questionService;
   private final WebSocketService webSocketService;
   private int gameCounter;
 
   @Autowired
   public GameService(
           PlayerService playerService,
+          IQuestionService questionService,
           WebSocketService webSocketService) {
     this.playerService = playerService;
+    this.questionService = questionService;
     this.webSocketService = webSocketService;
   }
 
@@ -71,7 +75,7 @@ public class GameService {
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
     removeAllPlayersFromGame((long) gameCounter);
-    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService);
+    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService, questionService);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
   }

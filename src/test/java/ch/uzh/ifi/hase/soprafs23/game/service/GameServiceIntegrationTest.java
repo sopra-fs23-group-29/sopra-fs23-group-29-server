@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
+import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
@@ -33,12 +34,14 @@ class GameServiceIntegrationTest {
 
     @Autowired
     private WebSocketService webSocketService;
+    @Autowired
+    private IQuestionService questionService;
 
     private Game g1;
 
     @BeforeEach
     public void setup() {
-        g1 = new Game(1L, "g1", GameMode.PVP, playerService);
+        g1 = new Game(1L, "g1", GameMode.PVP, playerService, questionService);
         playerRepository.deleteAll();
         GameRepository.clear();
     }

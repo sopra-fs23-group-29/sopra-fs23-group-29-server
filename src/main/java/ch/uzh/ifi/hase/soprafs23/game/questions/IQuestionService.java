@@ -1,8 +1,12 @@
 package ch.uzh.ifi.hase.soprafs23.game.questions;
 
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
+
 public interface IQuestionService {
 
-  RankQuestion generateRankQuestion();
-  BarrierQuestion generateBarrierQuestion();
+  RankingQuestion generateRankQuestion(int size);
+
+  // todo: Implement barrierQuestion
+//  BarrierQuestion generateBarrierQuestion();
 
 }

@@ -1,8 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.game.RestCountries.RankingQuestion;
-import ch.uzh.ifi.hase.soprafs23.game.questions.RankQuestion;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 
 import java.util.HashMap;
 import java.util.List;
