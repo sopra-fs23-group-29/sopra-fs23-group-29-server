@@ -140,6 +140,11 @@ public class GameService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Country Code %s is not one of the options in Game %s Turn %s".formatted(answer.getCountryCode(), gameId, turnNumber));
     }
 
+    // Error if the supplied answer.guess is not between 1 and Game.MAXPLAYERS
+    if (answer.getGuess() < 1 || answer.getGuess() > Game.MAXPLAYERS) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Guess %s not between 1 to %s in Game %s Turn %s".formatted(answer.getGuess(), Game.MAXPLAYERS, gameId, turnNumber));
+    }
+
     // Process the answer
     gameToUpdate.updateTurn(answer);
 

@@ -211,41 +211,46 @@ class GameServiceIntegrationTest {
 
     }
 
-//    @Test
-//    void processAnswer() {
-//        // given - adding a game with a dummy questionService via the service
-//        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP);
-//
-//        // given - add two players and start the game
-//        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
-//        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
-//        gameService.startGame(gameIdCreated);
-//
-//        // given - start next turn
-//        gameService.startNextTurn(gameIdCreated);
-//
-//        // assert that the answers are empty
-//        Turn currentTurn = gameService.getGameById(gameIdCreated).getTurn();
-//        assertTrue(currentTurn.getSavedGuesses().isEmpty());
-//        assertTrue(currentTurn.getSavedColors().isEmpty());
-//        assertTrue(currentTurn.getTurnPlayersDone().isEmpty());
-//
-//        // then - process a correct answer by p1_added
-//        Answer answer_correct = new Answer();
-//        answer_correct.setGuess(1);
-//        answer_correct.setCountryCode("GER");
-//        answer_correct.setUserToken(p1_added.getUserToken());
-//        // fetch the current turn id
-//        int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
-//        TurnOutgoingDTO turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
-//
-//        // assert - there is a guess at the right player, the other one has not yet made a guess
-//        assertEquals(turnWithAnswer.getSavedGuesses().size(), 1);
-//        assertEquals(turnWithAnswer.getTurnPlayersDone().get(p1_added), "GER");
-//        assertEquals(turnWithAnswer.getSavedGuesses().get("GER"), 1);
-//        assertEquals(turnWithAnswer.getSavedColors().get("GER"), p1_added.getPlayerColor());
-//
-//    }
+    @Test
+    void processAnswer() {
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP);
+
+        // given - add two players and start the game
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+        gameService.startGame(gameIdCreated);
+
+        // given - start next turn
+        gameService.startNextTurn(gameIdCreated);
+
+        // assert that the taken guesses so far are empty
+        Turn currentTurn = gameService.getGameById(gameIdCreated).getTurn();
+        assertTrue(currentTurn.getTakenGuesses().isEmpty());
+
+        // then - process a correct answer by p1_added
+        Answer answer_correct = new Answer();
+        answer_correct.setGuess(1);
+        answer_correct.setCountryCode("GER");
+        answer_correct.setUserToken(p1_added.getUserToken());
+        // fetch the current turn id
+        int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
+        TurnOutgoingDTO turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+
+        // fetch the takenGuesses
+        List<Guess> takenGuesses = turnWithAnswer.getTakenGuesses();
+        // assert - there is a guess at the right player, the other one has not yet made a guess
+        assertEquals(takenGuesses.size(), 1);
+
+        // assert - player 1 made a guess
+        // fetch the one guess made
+        Guess takenGuess = takenGuesses.get(0);
+        assertEquals(takenGuess.guessCountryCode(), "GER");
+        assertEquals(takenGuess.guessPlayerId(), p1_added.getId());
+        assertNotSame(takenGuess.guessPlayerColor(), PlayerColor.NOTSET);
+        assertEquals(takenGuess.guess(), 1);
+
+    }
 
     @Test
     void updateGame() {
