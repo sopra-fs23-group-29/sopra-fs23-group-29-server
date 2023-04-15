@@ -80,6 +80,35 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/topic/users", nextTurnDTOasString);
     }
 
+
+    /**
+     * Start a new turn in a game
+     * The game must be in progress already, otherwise throw BAD_REQUEST
+     * Returns a Turn object for the client to work with
+     */
+    @MessageMapping("/games/{gameId}/nextTurn")
+    public void nextTurn(@DestinationVariable long gameId) {
+        log.info("Game {} next turn", gameId);
+        gameService.startNextTurn(gameId);
+        Turn nextTurn = gameService.getGameById(gameId).getTurn();
+        log.info("Created Turn {}", nextTurn.getTurnNumber());
+
+        TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
+
+        String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
+
+        // send the new Turn to all subscribers
+        webSocketService.sendMessageToClients("/games" + gameId, nextTurnDTOasString);
+
+        // Debugging, send message to /users as well
+        log.info("Debugging sending startGame to /topic/users ...");
+        webSocketService.sendMessageToClients("/topic/users", nextTurnDTOasString);
+    }
+
+
+
+
+
     /**
      * Save an answer from a player for a given turn in a given game
      * Returns an updated Turn object for the client to work with
@@ -94,9 +123,10 @@ public class WebSocketController {
             Answer answer
     ) {
         log.info("Update Game {} Turn {} with answer from Player {}", gameId, turnNumber, playerId);
-        TurnOutgoingDTO turnOutgoingDTO = gameService.processAnswer(answer, playerId, turnNumber, gameId);
+        Turn updatedTurn = gameService.processAnswer(answer, playerId, turnNumber, gameId);
+        TurnOutgoingDTO updatedTurnDTO = new TurnOutgoingDTO(updatedTurn);
 
-        String turnOutgoingDTOasString = new Gson().toJson(turnOutgoingDTO);
+        String turnOutgoingDTOasString = new Gson().toJson(updatedTurnDTO);
 
         // send the updated Turn to all subscribers
         webSocketService.sendMessageToClients("/games" + gameId, turnOutgoingDTOasString);

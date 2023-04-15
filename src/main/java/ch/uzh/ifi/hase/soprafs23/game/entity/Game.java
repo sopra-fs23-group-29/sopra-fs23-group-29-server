@@ -134,7 +134,7 @@ public class Game {
 
   /**
    * Check if moving playerId by one field hits a barrier on the board
-   * @param playerId
+   * @param playerId Player ID
    * @return True if barrier is hit, false otherwise
    */
   public boolean hitsBarrier(Long playerId) {
@@ -160,6 +160,16 @@ public class Game {
   public void updatePlayers() {
     // Fetch all Players for the gameId
     players = playerService.getPlayersByGameId(this.gameId);
+  }
+
+  /**
+   * Update the leaderboard and barrierLeaderboard with players existing in this.players, fetched form the PlayerRepository
+   */
+  public void updateLeaderboards() {
+    // Fetch all current players IDs
+    List<Long> playerIds = this.players.stream().map(Player::getId).toList();
+    leaderboard.sync(playerIds);
+    barrierLeaderboard.sync(playerIds);
   }
 
   /**

@@ -10,20 +10,19 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -92,13 +91,26 @@ public class GameService {
     gameToStart.initGame();
   }
 
+  /**
+   * Update the game/players/leaderboards and start a new turn
+   * Throws BAD_REQUEST when the game is not INPROGRESS, only then a new turn should be created
+   * @param gameId The game to start the next turn
+   */
   public void startNextTurn(Long gameId) {
     Game gameNextTurn = GameRepository.findByGameId(gameId);
 
-    // todo: Update Players, drop not existing Players from Leaderboard
+    // todo: Catch changing players?
+
+    // Throw error if the game is not INPROGRESS
+    if (!gameNextTurn.getGameStatus().equals(GameStatus.INPROGRESS)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game %s is not INPROGRESS and cannot start a next turn".formatted(gameId));
+    }
+
+    // Update Players, drop not existing Players from Leaderboard
+    gameNextTurn.updatePlayers();
+    gameNextTurn.updateLeaderboards();
 
     gameNextTurn.nextTurn();
-
   }
 
   /**
@@ -107,7 +119,7 @@ public class GameService {
    * @param playerId Player ID of the player the answer is from
    * @return TurnOutgoingDTO object with the updated Turn
    */
-  public TurnOutgoingDTO processAnswer(Answer answer, Long playerId, int turnNumber, Long gameId) throws ResponseStatusException {
+  public Turn processAnswer(Answer answer, Long playerId, int turnNumber, Long gameId) throws ResponseStatusException {
     // Fetch/Check the Player at playerId. Throws NOT_FOUND if playerId is not existent
     Player player = playerService.getPlayerById(playerId);
     // Compare to the player from the userToken from answer, should match
@@ -149,10 +161,7 @@ public class GameService {
     gameToUpdate.updateTurn(answer);
 
     // Fetch the new turn
-    Turn updatedTurn = gameToUpdate.getTurn();
-
-    return new TurnOutgoingDTO(updatedTurn);
-
+    return gameToUpdate.getTurn();
   }
 
   /**

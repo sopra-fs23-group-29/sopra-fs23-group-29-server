@@ -239,10 +239,11 @@ class GameServiceIntegrationTest {
         answer_correct.setUserToken(p1_added.getUserToken());
         // fetch the current turn id
         int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
-        TurnOutgoingDTO turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+        Turn turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+        TurnOutgoingDTO turnWithAnswerDTO = new TurnOutgoingDTO(turnWithAnswer);
 
         // fetch the takenGuesses
-        List<Guess> takenGuesses = turnWithAnswer.getTakenGuesses();
+        List<Guess> takenGuesses = turnWithAnswerDTO.getTakenGuesses();
         // assert - there is a guess at the right player, the other one has not yet made a guess
         assertEquals(takenGuesses.size(), 1);
 
