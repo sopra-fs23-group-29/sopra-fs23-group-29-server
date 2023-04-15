@@ -4,10 +4,11 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
-import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 
 import java.util.*;
 
@@ -20,18 +21,21 @@ import java.util.*;
 public class Game {
 
   public static final int MAXPLAYERS = 6;
+  public static final int BARRIERPOSITION = 3; // every 3rd field is a barrier question
 
   private List<Player> players;
   private Turn turn;
+  private int turnNumber;
   private PlayerService playerService;
   private IQuestionService questionService;
+  private BarrierQuestion currentBarrierQuestion;
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
   private GameMode gameMode;
   private Leaderboard leaderboard;
   private Leaderboard barrierLeaderboard;
-  private int turnNumber;
+  private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
   private int boardSize;
   private int maxDuration;
   private int maxTurns;
@@ -61,13 +65,31 @@ public class Game {
     this.turnNumber = 0;
 
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
+    // create empty list of resovled BarrierQuestions
+    // set currentBarrierQuestion to null
+    this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
+    this.resolvedBarriers = new ArrayList<>();
   }
 
   // default no args constructor - needed for test
   public Game() {}
 
+
+
+  public void setCurrentBarrierQuestion(BarrierQuestion currentBarrierQuestion) {
+    this.currentBarrierQuestion = currentBarrierQuestion;
+  }
+  public BarrierQuestion getCurrentBarrierQuestion() {
+    return currentBarrierQuestion;
+  }
+  public void setResolvedBarriers(List<Integer> resolvedBarriers) {
+    this.resolvedBarriers = resolvedBarriers;
+  }
+  public List<Integer> getResolvedBarriers() {
+    return resolvedBarriers;
+  }
   public void setGameId(Long gameId) {this.gameId = gameId;}
   public Long getGameId() {return gameId;}
   public String getGameName() {
@@ -129,12 +151,46 @@ public class Game {
   }
 
 
+
+
+  /**
+   * Check if moving playerId by one field hits a barrier on the board
+   * @param playerId Player ID
+   * @return True if barrier is hit, false otherwise
+   */
+  public boolean hitsBarrier(Long playerId) {
+    // Get the playerId leaderboard entry
+    LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
+    // Get the current score/position of the player
+    int currentPosition = playerLeaderboardEntry.getCurrentScore();
+    int newPosition = currentPosition+1;
+
+    // Check if by adding one, player hits a barrier which is not resolved yet
+    // Ever BARRIERPOSITION field is a barrier, if modulo equals 0, we hit one of those
+    if (newPosition%BARRIERPOSITION == 0) {
+      return !resolvedBarriers.contains(newPosition);
+    }
+
+    return false;
+
+  }
+
   /**
    * Fetch all current players from the playerRepository via playerService and update the internal players list
    */
   public void updatePlayers() {
     // Fetch all Players for the gameId
     players = playerService.getPlayersByGameId(this.gameId);
+  }
+
+  /**
+   * Update the leaderboard and barrierLeaderboard with players existing in this.players, fetched form the PlayerRepository
+   */
+  public void updateLeaderboards() {
+    // Fetch all current players IDs
+    List<Long> playerIds = this.players.stream().map(Player::getId).toList();
+    leaderboard.sync(playerIds);
+    barrierLeaderboard.sync(playerIds);
   }
 
   /**
@@ -255,19 +311,47 @@ public class Game {
   }
 
   /**
-   * Update the leaderboard object from the turn object
+   * Process the barrier answer, update the game, leaderboards and the currentBarrierQuestion
+   * @param barrierAnswer The answer given
    */
-  public void updateLeaderboard() {
+  public void processBarrierAnswer(BarrierAnswer barrierAnswer) {
+    // Extract the player that gave the answer
+    Player playerGuessed = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
+    Long playerIdGuessed = playerGuessed.getId();
+    // Evaluate the guess
+    boolean guessCorrect = currentBarrierQuestion.evaluateGuess(barrierAnswer.getGuess());
+
+    // if the guess was correct, update the leaderboards
+    if (guessCorrect) {
+      // add to the resolved barriers. It should be where the playerGuessed is in the leaderboard, plus 1
+      this.resolvedBarriers.add(this.leaderboard.getEntry(playerIdGuessed).getCurrentScore() + 1);
+
+      // update the leaderboards
+      this.leaderboard.addToEntry(playerIdGuessed,1);
+      this.barrierLeaderboard.addToEntry(playerIdGuessed, 1);
+    }
+
+    // set currentBarrierQuestion to null since the question has been answered
+    this.currentBarrierQuestion = null;
+
+  }
+
+  /**
+   * Update the turnResult object from the turn object
+   * DO NOT update the leaderboard, since we dont know yet how many field the player actually can move bc of barriers
+   */
+  public void endTurn() {
 
     // todo: Check that turn.turnPlayersDone is equal to turn.turnPlayers? Otherwise you shouldn't end the turn
 
-    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the leaderboard
+    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the turnResult board
 
     // For each player in turn.getTakenGuesses
     for (Guess g : turn.getTakenGuesses()) {
       // evaluate the guess
       int playerScoreAdd = turn.evaluateGuess(g.guessCountryCode(), g.guess());
-      leaderboard.updateEntry(g.guessPlayerId(), playerScoreAdd);
+      // update the turnResult
+      turn.getTurnResult().replaceEntry(g.guessPlayerId(), playerScoreAdd);
     }
   }
 

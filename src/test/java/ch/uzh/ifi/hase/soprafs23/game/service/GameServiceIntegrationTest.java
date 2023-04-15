@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.game.service;
 import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.entity.*;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
@@ -19,9 +20,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -58,6 +57,11 @@ class GameServiceIntegrationTest {
             List<Country> dummyList = new ArrayList<>();
             dummyList.add(countryService.getCountryData("GER"));
             return new RankingQuestion(RankingQuestionEnum.AREA, dummyList);
+        }
+
+        @Override
+        public BarrierQuestion generateBarrierQuestion() {
+            return null;
         }
     }
 
@@ -153,13 +157,13 @@ class GameServiceIntegrationTest {
             assertNotSame(p.getPlayerColor(), PlayerColor.NOTSET);
         }
         // assert - leaderboards are filled, initialized to 0
-        List<LeaderboardEntry> gameStartedLeaderboardEntries = gameStarted.getLeaderboard().getPlayers();
+        List<LeaderboardEntry> gameStartedLeaderboardEntries = gameStarted.getLeaderboard().getEntries();
         assertEquals(gameStartedLeaderboardEntries.size(), 2);
         for (LeaderboardEntry lbe : gameStartedLeaderboardEntries) {
             assertEquals(lbe.getCurrentScore(), 0);
         }
         // assert - barrierLeaderboards are filled, initialized to 0
-        List<LeaderboardEntry> gameStartedBarrierLeaderboardEntries = gameStarted.getBarrierLeaderboard().getPlayers();
+        List<LeaderboardEntry> gameStartedBarrierLeaderboardEntries = gameStarted.getBarrierLeaderboard().getEntries();
         assertEquals(gameStartedBarrierLeaderboardEntries.size(), 2);
         for (LeaderboardEntry lbe : gameStartedBarrierLeaderboardEntries) {
             assertEquals(lbe.getCurrentScore(), 0);
@@ -235,10 +239,11 @@ class GameServiceIntegrationTest {
         answer_correct.setUserToken(p1_added.getUserToken());
         // fetch the current turn id
         int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
-        TurnOutgoingDTO turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+        Turn turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+        TurnOutgoingDTO turnWithAnswerDTO = new TurnOutgoingDTO(turnWithAnswer);
 
         // fetch the takenGuesses
-        List<Guess> takenGuesses = turnWithAnswer.getTakenGuesses();
+        List<Guess> takenGuesses = turnWithAnswerDTO.getTakenGuesses();
         // assert - there is a guess at the right player, the other one has not yet made a guess
         assertEquals(takenGuesses.size(), 1);
 

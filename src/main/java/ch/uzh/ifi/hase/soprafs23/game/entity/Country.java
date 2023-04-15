@@ -26,6 +26,8 @@ public class Country {
     private Map<String, Object> flagsMap;
     @JsonProperty("cioc")
     private String cioc;
+    @JsonProperty("borders")
+    private List<String> bordersList;
 
 
     public String getName() {
@@ -71,6 +73,11 @@ public class Country {
     public Double getPopulationDensity() {
         if (area == null || population == null) {return null;}
         return population / area;
+    }
+
+    public Integer getNBorders() {
+        if (bordersList == null) {return null;}
+        return bordersList.size();
     }
     
     

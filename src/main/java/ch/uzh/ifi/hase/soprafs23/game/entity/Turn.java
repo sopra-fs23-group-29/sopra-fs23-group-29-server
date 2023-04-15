@@ -10,22 +10,18 @@ public class Turn {
   private final List<Player> turnPlayers;
   private final RankingQuestion rankQuestion;
   private final List<Guess> takenGuesses; // Whenever an answer is saved, the guess is recorded as a Guess object
-//  private final HashMap<Player, String> turnPlayersDone; // <Player that took the guess, CountryCode guessed>
-//  private final HashMap<String, Integer> savedGuesses; // <CountryCode, Guess taken>
-//  private final HashMap<String, PlayerColor> savedColors; // <CountryCode, PlayerColor the guess was taken>
+  private final Leaderboard turnResult; // Turn result saving which player scored how many points. Is implemented as a leaderboard
 
   public Turn(int turnNumber, List<Player> turnPlayers, RankingQuestion rankQuestion) {
     this.turnNumber = turnNumber;
     this.turnPlayers = turnPlayers;
     this.rankQuestion = rankQuestion;
 
-//    // upon creation, create empty HashMap with the saved lists/hashmaps
-//    this.turnPlayersDone = new HashMap<>();
-//    this.savedGuesses = new HashMap<>();
-//    this.savedColors = new HashMap<>();
-
     // upon creation, create an empty list which holds the guesses
     this.takenGuesses = new ArrayList<>();
+    // upon creation, create an empty leaderboard with the players from turnPlayers
+    this.turnResult = new Leaderboard();
+    this.turnPlayers.forEach((p) -> this.turnResult.putNewPlayer(p.getId()));
   }
 
   public int getTurnNumber() {
@@ -37,16 +33,8 @@ public class Turn {
   public RankingQuestion getRankQuestion() {
     return rankQuestion;
   }
-//  public HashMap<String, Integer> getSavedGuesses() {
-//    return savedGuesses;
-//  }
-//  public HashMap<String, PlayerColor> getSavedColors() {
-//    return savedColors;
-//  }
-//  public HashMap<Player, String> getTurnPlayersDone() {
-//    return turnPlayersDone;
-//  }
   public List<Guess> getTakenGuesses() {return takenGuesses;}
+  public Leaderboard getTurnResult() {return turnResult;}
 
   /**
    * For convenience, return a list with all IDs of players participating in the turn / have answered
@@ -56,8 +44,6 @@ public class Turn {
     return turnPlayers.stream().map(Player::getId).toList();
   }
   public List<Long> getTurnPlayersDoneID() {
-//    return turnPlayersDone.keySet().stream().map(Player::getId).toList();
-
     // Loop through takenGuesses and get playerIds
     return takenGuesses.stream().map(Guess::guessPlayerId).toList();
   }
@@ -67,12 +53,7 @@ public class Turn {
   }
 
   public void saveGuess(Player player, String countryCode, int guess) {
-//    turnPlayersDone.put(player, countryCode);
-//    savedGuesses.put(countryCode, guess);
-//    savedColors.put(countryCode, guessColor);
-
     takenGuesses.add(new Guess(player.getId(), player.getPlayerColor(), countryCode, guess));
-
   }
 
 }

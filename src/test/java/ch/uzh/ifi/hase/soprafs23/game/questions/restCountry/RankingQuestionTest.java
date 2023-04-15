@@ -49,6 +49,13 @@ class RankingQuestionTest {
       dummyList.add(countryService.getCountryData("SWZ")); // SWZ = Swaziland
       return new RankingQuestion(dummyRankingCategory, dummyList);
     }
+
+    @Override
+    public BarrierQuestion generateBarrierQuestion() {
+      return null;
+    }
+
+
   }
 
   @BeforeEach

@@ -1,10 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.BarrierQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.constant.QuestionServiceType;
 import ch.uzh.ifi.hase.soprafs23.constant.RankingQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
-import ch.uzh.ifi.hase.soprafs23.game.questions.Question;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import org.slf4j.Logger;
@@ -92,9 +93,35 @@ public class QuestionServiceRestcountries implements IQuestionService {
 
   }
 
-//  @Override
-//  public BarrierQuestion generateBarrierQuestion() {
-//    // todo: Implement barrierQuestion
-//  }
+  @Override
+  public BarrierQuestion generateBarrierQuestion() {
+
+    Country countryChosen;
+
+    // Generate random barrierCategory
+    BarrierQuestionEnum randomBarrierQuestionEnum = BarrierQuestionEnum.getRandom();
+
+    while (true) {
+      int index = (int) (Math.random() * CIOC_CODES.length);
+      String ciocCode = CIOC_CODES[index];
+
+      Country tempCountry = countryService.getCountryData(ciocCode);
+
+      if (tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
+        continue;
+      }
+
+      switch(randomBarrierQuestionEnum) {
+        case NBORDERS:
+          if (tempCountry.getNBorders() == null) {continue;}
+      }
+
+      countryChosen = tempCountry;
+      break;
+    }
+
+    return new BarrierQuestion(randomBarrierQuestionEnum, countryChosen);
+
+  }
 
 }

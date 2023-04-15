@@ -5,7 +5,7 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
  */
 public class LeaderboardEntry {
 
-  private Long playerId;
+  private final Long playerId;
   private int currentScore;
 
   public LeaderboardEntry(Long playerId, int currentScore) {
@@ -19,9 +19,9 @@ public class LeaderboardEntry {
   public int getCurrentScore() {
     return currentScore;
   }
-
   public void addScore(int scoreToAdd) {
     this.currentScore+=scoreToAdd;
   }
+  public void replaceScore(int scoreToReplace){this.currentScore=scoreToReplace;}
 
 }

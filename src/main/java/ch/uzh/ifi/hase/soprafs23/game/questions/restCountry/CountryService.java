@@ -44,6 +44,9 @@ public class CountryService {
             } catch (JsonProcessingException e) {
                 log.warn("jsonDat from COICode {} could not be parsed, return null", COICode);
                 return null;
+            } catch (Exception other_exception) {
+                log.error("objectMapper.readValue(jsonData) failed for unknown reasons");
+                throw other_exception;
             }
         }
         return null;
