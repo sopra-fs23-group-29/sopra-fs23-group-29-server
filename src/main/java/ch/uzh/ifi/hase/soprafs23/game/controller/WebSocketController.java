@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
@@ -103,17 +104,18 @@ public class WebSocketController {
     }
 
     /**
-     * End a turn, send the new leaderboard with updated scores
-     * todo: Rather just send the delta? Or turnResults?
+     * End a turn, send the turn leaderboard, stating which player can advance how many fields
      */
     @MessageMapping("/games/{gameId}/endTurn")
     public void endTurn(
             @DestinationVariable long gameId
     ) {
         log.info("Game {} end current Turn", gameId);
-        LeaderboardDTO leaderboardDTO = gameService.endTurn(gameId);
+        Leaderboard turnResults = gameService.endTurn(gameId);
+        // Make a DTO
+        LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults);
 
-        String leaderboardDTOasString = new Gson().toJson(leaderboardDTO);
+        String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
 
         // send the updated Leaderboard to all subscribers
         webSocketService.sendMessageToClients("/games" + gameId, leaderboardDTOasString);

@@ -2,17 +2,16 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A leaderboard contains a mapping from PlayerId to number of fields
  */
 public class Leaderboard {
 
-  private List<LeaderboardEntry> players; // Each entry is one player with scores
+  private List<LeaderboardEntry> entries; // Each entry is one player with scores
 
   public Leaderboard() {
-    this.players = new ArrayList<>();
+    this.entries = new ArrayList<>();
   }
 
   /**
@@ -20,12 +19,12 @@ public class Leaderboard {
    * @param leaderboardToCopy Leaderboard to copy from
    */
   public Leaderboard(Leaderboard leaderboardToCopy) {
-    this.players = new ArrayList<>();
-    this.players.addAll(leaderboardToCopy.players);
+    this.entries = new ArrayList<>();
+    this.entries.addAll(leaderboardToCopy.entries);
   }
 
-  public List<LeaderboardEntry> getPlayers() {
-    return players;
+  public List<LeaderboardEntry> getEntries() {
+    return entries;
   }
 
   /**
@@ -33,26 +32,26 @@ public class Leaderboard {
    * Throws exception if the playerId already exists in the leaderboard
    */
   public void putNewPlayer(Long newPlayerId) throws IllegalArgumentException {
-    for (LeaderboardEntry entry : players) {
-      if (entry.getPlayerId() == newPlayerId) {
+    for (LeaderboardEntry entry : entries) {
+      if (entry.getPlayerId().equals(newPlayerId)) {
         throw new IllegalArgumentException("Player ID %s already exists".formatted(newPlayerId));
       }
     }
     LeaderboardEntry newEntry = new LeaderboardEntry(newPlayerId, 0);
-    players.add(newEntry);
+    entries.add(newEntry);
   }
 
   /**
-   * Increase the value if an entry in the leaderboard by the given value
+   * Increase the value of an entry in the leaderboard by the given value
    * If the key playerId is not found throw error
    *
    * @param playerId ID of the player in the leaderboard to update
    */
-  public void updateEntry(Long playerId, int addScore) throws IllegalArgumentException {
+  public void addToEntry(Long playerId, int addScore) throws IllegalArgumentException {
     boolean playerFound = false;
     int i = 0;
-    for (LeaderboardEntry entry : players) {
-      if (entry.getPlayerId() == playerId) {
+    for (LeaderboardEntry entry : entries) {
+      if (entry.getPlayerId().equals(playerId)) {
         playerFound = true;
         break;
       }
@@ -63,7 +62,31 @@ public class Leaderboard {
     }
 
     // Fetch the leaderboard entry and add the score
-    players.get(i).addScore(addScore);
+    entries.get(i).addScore(addScore);
+  }
+
+  /**
+   * Replace the value of an entry in the leaderboard by the given value
+   * If the key playerId is not found throw error
+   *
+   * @param playerId ID of the player in the leaderboard to update
+   */
+  public void replaceEntry(Long playerId, int replaceScore) throws IllegalArgumentException {
+    boolean playerFound = false;
+    int i = 0;
+    for (LeaderboardEntry entry : entries) {
+      if (entry.getPlayerId().equals(playerId)) {
+        playerFound = true;
+        break;
+      }
+      i++;
+    }
+    if (!playerFound) {
+      throw new IllegalArgumentException("Player %s not found".formatted(playerId));
+    }
+
+    // Fetch the leaderboard entry and add the score
+    entries.get(i).replaceScore(replaceScore);
   }
 
   /**
@@ -73,14 +96,14 @@ public class Leaderboard {
 
     List<LeaderboardEntry> newPlayers = new ArrayList<>();
 
-    for (LeaderboardEntry entry : players) {
+    for (LeaderboardEntry entry : entries) {
       if (playerIdsToKeep.contains(entry.getPlayerId())) {
         newPlayers.add(entry);
       }
     }
 
     // set the new player
-    this.players = newPlayers;
+    this.entries = newPlayers;
   }
 
 

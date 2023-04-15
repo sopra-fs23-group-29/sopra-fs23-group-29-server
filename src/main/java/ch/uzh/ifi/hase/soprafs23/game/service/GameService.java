@@ -157,19 +157,17 @@ public class GameService {
 
   /**
    * End the current turn, returning a new leaderboard with the updated scores
+   * @return A Leaderboard object containing the TURN RESULTS
    */
-  public LeaderboardDTO endTurn(Long gameId) {
+  public Leaderboard endTurn(Long gameId) {
     // Fetch the game
     Game gameToEndRound = GameRepository.findByGameId(gameId);
 
-    // Evaluate all the guesses from the current turn object, update the leaderboard
-    gameToEndRound.updateLeaderboard();
+    // Evaluate all the guesses from the current turn object, update the leaderboard and the turnResult
+    gameToEndRound.endTurn();
 
     // return that new Leaderboard
-    Leaderboard newLeaderboard = gameToEndRound.getLeaderboard();
-
-    // create DTO object and return it
-    return new LeaderboardDTO(newLeaderboard);
+    return gameToEndRound.getTurn().getTurnResult();
 
   }
 

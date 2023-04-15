@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
-import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
@@ -257,17 +256,20 @@ public class Game {
   /**
    * Update the leaderboard object from the turn object
    */
-  public void updateLeaderboard() {
+  public void endTurn() {
 
     // todo: Check that turn.turnPlayersDone is equal to turn.turnPlayers? Otherwise you shouldn't end the turn
 
-    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the leaderboard
+    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the leaderboard and the turnResult board
 
     // For each player in turn.getTakenGuesses
     for (Guess g : turn.getTakenGuesses()) {
       // evaluate the guess
       int playerScoreAdd = turn.evaluateGuess(g.guessCountryCode(), g.guess());
-      leaderboard.updateEntry(g.guessPlayerId(), playerScoreAdd);
+      // update leaderboard
+      leaderboard.addToEntry(g.guessPlayerId(), playerScoreAdd);
+      // update the turnResult
+      turn.getTurnResult().replaceEntry(g.guessPlayerId(), playerScoreAdd);
     }
   }
 

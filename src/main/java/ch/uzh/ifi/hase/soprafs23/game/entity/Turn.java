@@ -10,6 +10,7 @@ public class Turn {
   private final List<Player> turnPlayers;
   private final RankingQuestion rankQuestion;
   private final List<Guess> takenGuesses; // Whenever an answer is saved, the guess is recorded as a Guess object
+  private final Leaderboard turnResult; // Turn result saving which player scored how many points. Is implemented as a leaderboard
 
   public Turn(int turnNumber, List<Player> turnPlayers, RankingQuestion rankQuestion) {
     this.turnNumber = turnNumber;
@@ -18,6 +19,9 @@ public class Turn {
 
     // upon creation, create an empty list which holds the guesses
     this.takenGuesses = new ArrayList<>();
+    // upon creation, create an empty leaderboard with the players from turnPlayers
+    this.turnResult = new Leaderboard();
+    this.turnPlayers.forEach((p) -> this.turnResult.putNewPlayer(p.getId()));
   }
 
   public int getTurnNumber() {
@@ -30,6 +34,7 @@ public class Turn {
     return rankQuestion;
   }
   public List<Guess> getTakenGuesses() {return takenGuesses;}
+  public Leaderboard getTurnResult() {return turnResult;}
 
   /**
    * For convenience, return a list with all IDs of players participating in the turn / have answered

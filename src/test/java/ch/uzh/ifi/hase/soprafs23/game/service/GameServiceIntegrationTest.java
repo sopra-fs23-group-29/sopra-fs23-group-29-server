@@ -20,9 +20,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -159,13 +157,13 @@ class GameServiceIntegrationTest {
             assertNotSame(p.getPlayerColor(), PlayerColor.NOTSET);
         }
         // assert - leaderboards are filled, initialized to 0
-        List<LeaderboardEntry> gameStartedLeaderboardEntries = gameStarted.getLeaderboard().getPlayers();
+        List<LeaderboardEntry> gameStartedLeaderboardEntries = gameStarted.getLeaderboard().getEntries();
         assertEquals(gameStartedLeaderboardEntries.size(), 2);
         for (LeaderboardEntry lbe : gameStartedLeaderboardEntries) {
             assertEquals(lbe.getCurrentScore(), 0);
         }
         // assert - barrierLeaderboards are filled, initialized to 0
-        List<LeaderboardEntry> gameStartedBarrierLeaderboardEntries = gameStarted.getBarrierLeaderboard().getPlayers();
+        List<LeaderboardEntry> gameStartedBarrierLeaderboardEntries = gameStarted.getBarrierLeaderboard().getEntries();
         assertEquals(gameStartedBarrierLeaderboardEntries.size(), 2);
         for (LeaderboardEntry lbe : gameStartedBarrierLeaderboardEntries) {
             assertEquals(lbe.getCurrentScore(), 0);
