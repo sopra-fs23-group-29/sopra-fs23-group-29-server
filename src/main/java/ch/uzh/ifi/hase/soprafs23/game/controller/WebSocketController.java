@@ -36,14 +36,14 @@ public class WebSocketController {
     }
 
 
-    // viewing the user list
-    @MessageMapping("/users")
-    public void receiveMessage(DummyIncomingDTO dummyIncomingDTO) {
-        System.out.println("Received dummyIncomingDTO");
-        log.info("Received dummyIncomingDTO");
-        System.out.println("Dummy message: " + dummyIncomingDTO.getMessage());
-        log.info("Dummy message: " + dummyIncomingDTO.getMessage());
-    }
+//    // recieve a message in the backend
+//    @MessageMapping("/users")
+//    public void receiveMessage(DummyIncomingDTO dummyIncomingDTO) {
+//        System.out.println("Received dummyIncomingDTO");
+//        log.info("Received dummyIncomingDTO");
+//        System.out.println("Dummy message: " + dummyIncomingDTO.getMessage());
+//        log.info("Dummy message: " + dummyIncomingDTO.getMessage());
+//    }
 
     // viewing a single user
     @MessageMapping("/users/{userId}")
