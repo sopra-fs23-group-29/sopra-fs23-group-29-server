@@ -1,13 +1,16 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
+import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.service.*;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
@@ -110,7 +113,7 @@ public class WebSocketController {
 
 
     /**
-     * Save an answer from a player for a given turn in a given game
+     * Save an answer from a player for a given turn rank question in a given game
      * Returns an updated Turn object for the client to work with
      * todo: Is turnNumber necessary? a gameId has only one current active turn, one could assume thats always the
      *  turn we are looking at...
@@ -122,7 +125,7 @@ public class WebSocketController {
             @DestinationVariable long playerId,
             Answer answer
     ) {
-        log.info("Update Game {} Turn {} with answer from Player {}", gameId, turnNumber, playerId);
+        log.info("Update Game {} Turn {} with rank answer from Player {}", gameId, turnNumber, playerId);
         Turn updatedTurn = gameService.processAnswer(answer, playerId, turnNumber, gameId);
         TurnOutgoingDTO updatedTurnDTO = new TurnOutgoingDTO(updatedTurn);
 
@@ -136,6 +139,25 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/topic/users", turnOutgoingDTOasString);
 
     }
+
+
+    /**
+     * Resolve a barrier question answer from a player for a given barrier question in a given game
+     * Returns an updated Game object, either the leaderboard is increased by one or not
+     * todo: Is turnNumber necessary? a gameId has only one current active turn, one could assume thats always the
+     *  turn we are looking at...
+     */
+    @MessageMapping("/games/{gameId}/player/{playerId}/resolveBarrierAnswer")
+    public void resolveBarrierAnswer(
+      @DestinationVariable long gameId,
+      @DestinationVariable long playerId,
+      BarrierAnswer barrierAnswer
+    ) {
+        log.info("Update Game {} with barrier answer from Player {}", gameId, playerId);
+        Game gameUpdated = gameService.processBarrierAnswer(barrierAnswer, playerId, gameId);
+        gameService.updateGame(gameId);
+    }
+
 
     /**
      * End a turn, send the turn leaderboard, stating which player can advance how many fields
@@ -175,9 +197,10 @@ public class WebSocketController {
         // Ask the game service to move playerId in gameId by one field
         boolean barrierHit = gameService.movePlayerByOne(gameId, playerId);
 
-        // If a barrier is hit, create a new barrier question and send it
+        // If a barrier is hit, create a new barrier question, update the game with it and send it
         if (barrierHit) {
             BarrierQuestion barrierQuestion = questionService.generateBarrierQuestion();
+            gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
             String barrierQuestionAsString = new Gson().toJson(barrierQuestion);
             // send the barrierQuestion
             webSocketService.sendMessageToClients("/games" + gameId, barrierQuestionAsString);

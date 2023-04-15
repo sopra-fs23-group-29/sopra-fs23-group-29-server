@@ -4,9 +4,11 @@ import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 
 import java.util.*;
 
@@ -23,8 +25,10 @@ public class Game {
 
   private List<Player> players;
   private Turn turn;
+  private int turnNumber;
   private PlayerService playerService;
   private IQuestionService questionService;
+  private BarrierQuestion currentBarrierQuestion;
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -32,7 +36,6 @@ public class Game {
   private Leaderboard leaderboard;
   private Leaderboard barrierLeaderboard;
   private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
-  private int turnNumber;
   private int boardSize;
   private int maxDuration;
   private int maxTurns;
@@ -63,6 +66,8 @@ public class Game {
 
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resovled BarrierQuestions
+    // set currentBarrierQuestion to null
+    this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
@@ -71,6 +76,20 @@ public class Game {
   // default no args constructor - needed for test
   public Game() {}
 
+
+
+  public void setCurrentBarrierQuestion(BarrierQuestion currentBarrierQuestion) {
+    this.currentBarrierQuestion = currentBarrierQuestion;
+  }
+  public BarrierQuestion getCurrentBarrierQuestion() {
+    return currentBarrierQuestion;
+  }
+  public void setResolvedBarriers(List<Integer> resolvedBarriers) {
+    this.resolvedBarriers = resolvedBarriers;
+  }
+  public List<Integer> getResolvedBarriers() {
+    return resolvedBarriers;
+  }
   public void setGameId(Long gameId) {this.gameId = gameId;}
   public Long getGameId() {return gameId;}
   public String getGameName() {
@@ -130,6 +149,8 @@ public class Game {
   public Turn getTurn() {
     return turn;
   }
+
+
 
 
   /**
@@ -287,6 +308,32 @@ public class Game {
     int guess = answer.getGuess();
 
     this.turn.saveGuess(playerGuessed, countryCodeGuessed, guess);
+  }
+
+  /**
+   * Process the barrier answer, update the game, leaderboards and the currentBarrierQuestion
+   * @param barrierAnswer The answer given
+   */
+  public void processBarrierAnswer(BarrierAnswer barrierAnswer) {
+    // Extract the player that gave the answer
+    Player playerGuessed = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
+    Long playerIdGuessed = playerGuessed.getId();
+    // Evaluate the guess
+    boolean guessCorrect = currentBarrierQuestion.evaluateGuess(barrierAnswer.getGuess());
+
+    // if the guess was correct, update the leaderboards
+    if (guessCorrect) {
+      // add to the resolved barriers. It should be where the playerGuessed is in the leaderboard, plus 1
+      this.resolvedBarriers.add(this.leaderboard.getEntry(playerIdGuessed).getCurrentScore() + 1);
+
+      // update the leaderboards
+      this.leaderboard.addToEntry(playerIdGuessed,1);
+      this.barrierLeaderboard.addToEntry(playerIdGuessed, 1);
+    }
+
+    // set currentBarrierQuestion to null since the question has been answered
+    this.currentBarrierQuestion = null;
+
   }
 
   /**

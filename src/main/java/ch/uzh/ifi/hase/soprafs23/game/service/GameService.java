@@ -7,8 +7,10 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -117,7 +119,7 @@ public class GameService {
    * Given an answer from a player, update the corresponding turn in the
    * @param answer Answer object with the answer of the player
    * @param playerId Player ID of the player the answer is from
-   * @return TurnOutgoingDTO object with the updated Turn
+   * @return Turn object with the updated Turn
    */
   public Turn processAnswer(Answer answer, Long playerId, int turnNumber, Long gameId) throws ResponseStatusException {
     // Fetch/Check the Player at playerId. Throws NOT_FOUND if playerId is not existent
@@ -162,6 +164,33 @@ public class GameService {
 
     // Fetch the new turn
     return gameToUpdate.getTurn();
+  }
+
+  /**
+   * Given a barrier answer from a player, update the corresponding game
+   * Either the game is updated by advancing the playerId by one or not
+   * @param barrierAnswer Answer object with the answer of the player
+   * @param playerId Player ID of the player the answer is from
+   * @param gameId Game ID the barrier question is for
+   * @return Game object with the updated game
+   */
+  public Game processBarrierAnswer(BarrierAnswer barrierAnswer, Long playerId, Long gameId) {
+    // Fetch/Check the Player at playerId. Throws NOT_FOUND if playerId is not existent
+    Player player = playerService.getPlayerById(playerId);
+    // Compare to the player from the userToken from answer, should match
+    Player playerFromToken = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
+    if (!player.getId().equals(playerFromToken.getId())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Player with ID %s cannot answer for Player with ID %s".formatted(player.getId(), playerFromToken.getId()));
+    }
+
+    // Fetch the game
+    Game gameToUpdate = GameRepository.findByGameId(gameId);
+
+    // Evaluate the answer, done by the game
+    gameToUpdate.processBarrierAnswer(barrierAnswer);
+
+    return gameToUpdate;
+
   }
 
   /**
