@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.game.controller;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.service.*;
@@ -22,22 +23,23 @@ public class WebSocketController {
     private final WebSocketService webSocketService;
     private final GameService gameService;
     private final UserService userService;
-//    private final IQuestionService questionService;
+    private final IQuestionService questionService;
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
     public WebSocketController(
         WebSocketService webSocketService,
         GameService gameService,
-        UserService userService
+        UserService userService,
+        IQuestionService questionService
     ) {
         this.webSocketService = webSocketService;
         this.gameService = gameService;
         this.userService = userService;
-
+        this.questionService = questionService;
     }
 
 
-//    // recieve a message in the backend
+//    // receive a message in the backend
 //    @MessageMapping("/users")
 //    public void receiveMessage(DummyIncomingDTO dummyIncomingDTO) {
 //        System.out.println("Received dummyIncomingDTO");
@@ -81,6 +83,8 @@ public class WebSocketController {
     /**
      * Save an answer from a player for a given turn in a given game
      * Returns an updated Turn object for the client to work with
+     * todo: Is turnNumber necessary? a gameId has only one current active turn, one could assume thats always the
+     *  turn we are looking at...
      */
     @MessageMapping("/games/{gameId}/turn/{turnNumber}/player/{playerId}/saveAnswer")
     public void saveAnswer(
@@ -106,12 +110,13 @@ public class WebSocketController {
     /**
      * End a turn, send the turn leaderboard, stating which player can advance how many fields
      */
-    @MessageMapping("/games/{gameId}/endTurn")
+    @MessageMapping("/games/{gameId}/turn/{turnNumber}/endTurn")
     public void endTurn(
-            @DestinationVariable long gameId
+            @DestinationVariable long gameId,
+            @DestinationVariable int turnNumber
     ) {
         log.info("Game {} end current Turn", gameId);
-        Leaderboard turnResults = gameService.endTurn(gameId);
+        Leaderboard turnResults = gameService.endTurn(gameId, turnNumber);
         // Make a DTO
         LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults);
 
@@ -123,19 +128,36 @@ public class WebSocketController {
         // Debugging, send message to /users as well
         log.info("Debugging sending endTurn to /topic/users ...");
         webSocketService.sendMessageToClients("/topic/users", leaderboardDTOasString);
-
     }
 
     /**
-     * Send a barrier question to the given game, for the player requested
+     * Ask to move playerId in gameId by one field
+     * Either hit a barrier or not
+     * If a barrier is hit, the Controller send a barrierQuestionDTO
+     * If not, the game is updated and a gameDTO is sent
      */
-    @MessageMapping("/games/{gameId}/player/{playerId}/getBarrier")
-    public void getBarrierQuestion(
+    @MessageMapping("/games/{gameId}/player/{playerId}/moveByOne")
+    public void movePlayerByOne(
       @DestinationVariable long gameId,
       @DestinationVariable long playerId
     ) {
-        log.info("Game {} get BarrierQuestion for Player {}", gameId, playerId);
+        log.info("Game {} move players", gameId);
+        // Ask the game service to move playerId in gameId by one field
+        boolean barrierHit = gameService.movePlayerByOne(gameId, playerId);
 
-        // todo: Is a playerId needed at all? Or only send the barrierQuestion through QuestionService?
+        // If a barrier is hit, create a new barrier question and send it
+        if (barrierHit) {
+            BarrierQuestion barrierQuestion = questionService.generateBarrierQuestion();
+            String barrierQuestionAsString = new Gson().toJson(barrierQuestion);
+            // send the barrierQuestion
+            webSocketService.sendMessageToClients("/games" + gameId, barrierQuestionAsString);
+
+            // Debugging, send message to /users as well
+            log.info("Debugging sending movePlayerByOne to /topic/users ...");
+            webSocketService.sendMessageToClients("/topic/users", barrierQuestionAsString);
+        } else {
+            // If no barrier is hit, just send the updated game
+            gameService.updateGame(gameId);
+        }
     }
 }

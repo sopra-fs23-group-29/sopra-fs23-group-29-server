@@ -159,9 +159,14 @@ public class GameService {
    * End the current turn, returning a new leaderboard with the updated scores
    * @return A Leaderboard object containing the TURN RESULTS
    */
-  public Leaderboard endTurn(Long gameId) {
+  public Leaderboard endTurn(Long gameId, int turnNumber) {
     // Fetch the game
     Game gameToEndRound = GameRepository.findByGameId(gameId);
+
+    // throw error if turnNumber is not the current Turn
+    if (gameToEndRound.getTurnNumber() != turnNumber) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game %s is currently not at Turn %s".formatted(gameId, turnNumber));
+    }
 
     // Evaluate all the guesses from the current turn object, update the leaderboard and the turnResult
     gameToEndRound.endTurn();
@@ -169,6 +174,40 @@ public class GameService {
     // return that new Leaderboard
     return gameToEndRound.getTurn().getTurnResult();
 
+  }
+
+  /**
+   * Move the player with playerId in gameId by one field.
+   * No authentication with a user token is done, no body is sent.
+   * If no barrier question is hit, the game is updated / the leaderboard entry increased by one
+   * @return True if a barrier question is hit with the move, False otherwise
+   * Throw
+   * - NOT_FOUND if playerId is not found or if the gameId is not found
+   * - BAD_REQUEST if playerId is not participating in gameId
+   */
+  public boolean movePlayerByOne(Long gameId, Long playerId) {
+    // Fetch/Check the Player at playerId. Throws NOT_FOUND if playerId is not existent
+    Player player = playerService.getPlayerById(playerId);
+
+    // Fetch the game, throw NOT_FOUND if gameId is not existent
+    Game game = GameRepository.findByGameId(gameId);
+
+    // Error if the player from playerId is not participating in the game, throw BAD_REQUEST if not in game
+    // Compare ID, not player object!
+    List<Long> playersInGame = game.getPlayersView().stream().map(Player::getId).toList();
+    if (!playersInGame.contains(playerId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player ID %s is not part of Game %s".formatted(playerId, gameId));
+    }
+
+    // Check with the game leaderboard if moving by 1 place hits a barrier
+    boolean hitsBarrier = game.hitsBarrier(playerId);
+
+    // if no barrier was hit, update the leaderboard
+    if (!hitsBarrier) {
+      game.getLeaderboard().addToEntry(playerId, 1);
+    }
+
+    return hitsBarrier;
   }
 
   private void removeAllPlayersFromGame(Long gameId) {

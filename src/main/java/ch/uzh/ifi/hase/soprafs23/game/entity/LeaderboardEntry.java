@@ -5,7 +5,7 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
  */
 public class LeaderboardEntry {
 
-  private Long playerId;
+  private final Long playerId;
   private int currentScore;
 
   public LeaderboardEntry(Long playerId, int currentScore) {

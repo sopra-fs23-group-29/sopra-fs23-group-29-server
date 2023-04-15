@@ -19,6 +19,7 @@ import java.util.*;
 public class Game {
 
   public static final int MAXPLAYERS = 6;
+  public static final int BARRIERPOSITION = 3; // every 3rd field is a barrier question
 
   private List<Player> players;
   private Turn turn;
@@ -30,6 +31,7 @@ public class Game {
   private GameMode gameMode;
   private Leaderboard leaderboard;
   private Leaderboard barrierLeaderboard;
+  private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
   private int turnNumber;
   private int boardSize;
   private int maxDuration;
@@ -60,8 +62,10 @@ public class Game {
     this.turnNumber = 0;
 
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
+    // create empty list of resovled BarrierQuestions
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
+    this.resolvedBarriers = new ArrayList<>();
   }
 
   // default no args constructor - needed for test
@@ -127,6 +131,28 @@ public class Game {
     return turn;
   }
 
+
+  /**
+   * Check if moving playerId by one field hits a barrier on the board
+   * @param playerId
+   * @return True if barrier is hit, false otherwise
+   */
+  public boolean hitsBarrier(Long playerId) {
+    // Get the playerId leaderboard entry
+    LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
+    // Get the current score/position of the player
+    int currentPosition = playerLeaderboardEntry.getCurrentScore();
+    int newPosition = currentPosition+1;
+
+    // Check if by adding one, player hits a barrier which is not resolved yet
+    // Ever BARRIERPOSITION field is a barrier, if modulo equals 0, we hit one of those
+    if (newPosition%BARRIERPOSITION == 0) {
+      return !resolvedBarriers.contains(newPosition);
+    }
+
+    return false;
+
+  }
 
   /**
    * Fetch all current players from the playerRepository via playerService and update the internal players list
@@ -254,20 +280,19 @@ public class Game {
   }
 
   /**
-   * Update the leaderboard object from the turn object
+   * Update the turnResult object from the turn object
+   * DO NOT update the leaderboard, since we dont know yet how many field the player actually can move bc of barriers
    */
   public void endTurn() {
 
     // todo: Check that turn.turnPlayersDone is equal to turn.turnPlayers? Otherwise you shouldn't end the turn
 
-    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the leaderboard and the turnResult board
+    // For each player in turn.takenGuesses, get the player, his guess, evaluate and update the turnResult board
 
     // For each player in turn.getTakenGuesses
     for (Guess g : turn.getTakenGuesses()) {
       // evaluate the guess
       int playerScoreAdd = turn.evaluateGuess(g.guessCountryCode(), g.guess());
-      // update leaderboard
-      leaderboard.addToEntry(g.guessPlayerId(), playerScoreAdd);
       // update the turnResult
       turn.getTurnResult().replaceEntry(g.guessPlayerId(), playerScoreAdd);
     }

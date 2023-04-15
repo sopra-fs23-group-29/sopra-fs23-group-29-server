@@ -28,6 +28,27 @@ public class Leaderboard {
   }
 
   /**
+   * Fetch an entry with key playerId
+   * Throws IllegalArgumentException if playerId not a key in leaderboard
+   * @return LeaderboardEntry
+   */
+  public LeaderboardEntry getEntry(Long playerId) {
+    boolean playerFound = false;
+    int i = 0;
+    for (LeaderboardEntry entry : entries) {
+      if (entry.getPlayerId().equals(playerId)) {
+        playerFound = true;
+        break;
+      }
+      i++;
+    }
+    if (!playerFound) {
+      throw new IllegalArgumentException("Player %s not found".formatted(playerId));
+    }
+    return entries.get(i);
+  }
+
+  /**
    * Put a new player into the leaderboard with a value of 0
    * Throws exception if the playerId already exists in the leaderboard
    */
