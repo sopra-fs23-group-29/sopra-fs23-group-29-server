@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
@@ -59,6 +60,17 @@ class GameControllerTest {
 
     @Test
     void createGame_thenGetGameId() throws Exception {
+
+        // given
+        Player p1 = new Player();
+        p1.setIsHost(true);
+        p1.setGameId(1L);
+        p1.setPlayerColor(PlayerColor.BLUE);
+        p1.setToken("p1token");
+        p1.setUserToken("dummy");
+        p1.setId(1L);
+        p1.setPlayerName("p1");
+
         // given
         Game game = new Game();
         game.setGameId(1L);
@@ -73,9 +85,8 @@ class GameControllerTest {
         gamePostDTO.setGameName("game1");
         gamePostDTO.setGameMode(GameMode.PVP);
 
-        // this mocks the UserService -> we define above what the userService should
-        // return when getUsers() is called
         given(gameService.createNewGame("game1", GameMode.PVP)).willReturn(game.getGameId());
+        given(playerService.joinPlayer("dummy", game.getGameId().intValue())).willReturn(p1);
 
         // when
         MockHttpServletRequestBuilder postRequest = post("/games")

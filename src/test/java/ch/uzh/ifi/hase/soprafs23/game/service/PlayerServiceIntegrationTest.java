@@ -94,6 +94,7 @@ class PlayerServiceIntegrationTest {
         assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
         assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
         assertNull(player_fetched.getGameId());
+        assertFalse(player_fetched.getIsHost());
     }
 
     @Test
@@ -140,6 +141,7 @@ class PlayerServiceIntegrationTest {
         assertEquals(player_fetched.getUserToken(), u1_created.getToken());
         assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
         assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
+        assertFalse(player_fetched.getIsHost());
     }
 
     @Test
@@ -175,6 +177,7 @@ class PlayerServiceIntegrationTest {
         assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
         assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
         assertNull(player_fetched.getGameId());
+        assertFalse(player_fetched.getIsHost());
     }
 
     @Test
@@ -209,6 +212,7 @@ class PlayerServiceIntegrationTest {
         assertEquals(player_created.getPlayerName(), u1_created.getUsername());
         assertEquals(player_created.getUserToken(), u1_created.getToken());
         assertEquals(player_created.getPlayerColor(), PlayerColor.NOTSET);
+        assertFalse(player_created.getIsHost());
     }
 
     @Test

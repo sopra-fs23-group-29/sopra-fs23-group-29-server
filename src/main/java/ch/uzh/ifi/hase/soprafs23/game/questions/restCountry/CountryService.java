@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,32 +25,41 @@ public class CountryService {
 
     public Country getCountryData(String COICode) throws ResponseStatusException {
         String url = "https://restcountries.com/v3.1/alpha/" + COICode;
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            String jsonData = response.getBody();
+        // catch any HTTP errors from the request
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-            if (jsonData == null) {
-                log.error("jsonData from COICode {} is null, return null", COICode);
-                return null;
-            }
+            if (response.getStatusCode() == HttpStatus.OK) {
+                String jsonData = response.getBody();
 
-            if (jsonData.startsWith("[") && jsonData.endsWith("]")) {
-                jsonData = jsonData.substring(1, jsonData.length()-1);
-            }
+                if (jsonData == null) {
+                    log.error("jsonData from COICode {} is null, return null", COICode);
+                    return null;
+                }
 
-            // Catch JsonProcessingException, return null if it fails
-            try {
-                Country country = objectMapper.readValue(jsonData, Country.class);
-                return country;
-            } catch (JsonProcessingException e) {
-                log.warn("jsonDat from COICode {} could not be parsed, return null", COICode);
-                return null;
-            } catch (Exception other_exception) {
-                log.error("objectMapper.readValue(jsonData) failed for unknown reasons");
-                throw other_exception;
+                if (jsonData.startsWith("[") && jsonData.endsWith("]")) {
+                    jsonData = jsonData.substring(1, jsonData.length()-1);
+                }
+
+                // Catch JsonProcessingException, return null if it fails
+                try {
+                    Country country = objectMapper.readValue(jsonData, Country.class);
+                    return country;
+                } catch (JsonProcessingException e) {
+                    log.warn("jsonDat from COICode {} could not be parsed, return null", COICode);
+                    return null;
+                } catch (Exception other_exception) {
+                    log.error("objectMapper.readValue(jsonData) failed for unknown reasons");
+                    throw other_exception;
+                }
             }
+            return null;
+
+        } catch (HttpClientErrorException e) {
+            log.warn("COICode {} returned {}", COICode, e.getStatusCode());
+            return null;
         }
-        return null;
+
     }
 
 }

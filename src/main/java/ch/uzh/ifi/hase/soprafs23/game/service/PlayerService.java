@@ -96,13 +96,14 @@ public class PlayerService {
     Player playerFound = getPlayerByUserToken(userToken);
 
     if (playerFound == null) {
-      // if player does not exist wiht userToken, create
+      // if player does not exist with userToken, create
       log.info("No player with that userToken, create Player ...");
       Player playerCreated = new Player();
       playerCreated.setPlayerName(userToCreateFrom.getUsername());
       playerCreated.setUserToken(userToCreateFrom.getToken());
       playerCreated.setToken(UUID.randomUUID().toString());
       playerCreated.setPlayerColor(PlayerColor.NOTSET);
+      playerCreated.setIsHost(false);
 
       // Save the new Player
       savePlayer(playerCreated);

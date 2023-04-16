@@ -209,8 +209,8 @@ class GameServiceIntegrationTest {
         assertEquals(turnCreated.getTurnNumber(), 1);
         // assert - All players are there by ID and Token
         for (Player p : turnCreatedPlayers) {
-          assertTrue(playerIdsAdded.contains(p.getId()));
-          assertTrue(playerTokenAdded.contains(p.getToken()));
+            assertTrue(playerIdsAdded.contains(p.getId()));
+            assertTrue(playerTokenAdded.contains(p.getToken()));
         }
 
     }
@@ -291,5 +291,26 @@ class GameServiceIntegrationTest {
         assertEquals(gameToCheck.getGameId(), gameIdCreated);
         assertEquals(gameToCheck.getGameName(), g1.getGameName());
         assertEquals(gameToCheck.getGameMode(), g1.getGameMode());
+    }
+
+    @Test
+    void deleteGame_inLobbyIsDeleted() {
+        // given - adding a game via the service
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+
+        // give - add two players
+        Player p1_joined = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_joined = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+
+        // assert one game in repo and two players in the repo
+        assertEquals(1, GameRepository.getAllGames().size());
+        assertEquals(2, playerService.getPlayers().size());
+
+        // then - delete game
+        gameService.deleteGame(gameIdCreated);
+
+        // Assert empty GameRepository, empty PlayerRepository
+        assertEquals(0, GameRepository.getAllGames().size());
+        assertEquals(0, playerService.getPlayers().size());
     }
 }
