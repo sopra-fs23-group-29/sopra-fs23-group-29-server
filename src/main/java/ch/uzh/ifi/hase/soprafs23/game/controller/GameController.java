@@ -171,6 +171,7 @@ public class GameController {
         playerService.deletePlayerById(playerLeaving.getId());
 
         // let everybody know that someone left
+        gameService.greetGames();
         gameService.updatePlayers((long) gameId);
         gameService.updateGame((long) gameId);
 
