@@ -48,7 +48,7 @@
 
 - Mona
 
-  - Client 10 (only UI)
+  - Client 10, 16
 
 - Nils
 
