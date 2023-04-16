@@ -136,4 +136,45 @@ public class GameController {
 
     }
 
+    @DeleteMapping("/games/{gameId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void leaveGame(
+        @PathVariable int gameId,
+        HttpServletRequest request
+    ) throws ResponseStatusException {
+        // fetch auth_token from request
+        String auth_token = request.getHeader("Authorization");
+
+        // check if token was provided
+        if (auth_token == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "A token is required");
+        }
+
+        // check the auth_token, the ID must match the token! idToCheck is null, it just needs to be a valid userToken
+        // if the token does not apply to a valid user, throw UNAUTHORIZED
+        userService.checkToken(auth_token, null);
+
+        // Get the user from the auth_token
+        // HTTPError is thrown if userToken is not an existing user
+        User userLeaving = userService.getUserByToken(auth_token);
+
+        // Get the player from the auth_token
+        // NOT_FOUND if does not exist
+        Player playerLeaving = playerService.getPlayerByUserToken(auth_token);
+
+        log.info("Game {}: User {} leaving", gameId, userLeaving.getUsername());
+
+        // Tell the player repo that a player left
+        // NOT_FOUND if gameId does not exist
+        playerService.deletePlayerById(playerLeaving.getId());
+
+        // let everybody know that someone left
+        gameService.greetGames();
+        gameService.updatePlayers((long) gameId);
+        gameService.updateGame((long) gameId);
+
+    }
+
 }

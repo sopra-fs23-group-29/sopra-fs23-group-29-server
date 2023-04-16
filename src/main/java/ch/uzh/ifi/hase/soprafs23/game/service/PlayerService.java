@@ -84,7 +84,7 @@ public class PlayerService {
   /**
    * Given the userToken, either create a new player or return an existing player found by that userToken
    * Throws NOT_FOUND if there is no user to that userToken
-   * @param userToken
+   * @param userToken Token of the user
    * @return Player instance, either newly created or the existing one for that userToken
    * @throws org.springframework.web.server.ResponseStatusException
    */
