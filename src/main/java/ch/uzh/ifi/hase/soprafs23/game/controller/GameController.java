@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
@@ -72,6 +73,9 @@ public class GameController {
 
         // Add the creator of the game as a player
         Player playerJoined = playerService.joinPlayer(auth_token, newGameId.intValue());
+
+        // Set host of the creator to true
+        playerJoined.setIsHost(true);
 
         // let everybody know about the new game
         gameService.updatePlayers(newGameId);
@@ -160,20 +164,31 @@ public class GameController {
         // HTTPError is thrown if userToken is not an existing user
         User userLeaving = userService.getUserByToken(auth_token);
 
+        // Get the game to leave, otherwise throw NOT_FOUND via GameRepository
+        Game gameToLeave = gameService.getGameById((long) gameId);
+
         // Get the player from the auth_token
         // NOT_FOUND if does not exist
         Player playerLeaving = playerService.getPlayerByUserToken(auth_token);
 
         log.info("Game {}: User {} leaving", gameId, userLeaving.getUsername());
 
-        // Tell the player repo that a player left
-        // NOT_FOUND if gameId does not exist
-        playerService.deletePlayerById(playerLeaving.getId());
+        // If the user was the host and if the game is INLOBBY, delete the game, this deletes all players
+        if (playerLeaving.getIsHost() && gameToLeave.getGameStatus().equals(GameStatus.INLOBBY)) {
+            log.info("Game {}: Host left in LOBBY, delete game", gameId);
+            gameService.deleteGame((long) gameId);
+        } else {
+            // Otherwise, just remove that player that left
+            // Tell the player repo that a player left
+            // NOT_FOUND if gameId does not exist
+            playerService.deletePlayerById(playerLeaving.getId());
+            // in this case, let the game know that one player left
+            gameService.updatePlayers((long) gameId);
+            gameService.updateGame((long) gameId);
+        }
 
-        // let everybody know that someone left
+        // let everybody know that someone left or maybe the game is deleted
         gameService.greetGames();
-        gameService.updatePlayers((long) gameId);
-        gameService.updateGame((long) gameId);
 
     }
 

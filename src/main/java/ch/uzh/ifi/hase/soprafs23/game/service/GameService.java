@@ -71,7 +71,6 @@ public class GameService {
   /**
    * Create a new game and return the corresponding int
    * @return gameId of the created game
-   * @throws org.springframework.web.server.ResponseStatusException
    */
   public Long createNewGame(String gameName, GameMode gameMode) {
     gameCounter++;
@@ -79,6 +78,18 @@ public class GameService {
     Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService, questionService);
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
+  }
+
+  /**
+   * Remove a game from the GameRepository, also delete all Player entries in PlayerRepository
+   * Throw NOT_FOUND if the game at gameId does not exist
+   */
+  public void deleteGame(Long gameId) {
+    // Check if game exists
+    GameRepository.findByGameId(gameId);
+    // Remove all players
+    removeAllPlayersFromGame(gameId);
+    GameRepository.removeGame(gameId);
   }
 
   /**
@@ -254,7 +265,6 @@ public class GameService {
       log.info("Deleted Player: {}", player.getPlayerName());
       playerService.deletePlayerById(player.getId());
     }
-
   }
 
   /**

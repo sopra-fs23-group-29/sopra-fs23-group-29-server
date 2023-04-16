@@ -40,6 +40,8 @@ public class Player implements Serializable {
   @Column(nullable = false)
   private PlayerColor playerColor;
 
+  @Column(nullable = false)
+  private boolean isHost;
 
 
 
@@ -92,7 +94,11 @@ public class Player implements Serializable {
     this.playerColor = playerColor;
   }
 
+  public boolean getIsHost() {return this.isHost;}
 
+  public void setIsHost(boolean host) {
+    isHost = host;
+  }
 
   public String toString() {
     return "Player: " + this.getPlayerName() + " ID: " + this.getId() + " Token:" + this.getToken();
