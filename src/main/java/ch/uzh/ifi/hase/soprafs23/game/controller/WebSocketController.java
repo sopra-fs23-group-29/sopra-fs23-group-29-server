@@ -59,6 +59,15 @@ public class WebSocketController {
     }
 
     /**
+     * Send all games to all people in /games
+     */
+    @MessageMapping("/games/getAllGames")
+    public void getAllGames() {
+        log.info("Sending getAllGames message");
+        gameService.greetGames();
+    }
+
+    /**
      * Start a game
      * Returns a Turn object for the client to work with
      */
@@ -102,9 +111,6 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
 
     }
-
-
-
 
 
     /**
