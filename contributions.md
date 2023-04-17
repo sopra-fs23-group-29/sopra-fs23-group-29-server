@@ -63,6 +63,6 @@
 ### Week 16
 
 - Dominik
-  - Server 50, 51 (Game leaving, game deletion when in lobby)
+  - Server 50, 51, 52 (Game leaving, game deletion when in lobby)
 
 ### Week 17
