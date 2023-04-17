@@ -77,7 +77,7 @@ class GameTest {
         // given the game without any players
         // assert players is an empty list
         Game g1 = gameService.getGameById(gameId);
-        assertTrue(g1.isJoinable());
+        assertTrue(g1.getJoinable());
     }
 
     @Test
@@ -94,6 +94,9 @@ class GameTest {
         for (Player p : g1_players) {
             assertNotSame(p.getPlayerColor(), PlayerColor.NOTSET);
         }
+
+        // assert not joinable
+        assertFalse(g1.getJoinable());
     }
 
 }

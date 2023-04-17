@@ -36,6 +36,7 @@ public class Game {
   private Leaderboard leaderboard;
   private Leaderboard barrierLeaderboard;
   private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
+  private boolean joinable;
   private int boardSize;
   private int maxDuration;
   private int maxTurns;
@@ -67,10 +68,12 @@ public class Game {
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resovled BarrierQuestions
     // set currentBarrierQuestion to null
+    // set joinable to true
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
+    this.joinable = true;
   }
 
   // default no args constructor - needed for test
@@ -102,7 +105,9 @@ public class Game {
     return gameStatus;
   }
   public void setGameStatus(GameStatus gameStatus) {
+    // when the GameStatus is changed, update joinable as well
     this.gameStatus = gameStatus;
+    this.joinable = isJoinable();
   }
   public GameMode getGameMode() {
     return gameMode;
@@ -149,8 +154,7 @@ public class Game {
   public Turn getTurn() {
     return turn;
   }
-
-
+  public boolean getJoinable() {return this.joinable;}
 
 
   /**
@@ -177,10 +181,13 @@ public class Game {
 
   /**
    * Fetch all current players from the playerRepository via playerService and update the internal players list
+   * Upon updating player, also update if joinable or not
    */
   public void updatePlayers() {
     // Fetch all Players for the gameId
     players = playerService.getPlayersByGameId(this.gameId);
+    // Update if joinable
+    this.joinable = isJoinable();
   }
 
   /**
@@ -195,10 +202,17 @@ public class Game {
 
   /**
    * Determine if the game can be joined by a player
+   * Return False if GameStatus is not INLOBBY
+   * Then return true if players are null
    */
-  public boolean isJoinable() {
-      updatePlayers();
-      return players.size() < MAXPLAYERS && gameStatus == GameStatus.INLOBBY;
+  private boolean isJoinable() {
+    if (getGameStatus() != GameStatus.INLOBBY) {
+      return false;
+    }
+    if (this.players == null) {
+      return true;
+    }
+    return players.size() < MAXPLAYERS && this.getGameStatus() == GameStatus.INLOBBY;
    }
 
   /**

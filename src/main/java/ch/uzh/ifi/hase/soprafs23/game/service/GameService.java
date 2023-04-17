@@ -59,13 +59,15 @@ public class GameService {
    * Not joinable if
    * Full
    * Not INLOBBY
-   * @param gameId
+   * @param gameId Game to check if joinable
    * @throws ResponseStatusException if gameId does not exist
    * @return True if joinable, False otherwise
    */
   public boolean gameJoinable(Long gameId) {
     Game gameToJoin = GameRepository.findByGameId(gameId);
-    return gameToJoin.isJoinable();
+    // update the game
+    gameToJoin.updatePlayers();
+    return gameToJoin.getJoinable();
   }
 
   /**
@@ -287,10 +289,8 @@ public class GameService {
     }
 
     String gamesString = new Gson().toJson(tmpGames);
-    webSocketService.sendMessageToClients("/topic/games", gamesString);
 
-    // Debugging only, send message also to /users
-    webSocketService.sendMessageToClients("/topic/users", gamesString);
+    webSocketService.sendMessageToClients("/topic/games", gamesString);
   }
 
   /**
@@ -307,9 +307,6 @@ public class GameService {
 
     String gameString = new Gson().toJson(gameUpdateDTO);
     webSocketService.sendMessageToClients("/topic/games/" + gameId, gameString);
-
-    // Debugging only, send message also to /users
-    webSocketService.sendMessageToClients("/topic/users", gameString);
   }
 
 }
