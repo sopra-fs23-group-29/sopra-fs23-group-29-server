@@ -77,10 +77,8 @@ public class WebSocketController {
 
         // send the new Turn to all subscribers
         webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
-
-        // Debugging, send message to /users as well
-        log.info("Debugging sending startGame to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", nextTurnDTOasString);
+        // also send to /games to remove games not joinable anymore
+        gameService.greetGames();
     }
 
 
@@ -103,9 +101,6 @@ public class WebSocketController {
         // send the new Turn to all subscribers
         webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
 
-        // Debugging, send message to /users as well
-        log.info("Debugging sending startGame to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", nextTurnDTOasString);
     }
 
 
@@ -133,10 +128,6 @@ public class WebSocketController {
 
         // send the updated Turn to all subscribers
         webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTOasString);
-
-        // Debugging, send message to /users as well
-        log.info("Debugging sending saveAnswer to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", turnOutgoingDTOasString);
 
     }
 
@@ -177,9 +168,6 @@ public class WebSocketController {
         // send the updated Leaderboard to all subscribers
         webSocketService.sendMessageToClients("/games/" + gameId, leaderboardDTOasString);
 
-        // Debugging, send message to /users as well
-        log.info("Debugging sending endTurn to /topic/users ...");
-        webSocketService.sendMessageToClients("/topic/users", leaderboardDTOasString);
     }
 
     /**
@@ -205,9 +193,6 @@ public class WebSocketController {
             // send the barrierQuestion
             webSocketService.sendMessageToClients("/games/" + gameId, barrierQuestionAsString);
 
-            // Debugging, send message to /users as well
-            log.info("Debugging sending movePlayerByOne to /topic/users ...");
-            webSocketService.sendMessageToClients("/topic/users", barrierQuestionAsString);
         } else {
             // If no barrier is hit, just send the updated game
             gameService.updateGame(gameId);

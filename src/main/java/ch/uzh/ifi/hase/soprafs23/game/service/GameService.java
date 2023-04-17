@@ -290,10 +290,6 @@ public class GameService {
 
     String gamesString = new Gson().toJson(tmpGames);
 
-    // Debugging
-    log.info("Sending test message to /topic/games");
-    webSocketService.sendMessageToClients("/topic/games", "TEST MESSAGE FROM SERVER TO /topic/games");
-
     webSocketService.sendMessageToClients("/topic/games", gamesString);
   }
 
