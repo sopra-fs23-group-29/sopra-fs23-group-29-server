@@ -29,18 +29,18 @@
 
 - Nils
   - Client 84
-  - Client 85 
+  - Client 85
   - (Polishing websockets in frontend)
 
-### Week 14
+### Week 14 & 15
 
 - Thalia
 
-  - 
+  - Client 30, 33, 39, 91
 
 - Dominik
 
-  - Server 28, 29, 36, 37
+  - Server 28, 29, 36, 37, 26 27
 
 - Mark
 
@@ -52,13 +52,7 @@
 
 - Nils
 
-  - 
-
-### Week 15
-
-- Dominik
-  - Server 36, 37, 26, 27
-
+  - Client 61, 63
 
 ### Week 16
 
