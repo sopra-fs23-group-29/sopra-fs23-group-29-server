@@ -52,7 +52,7 @@
 
 - Nils
 
-  - Server 30, 17
+  - Client 61, 63
 
 ### Week 16
 
