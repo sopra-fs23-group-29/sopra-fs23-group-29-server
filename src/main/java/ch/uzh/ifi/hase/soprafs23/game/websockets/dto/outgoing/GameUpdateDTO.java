@@ -27,6 +27,7 @@ public class GameUpdateDTO {
     private GameMode gameMode;
     private Leaderboard leaderboard;
     private Leaderboard barrierLeaderboard;
+    private boolean joinable;
     private int boardSize;
     private int maxDuration;
     private int maxTurns;
@@ -45,6 +46,7 @@ public class GameUpdateDTO {
         this.boardSize = game.getBoardSize();
         this.maxDuration = game.getMaxDuration();
         this.maxTurns = game.getMaxTurns();
+        this.joinable = game.getJoinable();
     }
 
     public void setGameId(Long gameId) {this.gameId = gameId;}
@@ -115,5 +117,8 @@ public class GameUpdateDTO {
     public void setMaxTurns(int maxTurns) {
         this.maxTurns = maxTurns;
     }
+    public boolean getJoinable() {return this.joinable;}
+    public void setJoinable(boolean joinable) {this.joinable = joinable;}
+
 }
 

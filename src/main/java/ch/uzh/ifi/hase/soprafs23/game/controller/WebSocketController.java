@@ -76,7 +76,7 @@ public class WebSocketController {
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
         // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/games" + gameId, nextTurnDTOasString);
+        webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending startGame to /topic/users ...");
@@ -101,7 +101,7 @@ public class WebSocketController {
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
         // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/games" + gameId, nextTurnDTOasString);
+        webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending startGame to /topic/users ...");
@@ -132,7 +132,7 @@ public class WebSocketController {
         String turnOutgoingDTOasString = new Gson().toJson(updatedTurnDTO);
 
         // send the updated Turn to all subscribers
-        webSocketService.sendMessageToClients("/games" + gameId, turnOutgoingDTOasString);
+        webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending saveAnswer to /topic/users ...");
@@ -175,7 +175,7 @@ public class WebSocketController {
         String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
 
         // send the updated Leaderboard to all subscribers
-        webSocketService.sendMessageToClients("/games" + gameId, leaderboardDTOasString);
+        webSocketService.sendMessageToClients("/games/" + gameId, leaderboardDTOasString);
 
         // Debugging, send message to /users as well
         log.info("Debugging sending endTurn to /topic/users ...");
@@ -203,7 +203,7 @@ public class WebSocketController {
             gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
             String barrierQuestionAsString = new Gson().toJson(barrierQuestion);
             // send the barrierQuestion
-            webSocketService.sendMessageToClients("/games" + gameId, barrierQuestionAsString);
+            webSocketService.sendMessageToClients("/games/" + gameId, barrierQuestionAsString);
 
             // Debugging, send message to /users as well
             log.info("Debugging sending movePlayerByOne to /topic/users ...");

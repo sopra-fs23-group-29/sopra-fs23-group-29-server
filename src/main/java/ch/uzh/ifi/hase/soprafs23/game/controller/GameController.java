@@ -133,6 +133,7 @@ public class GameController {
         playerGetDTO.setGameId(playerJoining.getGameId());
 
         // let all players in the game know who joined
+        gameService.greetGames();
         gameService.updatePlayers((long) gameId);
         gameService.updateGame((long) gameId);
 

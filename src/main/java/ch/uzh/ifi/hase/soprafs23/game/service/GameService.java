@@ -59,13 +59,15 @@ public class GameService {
    * Not joinable if
    * Full
    * Not INLOBBY
-   * @param gameId
+   * @param gameId Game to check if joinable
    * @throws ResponseStatusException if gameId does not exist
    * @return True if joinable, False otherwise
    */
   public boolean gameJoinable(Long gameId) {
     Game gameToJoin = GameRepository.findByGameId(gameId);
-    return gameToJoin.isJoinable();
+    // update the game
+    gameToJoin.updatePlayers();
+    return gameToJoin.getJoinable();
   }
 
   /**
