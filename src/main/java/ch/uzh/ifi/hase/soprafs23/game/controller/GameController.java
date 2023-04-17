@@ -132,9 +132,10 @@ public class GameController {
         playerGetDTO.setPlayerColor(playerJoining.getPlayerColor());
         playerGetDTO.setGameId(playerJoining.getGameId());
 
-        // let all players in the game know who joined
-        gameService.greetGames();
         gameService.updatePlayers((long) gameId);
+        // let all games know that someone joined
+        gameService.greetGames();
+        // let the subscribers to that specific game know someone joined
         gameService.updateGame((long) gameId);
 
         return playerGetDTO;

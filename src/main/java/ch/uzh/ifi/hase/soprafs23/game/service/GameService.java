@@ -289,10 +289,12 @@ public class GameService {
     }
 
     String gamesString = new Gson().toJson(tmpGames);
-    webSocketService.sendMessageToClients("/topic/games", gamesString);
 
-    // Debugging only, send message also to /users
-    webSocketService.sendMessageToClients("/topic/users", gamesString);
+    // Debugging
+    log.info("Sending test message to /topic/games");
+    webSocketService.sendMessageToClients("/topic/games", "TEST MESSAGE FROM SERVER TO /topic/games");
+
+    webSocketService.sendMessageToClients("/topic/games", gamesString);
   }
 
   /**
@@ -309,9 +311,6 @@ public class GameService {
 
     String gameString = new Gson().toJson(gameUpdateDTO);
     webSocketService.sendMessageToClients("/topic/games/" + gameId, gameString);
-
-    // Debugging only, send message also to /users
-    webSocketService.sendMessageToClients("/topic/users", gameString);
   }
 
 }
