@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.game.service.*;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
 import com.google.gson.Gson;
@@ -102,16 +103,26 @@ public class WebSocketController {
     public void nextTurn(@DestinationVariable long gameId) {
         log.info("Game {} next turn", gameId);
         gameService.startNextTurn(gameId);
-        Turn nextTurn = gameService.getGameById(gameId).getTurn();
-        log.info("Created Turn {}", nextTurn.getTurnNumber());
 
-        TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+        } else {
+            Turn nextTurn = gameService.getGameById(gameId).getTurn();
+            log.info("Created Turn {}", nextTurn.getTurnNumber());
 
-        String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
+            TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
 
-        // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
+            String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
+            // send the new Turn to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
+        }
     }
 
 
