@@ -21,7 +21,9 @@ import java.util.*;
 public class Game {
 
   public static final int MAXPLAYERS = 6;
-  public static final int BARRIERPOSITION = 3; // every 3rd field is a barrier question
+  // every 3rd field is a barrier question
+  public static final int BARRIERPOSITION = 3; // todo: could be dynamic
+  public static final int BOARDSIZE = 2; // todo: could be dynamic
 
   private List<Player> players;
   private Turn turn;
@@ -43,6 +45,7 @@ public class Game {
 
   /**
    * The constructor always needs a playerRepository to fetch its current players
+   * Also a questionService to generate Rank questions
    * @param gameId id of the game
    * @param gameName name of the game
    * @param gameMode Which mode to play
@@ -58,6 +61,10 @@ public class Game {
     this.gameMode = gameMode;
     this.playerService = playerService;
     this.questionService = questionService;
+
+    // todo: boardSize/maxTurns/maxDuration depending on constructor?
+    // currently static
+    this.boardSize = BOARDSIZE;
 
     // upon creation, set gameStatus to INLOBBY
     this.gameStatus = GameStatus.INLOBBY;
@@ -223,6 +230,32 @@ public class Game {
    }
 
   /**
+   * Check if the conditions for a game over are fulfilled
+   * @return True if game is over, false otherwise.
+   */
+  public boolean gameOver() {
+    // if FINISHED, its always true, if INLOBBY always false
+    if (gameStatus.equals(GameStatus.FINISHED)) {return true;}
+    if (gameStatus.equals(GameStatus.INLOBBY)) {return false;}
+
+    // check winning conditions PVP
+    if (gameMode.equals(GameMode.PVP)) {
+      for (LeaderboardEntry entry : leaderboard.getEntries()) {
+        if (entry.getCurrentScore() >= this.boardSize) {
+          return true;
+        }
+      }
+
+    // default for GameMode not covered yet
+    } else {
+      System.out.println("ONLY PVP gameOver implemented!");
+      throw new RuntimeException();
+    }
+
+    return false;
+  }
+
+  /**
    * Returns the list of players as an unmodifiable list of the current players in the game.
    * Modifications to the list of players should only be done through the playerService/Repository
    * If no players are added jet, returns an empty list
@@ -301,6 +334,11 @@ public class Game {
    */
   public void nextTurn() {
 
+    // assert Game is in progress
+    if (!gameStatus.equals(GameStatus.INPROGRESS)) {
+      throw new IllegalStateException("Game not INPROGRESS, nextTurn cannot be called!");
+    }
+
     turnNumber++;
 
     // create ordered list of players, determining who's first
@@ -308,10 +346,6 @@ public class Game {
 
     // fetch a question object
     RankingQuestion turnQuestion = questionService.generateRankQuestion(players.size());
-
-    // Dummy RankQuestion
-//    RankQuestion turnQuestion = new RankQuestion();
-//    turnQuestion.buildDummyRankQuestion(6);
 
     // New Turn object is saved to game instance
     this.turn = new Turn(turnNumber, turnOrder, turnQuestion);
@@ -376,4 +410,13 @@ public class Game {
     }
   }
 
+  /**
+   * Set GameStatus.FINISHED
+   */
+  public void endGame() {
+    // Check again that GameStatus is INPROGRESS
+    assert gameStatus.equals(GameStatus.INPROGRESS);
+
+    setGameStatus(GameStatus.FINISHED);
+  }
 }
