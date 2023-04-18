@@ -68,15 +68,16 @@ public class Game {
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resovled BarrierQuestions
     // set currentBarrierQuestion to null
-    // set joinable to true
+    // set joinable to true if PVP, false otherwise
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
-    this.joinable = true;
+
+    this.joinable = gameMode.equals(GameMode.PVP);
   }
 
-  // default no args constructor - needed for test
+  // default no args constructor - needed for mapper
   public Game() {}
 
 
@@ -206,6 +207,12 @@ public class Game {
    * Then return true if players are null
    */
   private boolean isJoinable() {
+
+    // If not PVP, no game is ever joinable
+    if (!(getGameMode().equals(GameMode.PVP))) {
+      return false;
+    }
+
     if (getGameStatus() != GameStatus.INLOBBY) {
       return false;
     }

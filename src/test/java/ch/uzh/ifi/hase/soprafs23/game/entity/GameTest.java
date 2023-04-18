@@ -40,7 +40,7 @@ class GameTest {
     @Autowired
     private GameService gameService;
 
-    private Long gameId;
+    private Long gameId, gameIdSingle;
     private String userToken;
 
     @BeforeEach
@@ -51,6 +51,7 @@ class GameTest {
         userRepository.deleteAll();
 
         gameId = gameService.createNewGame("g1", GameMode.PVP);
+        gameIdSingle = gameService.createNewGame("g2", GameMode.HOWFAST);
 
         // create a player from dummy user
         User u1;
@@ -78,6 +79,16 @@ class GameTest {
         // assert players is an empty list
         Game g1 = gameService.getGameById(gameId);
         assertTrue(g1.getJoinable());
+    }
+
+    @Test
+    void singleNeverJoinable() {
+        // given the game without any players
+        // assert players is an empty list
+        Game g2_single = gameService.getGameById(gameIdSingle);
+
+        // assert not joinable
+        assertFalse(g2_single.getJoinable());
     }
 
     @Test
