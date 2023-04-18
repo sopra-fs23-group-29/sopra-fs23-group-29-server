@@ -23,7 +23,7 @@ public class Game {
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
   public static final int BARRIERPOSITION = 3; // todo: could be dynamic
-  public static final int BOARDSIZE = 2; // todo: could be dynamic
+  public static final int BOARDSIZE = 48; // todo: could be dynamic
 
   private List<Player> players;
   private Turn turn;
