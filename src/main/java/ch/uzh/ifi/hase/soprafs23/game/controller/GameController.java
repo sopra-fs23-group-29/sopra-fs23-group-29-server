@@ -65,6 +65,14 @@ public class GameController {
         // if the token does not apply to a valid user, throw UNAUTHORIZED
         userService.checkToken(auth_token, null);
 
+//        // If that user is assigned to a player who is currently in a game, throw CONFLICT
+//        // A user cannot have multiple players that are in games
+//        Player playerToJoin = playerService.getPlayerByUserToken(auth_token);
+//        if (!playerToJoin == null) {
+//            // given the player to the auth_token exists, if he has a gameId, then throw an error
+//
+//        }
+
         log.info("Game {}: create game ...", gamePostDTO.getGameName());
 
         // GameService creates the game and writes to the gameRepository
@@ -170,10 +178,15 @@ public class GameController {
         Game gameToLeave = gameService.getGameById((long) gameId);
 
         // Get the player from the auth_token
-        // NOT_FOUND if does not exist
+        // playerLeaving is null if there is no player from the auth_token
+        // in that case, throw NOT_FOUND because the player that wants to leave does not exist
         Player playerLeaving = playerService.getPlayerByUserToken(auth_token);
+        if (playerLeaving == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "User %s leaving does not have a Player entry".formatted(userLeaving.getUsername()));
+        }
 
-        log.info("Game {}: User {} leaving", gameId, userLeaving.getUsername());
+        log.info("Game {}: User {} Player {} leaving", gameId, userLeaving.getUsername(), playerLeaving.getId());
 
         // If the user was the host and if the game is INLOBBY, delete the game, this deletes all players
         if (playerLeaving.getIsHost() && gameToLeave.getGameStatus().equals(GameStatus.INLOBBY)) {

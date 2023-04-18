@@ -191,6 +191,35 @@ class PlayerServiceIntegrationTest {
     }
 
     @Test
+    void getPlayerByUserToken() {
+        // given - creating a user
+        User u1_created = userService.createUser(u1);
+
+        // given - create a player from the user
+        Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
+
+        // then - fetch player
+        Player player_fetched = playerService.getPlayerByUserToken(u1_created.getToken());
+
+        // assert player is there
+        assertNotNull(player_fetched.getToken());
+        assertNotNull(player_fetched.getId());
+        assertEquals(player_fetched.getUserToken(), u1_created.getToken());
+        assertEquals(player_fetched.getPlayerColor(), PlayerColor.NOTSET);
+        assertEquals(player_fetched.getPlayerName(), u1_created.getUsername());
+        assertNull(player_fetched.getGameId());
+        assertFalse(player_fetched.getIsHost());
+    }
+
+    @Test
+    void getPlayerByUserToken_nullIfNotFound() {
+        // given empty playerRepository
+        // then - fetching a player from a userToken
+        Player player_searched = playerService.getPlayerByUserToken("userThatDoesNotExist");
+        assertNull(player_searched);
+    }
+
+    @Test
     void createPlayerFromUserToken() {
         // given - creating a user
         User u1_created = userService.createUser(u1);
@@ -231,7 +260,6 @@ class PlayerServiceIntegrationTest {
         assertEquals(player_created.getToken(), second_player_created.getToken());
         assertEquals(player_created.getUserToken(), second_player_created.getUserToken());
     }
-
 
     @Test
     void createPlayerFromUserToken_noUserThrows() {
