@@ -1,17 +1,15 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
+import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
-import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
-import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs23.game.service.*;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
@@ -31,10 +29,10 @@ public class WebSocketController {
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
     public WebSocketController(
-        WebSocketService webSocketService,
-        GameService gameService,
-        UserService userService,
-        IQuestionService questionService
+      WebSocketService webSocketService,
+      GameService gameService,
+      UserService userService,
+      IQuestionService questionService
     ) {
         this.webSocketService = webSocketService;
         this.gameService = gameService;
@@ -42,15 +40,6 @@ public class WebSocketController {
         this.questionService = questionService;
     }
 
-
-//    // receive a message in the backend
-//    @MessageMapping("/users")
-//    public void receiveMessage(DummyIncomingDTO dummyIncomingDTO) {
-//        System.out.println("Received dummyIncomingDTO");
-//        log.info("Received dummyIncomingDTO");
-//        System.out.println("Dummy message: " + dummyIncomingDTO.getMessage());
-//        log.info("Dummy message: " + dummyIncomingDTO.getMessage());
-//    }
 
     // viewing a single user
     @MessageMapping("/users/{userId}")
@@ -60,12 +49,21 @@ public class WebSocketController {
     }
 
     /**
-     * Send all games to all people in /games
+     * Send all games to all subscribers in /games
      */
     @MessageMapping("/games/getAllGames")
     public void getAllGames() {
         log.info("Sending getAllGames message");
         gameService.greetGames();
+    }
+
+    /**
+     * Send the game at gameId to all subscribers in /games/gameId
+     */
+    @MessageMapping("/games/{gameId}/getGame")
+    public void getGame(@DestinationVariable long gameId) {
+        log.info("Sending getGame message to game {}", gameId);
+        gameService.updateGame((long) gameId);
     }
 
     /**
@@ -112,17 +110,18 @@ public class WebSocketController {
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
             webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
-        } else {
-            Turn nextTurn = gameService.getGameById(gameId).getTurn();
-            log.info("Created Turn {}", nextTurn.getTurnNumber());
-
-            TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
-
-            String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
-
-            // send the new Turn to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
+            return;
         }
+
+        Turn nextTurn = gameService.getGameById(gameId).getTurn();
+        log.info("Created Turn {}", nextTurn.getTurnNumber());
+
+        TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
+
+        String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
+
+        // send the new Turn to all subscribers
+        webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
     }
 
 
@@ -134,11 +133,23 @@ public class WebSocketController {
      */
     @MessageMapping("/games/{gameId}/turn/{turnNumber}/player/{playerId}/saveAnswer")
     public void saveAnswer(
-            @DestinationVariable long gameId,
-            @DestinationVariable int turnNumber,
-            @DestinationVariable long playerId,
-            Answer answer
+      @DestinationVariable long gameId,
+      @DestinationVariable int turnNumber,
+      @DestinationVariable long playerId,
+      Answer answer
     ) {
+
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            return;
+        }
+
         log.info("Update Game {} Turn {} with rank answer from Player {}", gameId, turnNumber, playerId);
         Turn updatedTurn = gameService.processAnswer(answer, playerId, turnNumber, gameId);
         TurnOutgoingDTO updatedTurnDTO = new TurnOutgoingDTO(updatedTurn);
@@ -163,6 +174,17 @@ public class WebSocketController {
       @DestinationVariable long playerId,
       BarrierAnswer barrierAnswer
     ) {
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            return;
+        }
+
         log.info("Update Game {} with barrier answer from Player {}", gameId, playerId);
         Game gameUpdated = gameService.processBarrierAnswer(barrierAnswer, playerId, gameId);
         gameService.updateGame(gameId);
@@ -174,9 +196,20 @@ public class WebSocketController {
      */
     @MessageMapping("/games/{gameId}/turn/{turnNumber}/endTurn")
     public void endTurn(
-            @DestinationVariable long gameId,
-            @DestinationVariable int turnNumber
+      @DestinationVariable long gameId,
+      @DestinationVariable int turnNumber
     ) {
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            return;
+        }
+
         log.info("Game {} end current Turn", gameId);
         Leaderboard turnResults = gameService.endTurn(gameId, turnNumber);
         // Make a DTO
@@ -200,6 +233,17 @@ public class WebSocketController {
       @DestinationVariable long gameId,
       @DestinationVariable long playerId
     ) {
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            return;
+        }
+
         log.info("Game {} move players", gameId);
         // Ask the game service to move playerId in gameId by one field
         boolean barrierHit = gameService.movePlayerByOne(gameId, playerId);
