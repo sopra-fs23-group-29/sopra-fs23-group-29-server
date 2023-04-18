@@ -65,6 +65,22 @@ public class GameController {
         // if the token does not apply to a valid user, throw UNAUTHORIZED
         userService.checkToken(auth_token, null);
 
+        // If that user is assigned to a player who is currently in a game, throw CONFLICT
+        // A user cannot have multiple players that are in games
+        // In theory, there should not be a player without a gameId
+        Player playerToJoin = playerService.getPlayerByUserToken(auth_token);
+        if (playerToJoin != null) {
+            // given the player to the auth_token exists, if he has a gameId, then throw an error
+            if (playerToJoin.getGameId() != null) {
+                log.error("userToken {} with Player {} is already in game {}, cannot create a new game",
+                    auth_token, playerToJoin.getId(), playerToJoin.getGameId());
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot crate game, user is in a game already, leave game first");
+            } else {
+                log.warn("userToken {} with Player {} has a player without gameId!",
+                    auth_token, playerToJoin.getId());
+            }
+        }
+
         log.info("Game {}: create game ...", gamePostDTO.getGameName());
 
         // GameService creates the game and writes to the gameRepository
@@ -92,7 +108,7 @@ public class GameController {
     @PostMapping("/games/{gameId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public PlayerGetDTO createPlayer(
+    public PlayerGetDTO joinGame(
         @PathVariable int gameId,
         HttpServletRequest request
         ) throws ResponseStatusException {
@@ -116,6 +132,22 @@ public class GameController {
         // Get the user from the auth_token
         // HTTPError is thrown if userToken is not an existing user
         User userJoining = userService.getUserByToken(auth_token);
+
+        // If that user is assigned to a player who is currently in a game, throw CONFLICT
+        // A user cannot have multiple players that are in games
+        // In theory, there should not be a player without a gameId
+        Player playerToJoin = playerService.getPlayerByUserToken(auth_token);
+        if (playerToJoin != null) {
+            // given the player to the auth_token exists, if he has a gameId, then throw an error
+            if (playerToJoin.getGameId() != null) {
+                log.error("userToken {} with Player {} is already in game {}, cannot create a new game",
+                    auth_token, playerToJoin.getId(), playerToJoin.getGameId());
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot crate game, user is in a game already, leave game first");
+            } else {
+                log.warn("userToken {} with Player {} has a player without gameId!",
+                    auth_token, playerToJoin.getId());
+            }
+        }
 
         log.info("Game {}: User {} joining", gameId, userJoining.getUsername());
 
@@ -170,10 +202,23 @@ public class GameController {
         Game gameToLeave = gameService.getGameById((long) gameId);
 
         // Get the player from the auth_token
-        // NOT_FOUND if does not exist
+        // playerLeaving is null if there is no player from the auth_token
+        // in that case, throw NOT_FOUND because the player that wants to leave does not exist
         Player playerLeaving = playerService.getPlayerByUserToken(auth_token);
+        if (playerLeaving == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "User %s leaving does not have a Player entry".formatted(userLeaving.getUsername()));
+        }
 
-        log.info("Game {}: User {} leaving", gameId, userLeaving.getUsername());
+        // If the playerLeaving exists, is he currently in the gameId provided, otherwise throw BAD_REQUEST
+        if (playerLeaving.getGameId() != gameId) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "User %s leaving is currently in game %s, cannot leave game %s".formatted(
+                    userLeaving.getUsername(), playerLeaving.getGameId(), gameId
+                ));
+        }
+
+        log.info("Game {}: User {} Player {} leaving", gameId, userLeaving.getUsername(), playerLeaving.getId());
 
         // If the user was the host and if the game is INLOBBY, delete the game, this deletes all players
         if (playerLeaving.getIsHost() && gameToLeave.getGameStatus().equals(GameStatus.INLOBBY)) {

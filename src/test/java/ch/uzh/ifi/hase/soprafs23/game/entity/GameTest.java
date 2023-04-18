@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -40,7 +42,7 @@ class GameTest {
     @Autowired
     private GameService gameService;
 
-    private Long gameId;
+    private Long gameId, gameIdSingle;
     private String userToken;
 
     @BeforeEach
@@ -51,6 +53,7 @@ class GameTest {
         userRepository.deleteAll();
 
         gameId = gameService.createNewGame("g1", GameMode.PVP);
+        gameIdSingle = gameService.createNewGame("g2", GameMode.HOWFAST);
 
         // create a player from dummy user
         User u1;
@@ -81,6 +84,55 @@ class GameTest {
     }
 
     @Test
+    void notOverUponCreation() {
+        // given the game without any players
+        // assert game is not over
+        Game g1 = gameService.getGameById(gameId);
+        assertFalse(g1.gameOver());
+    }
+
+    @Test
+    void overWhenWinningCondition() {
+        // given the game without any players
+        Game g1 = gameService.getGameById(gameId);
+        // set boardsize = 0
+        g1.setBoardSize(0);
+        // assert not over, because GameStatus.INLOBBY
+        assertFalse(g1.gameOver());
+
+        // set gameStatus INPROGRESS and endGame()
+        g1.setGameStatus(GameStatus.INPROGRESS);
+        g1.endGame();
+        // assert game over
+        assertTrue(g1.gameOver());
+    }
+
+    @Test
+    void endGame() {
+        // given the game without any players
+        Game g1 = gameService.getGameById(gameId);
+        // assert that endGame throws RuntimeExecption if gameStatus INLOBBY
+        assertThrows(AssertionError.class, () -> g1.endGame());
+
+        // set gameState to INPROGRESS
+        g1.setGameStatus(GameStatus.INPROGRESS);
+        g1.endGame();
+
+        // assert not joinable no more
+        assertFalse(g1.getJoinable());
+    }
+
+    @Test
+    void singleNeverJoinable() {
+        // given the game without any players
+        // assert players is an empty list
+        Game g2_single = gameService.getGameById(gameIdSingle);
+
+        // assert not joinable
+        assertFalse(g2_single.getJoinable());
+    }
+
+    @Test
     void initGame() {
         // given - add player to game
         Game g1 = gameService.getGameById(gameId);
@@ -97,6 +149,9 @@ class GameTest {
 
         // assert not joinable
         assertFalse(g1.getJoinable());
+
+        // assert not over
+        assertFalse(g1.gameOver());
     }
 
 }

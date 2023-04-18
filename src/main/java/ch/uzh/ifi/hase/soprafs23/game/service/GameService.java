@@ -114,11 +114,18 @@ public class GameService {
   public void startNextTurn(Long gameId) {
     Game gameNextTurn = GameRepository.findByGameId(gameId);
 
-    // todo: Catch changing players?
-
     // Throw error if the game is not INPROGRESS
     if (!gameNextTurn.getGameStatus().equals(GameStatus.INPROGRESS)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game %s is not INPROGRESS and cannot start a next turn".formatted(gameId));
+    }
+
+    // Check if game has reached winning conditions
+    // If yes, go to endGame step
+    boolean gameOver = gameNextTurn.gameOver();
+    if (gameOver) {
+      log.info("Game {} is over, ending ...", gameId);
+      gameNextTurn.endGame();
+      return;
     }
 
     // Update Players, drop not existing Players from Leaderboard

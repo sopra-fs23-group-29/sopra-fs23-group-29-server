@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.game.service.*;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.DummyIncomingDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
 import com.google.gson.Gson;
@@ -85,7 +86,7 @@ public class WebSocketController {
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
         // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
         // also send to /games to remove games not joinable anymore
         gameService.greetGames();
     }
@@ -94,22 +95,34 @@ public class WebSocketController {
     /**
      * Start a new turn in a game
      * The game must be in progress already, otherwise throw BAD_REQUEST
-     * Returns a Turn object for the client to work with
+     * Sends a message containing the next turn
+     * If the game has reached the winning condition, a message to /games/gameId is issued with the updated game
+     * - GameStatus.FINISHED
      */
     @MessageMapping("/games/{gameId}/nextTurn")
     public void nextTurn(@DestinationVariable long gameId) {
         log.info("Game {} next turn", gameId);
         gameService.startNextTurn(gameId);
-        Turn nextTurn = gameService.getGameById(gameId).getTurn();
-        log.info("Created Turn {}", nextTurn.getTurnNumber());
 
-        TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+        } else {
+            Turn nextTurn = gameService.getGameById(gameId).getTurn();
+            log.info("Created Turn {}", nextTurn.getTurnNumber());
 
-        String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
+            TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
 
-        // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/games/" + gameId, nextTurnDTOasString);
+            String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
+            // send the new Turn to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
+        }
     }
 
 
@@ -133,7 +146,7 @@ public class WebSocketController {
         String turnOutgoingDTOasString = new Gson().toJson(updatedTurnDTO);
 
         // send the updated Turn to all subscribers
-        webSocketService.sendMessageToClients("/games/" + gameId, turnOutgoingDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId, turnOutgoingDTOasString);
 
     }
 
@@ -172,7 +185,7 @@ public class WebSocketController {
         String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
 
         // send the updated Leaderboard to all subscribers
-        webSocketService.sendMessageToClients("/games/" + gameId, leaderboardDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId, leaderboardDTOasString);
 
     }
 
@@ -197,7 +210,7 @@ public class WebSocketController {
             gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
             String barrierQuestionAsString = new Gson().toJson(barrierQuestion);
             // send the barrierQuestion
-            webSocketService.sendMessageToClients("/games/" + gameId, barrierQuestionAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId, barrierQuestionAsString);
 
         } else {
             // If no barrier is hit, just send the updated game
