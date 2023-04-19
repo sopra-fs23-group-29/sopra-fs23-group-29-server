@@ -3,21 +3,20 @@ package ch.uzh.ifi.hase.soprafs23.game.questions.restCountry;
 import ch.uzh.ifi.hase.soprafs23.constant.BarrierQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.constant.QuestionType;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
-
-import java.util.List;
 
 public class BarrierQuestion {
 
     private final QuestionType questionType;
+    private final BarrierQuestionEnum barrierQuestionEnum;
+    private final String questionText;
     private final Country country;
     private int correctResult;
-    private final BarrierQuestionEnum barrierQuestionEnum;
 
     public BarrierQuestion(BarrierQuestionEnum barrierQuestionEnum, Country country) {
         this.questionType = QuestionType.BARRIER;
         this.country = country;
         this.barrierQuestionEnum = barrierQuestionEnum;
+        this.questionText = this.barrierQuestionEnum.getQuestion();
         setCorrectResult();
     }
 
@@ -29,10 +28,6 @@ public class BarrierQuestion {
      */
     public boolean evaluateGuess(int guess) {
         return correctResult == guess;
-    }
-
-    public String getQuestionText() {
-        return barrierQuestionEnum.getQuestion();
     }
     public Country getCountry() {
         return country;
