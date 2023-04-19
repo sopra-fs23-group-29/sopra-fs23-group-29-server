@@ -57,6 +57,10 @@
 ### Week 16
 
 - Dominik
+
   - Server 50, 51, 52 (Game leaving, game deletion when in lobby)
+
+- Thalia
+  - Client 38, 40, 41, 45, 47, 48, 96
 
 ### Week 17
