@@ -1,5 +1,4 @@
 package ch.uzh.ifi.hase.soprafs23.game.questions.restCountry;
-import java.util.ArrayList;
 import java.util.List;
 
 import ch.uzh.ifi.hase.soprafs23.constant.QuestionType;
@@ -9,13 +8,15 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 
 public class RankingQuestion {
     private final QuestionType questionType;
-    private final List<Country> countryList;
     private final RankingQuestionEnum rankQuestionCategory;
+    private final String questionText;
+    private final List<Country> countryList;
 
     public RankingQuestion(RankingQuestionEnum rankingQuestionEnum, List<Country> countryList) {
         this.questionType = QuestionType.RANK;
         this.countryList = countryList;
         this.rankQuestionCategory = rankingQuestionEnum;
+        this.questionText = this.rankQuestionCategory.getQuestion();
         sortCountryList();
     }
 
@@ -50,9 +51,6 @@ public class RankingQuestion {
         }
     }
 
-    public String getQuestionText() {
-        return this.rankQuestionCategory.getQuestion();
-    }
     public List<Country> getCountries() {
         return this.countryList;
     }

@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,9 +39,13 @@ class BarrierQuestionTest {
   private final BarrierQuestionEnum dummyBarrierCategory = BarrierQuestionEnum.NBORDERS;
 
   class DummyQuestionService implements IQuestionService {
-    public BarrierQuestion generateBarrierQuestion() {// always return rankingQuestion of size 3 with same countryCodes
+    public BarrierQuestion generateBarrierQuestion() {// always return barrierQuestion with the same 5 countries
       Country dummyCountry = countryService.getCountryData("SUI");
-      return new BarrierQuestion(dummyBarrierCategory, dummyCountry);
+      Country dummyCountry2 = countryService.getCountryData("GER");
+      Country dummyCountry3 = countryService.getCountryData("USA");
+      Country dummyCountry4 = countryService.getCountryData("CAN");
+      Country dummyCountry5 = countryService.getCountryData("FRA");
+      return new BarrierQuestion(dummyBarrierCategory, dummyCountry, Arrays.asList(dummyCountry, dummyCountry2, dummyCountry3, dummyCountry4, dummyCountry5));
     }
     @Override
     public RankingQuestion generateRankQuestion(int size) {

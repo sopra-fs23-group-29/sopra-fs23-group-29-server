@@ -6,7 +6,7 @@ public enum BarrierQuestionEnum {
 
   // todo: More categories need corresponding methods in Country!!
 
-  NBORDERS("How many neighbouring countries?");
+  NBORDERS("How many neighbouring countries does this country have?");
 
   private final String question;
 

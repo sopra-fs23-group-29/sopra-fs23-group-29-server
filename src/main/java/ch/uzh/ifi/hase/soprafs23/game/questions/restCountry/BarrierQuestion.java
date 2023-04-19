@@ -3,22 +3,28 @@ package ch.uzh.ifi.hase.soprafs23.game.questions.restCountry;
 import ch.uzh.ifi.hase.soprafs23.constant.BarrierQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.constant.QuestionType;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 
 import java.util.List;
 
 public class BarrierQuestion {
 
-    private final QuestionType questionType;
-    private final Country country;
-    private int correctResult;
-    private final BarrierQuestionEnum barrierQuestionEnum;
+    public static final int NOPTIONS = 5; // always give 5 DIFFERENT options, one of the the correct one
 
-    public BarrierQuestion(BarrierQuestionEnum barrierQuestionEnum, Country country) {
+    private final QuestionType questionType;
+    private final BarrierQuestionEnum barrierQuestionEnum;
+    private final String questionText;
+    private final Country country;
+    private List<Integer> answerOptions;
+    private List<Country> countryOptions;
+    private int correctResult;
+
+    public BarrierQuestion(BarrierQuestionEnum barrierQuestionEnum, Country country, List<Country> countryOptions) {
         this.questionType = QuestionType.BARRIER;
         this.country = country;
+        this.countryOptions = countryOptions;
         this.barrierQuestionEnum = barrierQuestionEnum;
-        setCorrectResult();
+        this.questionText = this.barrierQuestionEnum.getQuestion();
+        setCorrectResultAndOptions();
     }
 
     // The Guessed Rank is given like 1,2,3... with 1 being the largest value, the country should be given in the cioc code
@@ -30,20 +36,15 @@ public class BarrierQuestion {
     public boolean evaluateGuess(int guess) {
         return correctResult == guess;
     }
-
-    public String getQuestionText() {
-        return barrierQuestionEnum.getQuestion();
-    }
     public Country getCountry() {
         return country;
     }
 
-    private void setCorrectResult() {
+    private void setCorrectResultAndOptions() {
         switch (this.barrierQuestionEnum) {
-            case NBORDERS -> correctResult = country.getNBorders();
+            case NBORDERS:
+                correctResult = country.getNBorders();
+                answerOptions = countryOptions.stream().map(Country::getNBorders).toList();
         }
     }
-
-
-
 }

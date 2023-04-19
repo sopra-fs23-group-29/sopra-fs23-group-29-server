@@ -65,7 +65,7 @@ public class QuestionServiceRestcountries implements IQuestionService {
 
           Country tempCountry = countryService.getCountryData(ciocCode);
 
-          if (tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
+          if (tempCountry == null || tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
             continue;
           }
 
@@ -97,17 +97,21 @@ public class QuestionServiceRestcountries implements IQuestionService {
   public BarrierQuestion generateBarrierQuestion() {
 
     Country countryChosen;
+    // List to hold all countries the answers are chosen from, including the correct one
+    List<Country> listOptions = new ArrayList<>();
 
     // Generate random barrierCategory
     BarrierQuestionEnum randomBarrierQuestionEnum = BarrierQuestionEnum.getRandom();
 
+
+    // first find the chosen country with the correct answer
     while (true) {
       int index = (int) (Math.random() * CIOC_CODES.length);
       String ciocCode = CIOC_CODES[index];
 
       Country tempCountry = countryService.getCountryData(ciocCode);
 
-      if (tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
+      if (tempCountry == null || tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
         continue;
       }
 
@@ -117,10 +121,37 @@ public class QuestionServiceRestcountries implements IQuestionService {
       }
 
       countryChosen = tempCountry;
+      listOptions.add(countryChosen);
       break;
     }
 
-    return new BarrierQuestion(randomBarrierQuestionEnum, countryChosen);
+    // then, find the other options, which have to come from countries different then country with the answer option different from the correct one
+
+    for (int i = 0; i < BarrierQuestion.NOPTIONS-1; i++) {
+      while (true) {
+        int index = (int) (Math.random() * CIOC_CODES.length);
+        String ciocCode = CIOC_CODES[index];
+
+        if (ciocCode.equals(countryChosen.getCioc())){continue;}
+
+        Country tempCountry = countryService.getCountryData(ciocCode);
+
+        if (tempCountry == null || tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
+          continue;
+        }
+
+        switch(randomBarrierQuestionEnum) {
+          case NBORDERS:
+            // don't keep the country if the answer would be the same as the correct one
+            if (tempCountry.getNBorders() == null || tempCountry.getNBorders() == countryChosen.getNBorders()) {continue;}
+        }
+
+        listOptions.add(tempCountry);
+        break;
+      }
+    }
+
+    return new BarrierQuestion(randomBarrierQuestionEnum, countryChosen, listOptions);
 
   }
 
