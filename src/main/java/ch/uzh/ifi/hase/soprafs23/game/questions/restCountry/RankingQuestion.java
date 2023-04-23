@@ -10,6 +10,7 @@ public class RankingQuestion {
     private final QuestionType questionType;
     private final RankingQuestionEnum rankQuestionCategory;
     private final String questionText;
+    private final String questionTextShort;
     private final List<Country> countryList;
 
     public RankingQuestion(RankingQuestionEnum rankingQuestionEnum, List<Country> countryList) {
@@ -17,6 +18,7 @@ public class RankingQuestion {
         this.countryList = countryList;
         this.rankQuestionCategory = rankingQuestionEnum;
         this.questionText = this.rankQuestionCategory.getQuestion();
+        this.questionTextShort = this.rankQuestionCategory.getQuestionShort();
         sortCountryList();
     }
 
