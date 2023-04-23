@@ -21,7 +21,7 @@ public class Turn {
     this.takenGuesses = new ArrayList<>();
     // upon creation, create an empty leaderboard with the players from turnPlayers
     this.turnResult = new Leaderboard();
-    this.turnPlayers.forEach((p) -> this.turnResult.putNewPlayer(p.getId(), p.getPlayerName()));
+    this.turnPlayers.forEach((p) -> this.turnResult.putNewPlayer(p.getId(), p.getPlayerName(), p.getPlayerColor()));
   }
 
   public int getTurnNumber() {
