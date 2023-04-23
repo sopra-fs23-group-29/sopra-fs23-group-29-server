@@ -325,8 +325,8 @@ public class Game {
     updatePlayers();
 
     // populate leaderboard and barrierLeaderboard
-    players.forEach((p) -> leaderboard.putNewPlayer(p.getId(), p.getPlayerName()));
-    players.forEach((p) -> barrierLeaderboard.putNewPlayer(p.getId(), p.getPlayerName()));
+    players.forEach((p) -> leaderboard.putNewPlayer(p.getId(), p.getPlayerName(), p.getPlayerColor()));
+    players.forEach((p) -> barrierLeaderboard.putNewPlayer(p.getId(), p.getPlayerName(), p.getPlayerColor()));
   }
 
   /**
