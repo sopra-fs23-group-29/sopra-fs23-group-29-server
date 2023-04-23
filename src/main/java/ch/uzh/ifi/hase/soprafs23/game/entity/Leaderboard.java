@@ -52,13 +52,13 @@ public class Leaderboard {
    * Put a new player into the leaderboard with a value of 0
    * Throws exception if the playerId already exists in the leaderboard
    */
-  public void putNewPlayer(Long newPlayerId) throws IllegalArgumentException {
+  public void putNewPlayer(Long newPlayerId, String playerUsername) throws IllegalArgumentException {
     for (LeaderboardEntry entry : entries) {
       if (entry.getPlayerId().equals(newPlayerId)) {
         throw new IllegalArgumentException("Player ID %s already exists".formatted(newPlayerId));
       }
     }
-    LeaderboardEntry newEntry = new LeaderboardEntry(newPlayerId, 0);
+    LeaderboardEntry newEntry = new LeaderboardEntry(newPlayerId, 0, playerUsername);
     entries.add(newEntry);
   }
 
@@ -92,7 +92,7 @@ public class Leaderboard {
    *
    * @param playerId ID of the player in the leaderboard to update
    */
-  public void replaceEntry(Long playerId, int replaceScore) throws IllegalArgumentException {
+  public void replaceEntry(Long playerId, int replaceScore, String guessCountyCode, int guess) throws IllegalArgumentException {
     boolean playerFound = false;
     int i = 0;
     for (LeaderboardEntry entry : entries) {
@@ -108,6 +108,8 @@ public class Leaderboard {
 
     // Fetch the leaderboard entry and add the score
     entries.get(i).replaceScore(replaceScore);
+    entries.get(i).setGuessCountryCode(guessCountyCode);
+    entries.get(i).setGuess(guess);
   }
 
   /**

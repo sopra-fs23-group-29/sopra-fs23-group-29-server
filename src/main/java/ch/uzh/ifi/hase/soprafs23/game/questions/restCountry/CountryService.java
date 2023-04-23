@@ -44,6 +44,7 @@ public class CountryService {
                 // Catch JsonProcessingException, return null if it fails
                 try {
                     Country country = objectMapper.readValue(jsonData, Country.class);
+                    country.refreshDataFromNestedObjects();
                     return country;
                 } catch (JsonProcessingException e) {
                     log.warn("jsonDat from COICode {} could not be parsed, return null", COICode);

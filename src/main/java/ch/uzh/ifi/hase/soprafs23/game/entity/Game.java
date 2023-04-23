@@ -325,8 +325,8 @@ public class Game {
     updatePlayers();
 
     // populate leaderboard and barrierLeaderboard
-    players.forEach((p) -> leaderboard.putNewPlayer(p.getId()));
-    players.forEach((p) -> barrierLeaderboard.putNewPlayer(p.getId()));
+    players.forEach((p) -> leaderboard.putNewPlayer(p.getId(), p.getPlayerName()));
+    players.forEach((p) -> barrierLeaderboard.putNewPlayer(p.getId(), p.getPlayerName()));
   }
 
   /**
@@ -406,7 +406,7 @@ public class Game {
       // evaluate the guess
       int playerScoreAdd = turn.evaluateGuess(g.guessCountryCode(), g.guess());
       // update the turnResult
-      turn.getTurnResult().replaceEntry(g.guessPlayerId(), playerScoreAdd);
+      turn.getTurnResult().replaceEntry(g.guessPlayerId(), playerScoreAdd, g.guessCountryCode(), g.guess());
     }
   }
 

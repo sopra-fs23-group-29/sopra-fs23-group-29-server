@@ -7,10 +7,14 @@ public class LeaderboardEntry {
 
   private final Long playerId;
   private int currentScore;
+  private String playerUsername;
+  private String guessCountryCode;
+  private int guess;
 
-  public LeaderboardEntry(Long playerId, int currentScore) {
+  public LeaderboardEntry(Long playerId, int currentScore, String playerUsername) {
     this.playerId = playerId;
     this.currentScore = currentScore;
+    this.playerUsername = playerUsername;
   }
 
   public Long getPlayerId() {
@@ -19,9 +23,16 @@ public class LeaderboardEntry {
   public int getCurrentScore() {
     return currentScore;
   }
+
+
+
   public void addScore(int scoreToAdd) {
     this.currentScore+=scoreToAdd;
   }
   public void replaceScore(int scoreToReplace){this.currentScore=scoreToReplace;}
+
+  public void setGuessCountryCode(String guessCountryCode) {this.guessCountryCode = guessCountryCode;}
+
+  public void setGuess(int guess) {this.guess = guess;}
 
 }

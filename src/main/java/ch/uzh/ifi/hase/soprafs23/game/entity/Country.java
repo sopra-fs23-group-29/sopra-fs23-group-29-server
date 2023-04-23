@@ -29,6 +29,11 @@ public class Country {
     @JsonProperty("borders")
     private List<String> bordersList;
 
+    private Double gini;
+    private String giniYear;
+    private Double capitalLatitude;
+    private String flagUrl;
+
 
     public String getName() {
         if (nameMap == null) {return null;}
@@ -79,7 +84,13 @@ public class Country {
         if (bordersList == null) {return null;}
         return bordersList.size();
     }
-    
+
+    public void refreshDataFromNestedObjects() {
+        this.gini = getGini();
+        this.giniYear = getGiniYear();
+        this.capitalLatitude = getCapitalLatitude();
+        this.flagUrl = getFlagUrl();
+    }
     
 }
 

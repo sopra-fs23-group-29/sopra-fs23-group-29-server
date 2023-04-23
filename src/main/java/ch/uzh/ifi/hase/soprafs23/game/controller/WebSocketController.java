@@ -212,8 +212,9 @@ public class WebSocketController {
 
         log.info("Game {} end current Turn", gameId);
         Leaderboard turnResults = gameService.endTurn(gameId, turnNumber);
+        Turn currentTurn = gameService.getGameById(gameId).getTurn();
         // Make a DTO
-        LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults);
+        LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults, currentTurn);
 
         String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
 
