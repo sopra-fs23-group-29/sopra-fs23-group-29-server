@@ -56,4 +56,17 @@ public class Turn {
     takenGuesses.add(new Guess(player.getId(), player.getPlayerColor(), countryCode, guess));
   }
 
+  /**
+   * Determine if all players in turnPlayers have taken a guess.
+   * Compare takenGuesses and turnPlayers, check if every player has made one guess
+   * @return True if all players of the turn have saved a guess, false otherwise
+   */
+  public boolean allPlayersGuessed() {
+    // the player IDs of all taken guesses
+    List<Long> takenGuessesPlayerId = getTurnPlayersDoneID();
+    // the player IDs of all turn players
+    List<Long> turnPlayersPlayerId = getTurnPlayersID();
+    return takenGuessesPlayerId.containsAll(turnPlayersPlayerId);
+  }
+
 }

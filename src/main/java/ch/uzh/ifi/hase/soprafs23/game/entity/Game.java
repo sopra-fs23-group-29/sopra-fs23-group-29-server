@@ -344,8 +344,9 @@ public class Game {
     // create ordered list of players, determining who's first
     List<Player> turnOrder = createTurnOrder();
 
-    // fetch a question object
-    RankingQuestion turnQuestion = questionService.generateRankQuestion(players.size());
+    // fetch a question object, depending on the number of players either 5 or 6 countries
+    int sizeRankingQuestion = players.size() >= 5 ? 6 : 5;
+    RankingQuestion turnQuestion = questionService.generateRankQuestion(sizeRankingQuestion);
 
     // New Turn object is saved to game instance
     this.turn = new Turn(turnNumber, turnOrder, turnQuestion);

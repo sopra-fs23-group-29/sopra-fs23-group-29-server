@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs23.game.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
-import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @WebAppConfiguration
 @SpringBootTest
@@ -48,6 +49,34 @@ class TurnTest {
     Turn t1 = new Turn(1, playerList, rankQuestion);
 
     System.out.println("t1");
+
+  }
+
+  @Test
+  void allPlayersGuessed() {
+    List<Player> playerList = Arrays.asList(p1,p2);
+    Turn t1 = new Turn(1, playerList, rankQuestion);
+
+    assertFalse(t1.allPlayersGuessed());
+
+    t1.saveGuess(p1, "dummyCountry1", 1);
+    t1.saveGuess(p2, "dummyCountry2", 2);
+
+    assertTrue(t1.allPlayersGuessed());
+
+  }
+
+  @Test
+  void saveGuess_duplicatedGuessIsAllowed() {
+    List<Player> playerList = Arrays.asList(p1,p2);
+    Turn t1 = new Turn(1, playerList, rankQuestion);
+
+    assertFalse(t1.allPlayersGuessed());
+
+    t1.saveGuess(p1, "dummyCountry1", 1);
+    t1.saveGuess(p1, "dummyCountry1", 1);
+
+    assertFalse(t1.allPlayersGuessed());
 
   }
 
