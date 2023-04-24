@@ -313,7 +313,7 @@ public class GameService {
     GameUpdateDTO gameUpdateDTO = new GameUpdateDTO(gameToUpdate);
 
     String gameString = new Gson().toJson(gameUpdateDTO);
-    webSocketService.sendMessageToClients("/topic/games/" + gameId, gameString);
+    webSocketService.sendMessageToClients("/topic/games/" + gameId + "/lobby", gameString);
   }
 
 }
