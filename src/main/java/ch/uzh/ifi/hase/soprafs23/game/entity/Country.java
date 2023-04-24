@@ -33,6 +33,8 @@ public class Country {
     private String giniYear;
     private Double capitalLatitude;
     private String flagUrl;
+    private String name;
+    private Double populationDensity;
 
 
     public String getName() {
@@ -90,6 +92,8 @@ public class Country {
         this.giniYear = getGiniYear();
         this.capitalLatitude = getCapitalLatitude();
         this.flagUrl = getFlagUrl();
+        this.name = getName();
+        this.populationDensity = getPopulationDensity();
     }
     
 }

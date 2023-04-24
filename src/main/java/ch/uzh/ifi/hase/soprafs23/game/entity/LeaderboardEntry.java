@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+
 /**
  * This class summarizes one entry in the leaderboard with Player - current score etc.
  */
@@ -10,11 +12,13 @@ public class LeaderboardEntry {
   private String playerUsername;
   private String guessCountryCode;
   private int guess;
+  private PlayerColor playerColor;
 
-  public LeaderboardEntry(Long playerId, int currentScore, String playerUsername) {
+  public LeaderboardEntry(Long playerId, int currentScore, String playerUsername, PlayerColor playerColor) {
     this.playerId = playerId;
     this.currentScore = currentScore;
     this.playerUsername = playerUsername;
+    this.playerColor = playerColor;
   }
 
   public Long getPlayerId() {

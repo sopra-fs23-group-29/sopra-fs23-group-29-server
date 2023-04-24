@@ -63,4 +63,12 @@
 - Thalia
   - Client 38, 40, 41, 45, 47, 48, 96
 
+- Mona
+
+  - Client 76, 53
+
+- Mark
+  - Client 49, 51
+
+
 ### Week 17
