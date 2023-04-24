@@ -83,7 +83,9 @@ public class WebSocketController {
 
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
-        // send the new Turn to all subscribers
+        // send an update to all players in the lobby to change the route
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamestart", nextTurnDTOasString);
+        // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
         // also send to /games to remove games not joinable anymore
         gameService.greetGames();
