@@ -84,7 +84,7 @@ public class WebSocketController {
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
         // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
         // also send to /games to remove games not joinable anymore
         gameService.greetGames();
     }
@@ -109,7 +109,7 @@ public class WebSocketController {
             GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
             return;
         }
 
@@ -121,7 +121,7 @@ public class WebSocketController {
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
         // send the new Turn to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId, nextTurnDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
     }
 
 
@@ -146,7 +146,7 @@ public class WebSocketController {
             GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
             return;
         }
 
@@ -157,7 +157,7 @@ public class WebSocketController {
         String turnOutgoingDTOasString = new Gson().toJson(updatedTurnDTO);
 
         // send the updated Turn to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId, turnOutgoingDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/updatedturn", turnOutgoingDTOasString);
 
     }
 
@@ -181,7 +181,7 @@ public class WebSocketController {
             GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
             return;
         }
 
@@ -206,7 +206,7 @@ public class WebSocketController {
             GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
             return;
         }
 
@@ -219,7 +219,7 @@ public class WebSocketController {
         String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
 
         // send the updated Leaderboard to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId, leaderboardDTOasString);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId +"/scoreboard", leaderboardDTOasString);
 
     }
 
@@ -241,7 +241,7 @@ public class WebSocketController {
             GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
             return;
         }
 
@@ -255,7 +255,7 @@ public class WebSocketController {
             gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
             String barrierQuestionAsString = new Gson().toJson(barrierQuestion);
             // send the barrierQuestion
-            webSocketService.sendMessageToClients("/topic/games/" + gameId, barrierQuestionAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/barrierquestion", barrierQuestionAsString);
 
         } else {
             // If no barrier is hit, just send the updated game
