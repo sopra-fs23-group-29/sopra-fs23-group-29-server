@@ -71,7 +71,7 @@ public class WebSocketController {
      * Returns a Turn object for the client to work with
      */
     @MessageMapping("/games/{gameId}/startGame")
-    public void startGame(@DestinationVariable long gameId) {
+    public void startGame(@DestinationVariable long gameId) throws InterruptedException {
         log.info("Start Game {}", gameId);
         gameService.startGame(gameId);
         log.info("Create Turn");
@@ -85,6 +85,7 @@ public class WebSocketController {
 
         // send an update to all players in the lobby to change the route
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamestart", nextTurnDTOasString);
+        Thread.sleep(5000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
         // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
         // also send to /games to remove games not joinable anymore
