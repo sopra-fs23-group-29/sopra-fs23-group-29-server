@@ -102,7 +102,7 @@ public class WebSocketController {
         log.info("Game {} next turn", gameId);
         gameService.startNextTurn(gameId);
 
-        // check if the game is over, if so, just send the game object
+        // check if the game is over, if so, just send the game object to the gameover topic
         Game gameNextTurn = gameService.getGameById(gameId);
         if (gameNextTurn.gameOver()) {
             log.info("Game {} is over", gameId);
@@ -152,13 +152,40 @@ public class WebSocketController {
 
         log.info("Update Game {} Turn {} with rank answer from Player {}", gameId, turnNumber, playerId);
         Turn updatedTurn = gameService.processAnswer(answer, playerId, turnNumber, gameId);
-        TurnOutgoingDTO updatedTurnDTO = new TurnOutgoingDTO(updatedTurn);
 
-        String turnOutgoingDTOasString = new Gson().toJson(updatedTurnDTO);
+        // check if all players have made a guess this turn
+        if (updatedTurn.allPlayersGuessed()) {
+            // if yes, send a leaderboardDTO to /topic/games/gameId/scoreboard
 
-        // send the updated Turn to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/updatedturn", turnOutgoingDTOasString);
+            // check if the game is over, if so, just send the game object to the gameover topic
+            gameNextTurn = gameService.getGameById(gameId);
+            if (gameNextTurn.gameOver()) {
+                log.info("Game {} is over", gameId);
+                GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+                String gameOverAsString = new Gson().toJson(gameOver);
+                // send the game over to all subscribers
+                webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+                return;
+            }
 
+            log.info("Game {} end current Turn", gameId);
+            Leaderboard turnResults = gameService.endTurn(gameId, turnNumber);
+            Turn currentTurn = gameService.getGameById(gameId).getTurn();
+            // Make a DTO
+            LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults, currentTurn);
+            String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
+
+            // send the updated Leaderboard to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId +"/scoreboard", leaderboardDTOasString);
+
+        } else {
+            // if no, send a turnOutgoingDTO to /topic/games/gameId/updatedturn
+            TurnOutgoingDTO updatedTurnDTO = new TurnOutgoingDTO(updatedTurn);
+            String turnOutgoingDTOasString = new Gson().toJson(updatedTurnDTO);
+
+            // send the updated Turn to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/updatedturn", turnOutgoingDTOasString);
+        }
     }
 
 
@@ -192,38 +219,6 @@ public class WebSocketController {
 
 
     /**
-     * End a turn, send the turn leaderboard, stating which player can advance how many fields
-     */
-    @MessageMapping("/games/{gameId}/turn/{turnNumber}/endTurn")
-    public void endTurn(
-      @DestinationVariable long gameId,
-      @DestinationVariable int turnNumber
-    ) {
-        // check if the game is over, if so, just send the game object
-        Game gameNextTurn = gameService.getGameById(gameId);
-        if (gameNextTurn.gameOver()) {
-            log.info("Game {} is over", gameId);
-            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
-            String gameOverAsString = new Gson().toJson(gameOver);
-            // send the game over to all subscribers
-            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
-            return;
-        }
-
-        log.info("Game {} end current Turn", gameId);
-        Leaderboard turnResults = gameService.endTurn(gameId, turnNumber);
-        Turn currentTurn = gameService.getGameById(gameId).getTurn();
-        // Make a DTO
-        LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults, currentTurn);
-
-        String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
-
-        // send the updated Leaderboard to all subscribers
-        webSocketService.sendMessageToClients("/topic/games/" + gameId +"/scoreboard", leaderboardDTOasString);
-
-    }
-
-    /**
      * Ask to move playerId in gameId by one field
      * Either hit a barrier or not
      * If a barrier is hit, the Controller send a barrierQuestionDTO
@@ -234,7 +229,7 @@ public class WebSocketController {
       @DestinationVariable long gameId,
       @DestinationVariable long playerId
     ) {
-        // check if the game is over, if so, just send the game object
+        // check if the game is over, if so, just send the game object to the gameover topic
         Game gameNextTurn = gameService.getGameById(gameId);
         if (gameNextTurn.gameOver()) {
             log.info("Game {} is over", gameId);
