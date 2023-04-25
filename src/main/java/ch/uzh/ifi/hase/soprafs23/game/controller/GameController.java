@@ -10,6 +10,7 @@ import ch.uzh.ifi.hase.soprafs23.game.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -33,15 +34,18 @@ public class GameController {
     private final GameService gameService;
     private final UserService userService;
     private final PlayerService playerService;
+    private final WebSocketService webSocketService;
 
     GameController(
         UserService userService,
         GameService gameService,
-        PlayerService playerService
+        PlayerService playerService,
+        WebSocketService webSocketService
     ) {
         this.userService = userService;
         this.playerService = playerService;
         this.gameService = gameService;
+        this.webSocketService = webSocketService;
     }
 
     @PostMapping("/games")
@@ -221,9 +225,11 @@ public class GameController {
         log.info("Game {}: User {} Player {} leaving", gameId, userLeaving.getUsername(), playerLeaving.getId());
 
         // If the user was the host and if the game is INLOBBY, delete the game, this deletes all players
+        // Send an update to everybody to gamedeleted
         if (playerLeaving.getIsHost() && gameToLeave.getGameStatus().equals(GameStatus.INLOBBY)) {
             log.info("Game {}: Host left in LOBBY, delete game", gameId);
             gameService.deleteGame((long) gameId);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamedeleted", "Game %s deleted".formatted(gameId));
         } else {
             // Otherwise, just remove that player that left
             // Tell the player repo that a player left

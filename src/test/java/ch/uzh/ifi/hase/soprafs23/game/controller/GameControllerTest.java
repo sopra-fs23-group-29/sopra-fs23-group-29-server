@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.game.rest.dto.GamePostDTO;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -52,6 +53,9 @@ class GameControllerTest {
 
     @MockBean
     private PlayerService playerService;
+
+    @MockBean
+    private WebSocketService webSocketService;
 
     @BeforeEach
     void init() {
