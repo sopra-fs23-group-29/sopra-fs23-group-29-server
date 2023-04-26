@@ -80,7 +80,7 @@
   
 ### Week 18
 - Dominik
-	- Client 77
+	- Client 77, 113
 
 ### Week 19
 
