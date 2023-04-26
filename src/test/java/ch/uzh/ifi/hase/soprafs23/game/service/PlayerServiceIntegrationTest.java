@@ -61,7 +61,7 @@ class PlayerServiceIntegrationTest {
         p1.setUserToken("userToken");
         p1.setPlayerName("playerName");
         p1.setGameId(1L);
-        p1.setPlayerColor(PlayerColor.BLUE);
+        p1.setPlayerColor(PlayerColor.INDIANRED);
 
         playerRepository.deleteAll();
         userRepository.deleteAll();

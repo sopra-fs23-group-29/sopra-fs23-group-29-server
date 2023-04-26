@@ -69,7 +69,7 @@ class GameControllerTest {
         Player p1 = new Player();
         p1.setIsHost(true);
         p1.setGameId(1L);
-        p1.setPlayerColor(PlayerColor.BLUE);
+        p1.setPlayerColor(PlayerColor.INDIANRED);
         p1.setToken("p1token");
         p1.setUserToken("dummy");
         p1.setId(1L);

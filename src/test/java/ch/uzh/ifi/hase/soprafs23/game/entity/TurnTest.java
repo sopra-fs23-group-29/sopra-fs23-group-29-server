@@ -30,14 +30,14 @@ class TurnTest {
     p1.setUserToken("p1UserToken");
     p1.setPlayerName("p1");
     p1.setGameId(1L);
-    p1.setPlayerColor(PlayerColor.BLUE);
+    p1.setPlayerColor(PlayerColor.INDIANRED);
     p2 = new Player();
     p2.setId(2L);
     p2.setToken("p2Token");
     p2.setUserToken("p2UserToken");
     p2.setPlayerName("p2");
     p2.setGameId(2L);
-    p2.setPlayerColor(PlayerColor.RED);
+    p2.setPlayerColor(PlayerColor.ORANGE);
     RankingQuestion rankQuestion = questionService.generateRankQuestion(6);
   }
 
