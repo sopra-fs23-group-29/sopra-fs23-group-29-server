@@ -88,6 +88,9 @@ public class WebSocketController {
         Thread.sleep(5000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
         // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
+        // inform the GameHeader client separately
+        log.info("Send message seperate to newturn_gameheader");
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
         // also send to /games to remove games not joinable anymore
         gameService.greetGames();
     }
@@ -125,6 +128,10 @@ public class WebSocketController {
 
         // send the new Turn to all subscribers
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
+
+        // inform the GameHeader client separately
+        log.info("Send message seperate to newturn_gameheader");
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
     }
 
 
