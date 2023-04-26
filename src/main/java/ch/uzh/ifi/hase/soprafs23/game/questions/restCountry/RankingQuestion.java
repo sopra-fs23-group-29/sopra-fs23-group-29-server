@@ -19,7 +19,6 @@ public class RankingQuestion {
         this.rankQuestionCategory = rankingQuestionEnum;
         this.questionText = this.rankQuestionCategory.getQuestion();
         this.questionTextShort = this.rankQuestionCategory.getQuestionShort();
-        sortCountryList();
     }
 
     // The Guessed Rank is given like 1,2,3... with 1 being the largest value, the country should be given in the cioc code
