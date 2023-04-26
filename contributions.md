@@ -76,4 +76,13 @@
   - Server 59, 60, 61
 
 - Mark
-  - Client 64, 67  
+  - Client 64, 67
+  
+### Week 18
+- Dominik
+	- Client 77
+
+### Week 19
+
+
+### Week 20
