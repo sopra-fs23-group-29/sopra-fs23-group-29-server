@@ -54,13 +54,13 @@ public class Leaderboard {
    * Put a new player into the leaderboard with a value of 0
    * Throws exception if the playerId already exists in the leaderboard
    */
-  public void putNewPlayer(Long newPlayerId, String playerUsername, PlayerColor playerColor) throws IllegalArgumentException {
+  public void putNewPlayer(Long newPlayerId, String playerName, PlayerColor playerColor) throws IllegalArgumentException {
     for (LeaderboardEntry entry : entries) {
       if (entry.getPlayerId().equals(newPlayerId)) {
         throw new IllegalArgumentException("Player ID %s already exists".formatted(newPlayerId));
       }
     }
-    LeaderboardEntry newEntry = new LeaderboardEntry(newPlayerId, 0, playerUsername, playerColor);
+    LeaderboardEntry newEntry = new LeaderboardEntry(newPlayerId, 0, playerName, playerColor);
     entries.add(newEntry);
   }
 

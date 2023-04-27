@@ -9,15 +9,15 @@ public class LeaderboardEntry {
 
   private final Long playerId;
   private int currentScore;
-  private String playerUsername;
+  private String playerName;
   private String guessCountryCode;
   private int guess;
   private PlayerColor playerColor;
 
-  public LeaderboardEntry(Long playerId, int currentScore, String playerUsername, PlayerColor playerColor) {
+  public LeaderboardEntry(Long playerId, int currentScore, String playerName, PlayerColor playerColor) {
     this.playerId = playerId;
     this.currentScore = currentScore;
-    this.playerUsername = playerUsername;
+    this.playerName = playerName;
     this.playerColor = playerColor;
   }
 
