@@ -314,6 +314,7 @@ public class GameService {
 
     String gameString = new Gson().toJson(gameUpdateDTO);
     webSocketService.sendMessageToClients("/topic/games/" + gameId + "/lobby", gameString);
+    // todo: game in progress should also be notified
   }
 
 }

@@ -237,6 +237,7 @@ public class GameController {
             playerService.deletePlayerById(playerLeaving.getId());
             // in this case, let the game know that one player left
             gameService.updatePlayers((long) gameId);
+            // todo: updateGame should also notify the game in progress
             gameService.updateGame((long) gameId);
         }
 
