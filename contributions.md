@@ -57,9 +57,11 @@
 ### Week 16
 
 - Dominik
+
   - Server 50, 51, 52 (Game leaving, game deletion when in lobby)
 
 - Thalia
+
   - Client 38, 40, 41, 45, 47, 48, 96
 
 - Mona
@@ -69,23 +71,26 @@
 - Mark
   - Client 49, 51
 
-
 ### Week 17
 
 - Dominik
+
   - Server 59, 60, 61
 
 - Mark
+
   - Client 64, 67
 
 - Mona
   - Client 52, 54, 56
-  
+- Thalia
+  - Client 95, 103
+
 ### Week 18
+
 - Dominik
-	- Client 77, 113
+  - Client 77, 113
 
 ### Week 19
-
 
 ### Week 20
