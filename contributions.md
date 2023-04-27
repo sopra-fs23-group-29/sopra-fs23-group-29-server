@@ -77,6 +77,9 @@
 
 - Mark
   - Client 64, 67
+
+- Mona
+  - Client 52, 54, 56
   
 ### Week 18
 - Dominik
