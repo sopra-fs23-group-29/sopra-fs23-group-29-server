@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
@@ -10,6 +11,7 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.MovePlayers;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
@@ -19,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 public class WebSocketController {
@@ -93,6 +97,37 @@ public class WebSocketController {
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
         // also send to /games to remove games not joinable anymore
         gameService.greetGames();
+    }
+
+    /**
+     * Get a message that a client is ready to remove the scoreboard and move the players
+     */
+    @MessageMapping("/games/{gameId}/readyMovePlayers")
+    public void readyMovePlayers(@DestinationVariable long gameId, MovePlayers movePlayers) throws InterruptedException {
+
+        // check if the game is over, if so, just send the game object
+        Game gameNextTurn = gameService.getGameById(gameId);
+        if (gameNextTurn.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+            return;
+        }
+
+        log.info("Received ready to move players for Game {}", gameId);
+        boolean moveOn = gameService.processMovePlayers(movePlayers, gameId);
+
+        // If the game says we are ready to move on, send a message to /scoreboardOver, same content as /scoreboard from saveAnswer
+        if (moveOn) {
+            Turn currentTurn = gameService.getGameById(gameId).getTurn();
+            Leaderboard turnResults = currentTurn.getTurnResult();
+            // Make a DTO
+            LeaderboardDTO turnResultsDTO = new LeaderboardDTO(turnResults, currentTurn);
+            String leaderboardDTOasString = new Gson().toJson(turnResultsDTO);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/scoreboardOver", leaderboardDTOasString);
+        }
     }
 
 

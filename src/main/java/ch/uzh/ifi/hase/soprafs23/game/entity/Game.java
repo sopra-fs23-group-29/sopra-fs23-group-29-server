@@ -23,9 +23,11 @@ public class Game {
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
   public static final int BARRIERPOSITION = 3; // todo: could be dynamic
-  public static final int BOARDSIZE = 48; // todo: could be dynamic
+  public static final int BOARDSIZE = 48; // todo: could be dynamic, must match Board.js
 
   private List<Player> players;
+  // Which players have agreed to hide the scoreboard and move on to moving the players? Is reset with each new turn
+  private List<Long> playerIdReadyToMove;
   private Turn turn;
   private int turnNumber;
   private PlayerService playerService;
@@ -74,20 +76,19 @@ public class Game {
 
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resovled BarrierQuestions
+    // create empty list of players ready to move
     // set currentBarrierQuestion to null
     // set joinable to true if PVP, false otherwise
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
-
+    this.playerIdReadyToMove = new ArrayList<>();
     this.joinable = gameMode.equals(GameMode.PVP);
   }
 
   // default no args constructor - needed for mapper
   public Game() {}
-
-
 
   public void setCurrentBarrierQuestion(BarrierQuestion currentBarrierQuestion) {
     this.currentBarrierQuestion = currentBarrierQuestion;
@@ -196,6 +197,39 @@ public class Game {
     players = playerService.getPlayersByGameId(this.gameId);
     // Update if joinable
     this.joinable = isJoinable();
+  }
+
+  /**
+   * Add a player to the current list of all players who are ready to move on
+   * @param playerIdToAdd Player
+   */
+  public void addPlayerIdReadyToMove(Long playerIdToAdd) {
+    this.playerIdReadyToMove.add(playerIdToAdd);
+  }
+
+  /**
+   * Check if currently all players in the game have answered to be ready to move on
+   * @return True if all Player in players are found in playerIdReadyToMove
+   */
+  public boolean readyToMovePlayers() {
+
+    // if not INPROGRESS never true
+    if (!gameStatus.equals(GameStatus.INPROGRESS)) {
+      return false;
+    }
+
+    // if this.playerIdReadyToMove is empty, never return true
+    if (this.playerIdReadyToMove.isEmpty()) {
+      return false;
+    }
+
+    updatePlayers();
+    for (Player p : this.players) {
+      if (!this.playerIdReadyToMove.contains(p.getId())) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -340,6 +374,9 @@ public class Game {
     }
 
     turnNumber++;
+
+    // reset the playerIdReadyToMove to an empty list
+    this.playerIdReadyToMove = new ArrayList<>();
 
     // create ordered list of players, determining who's first
     List<Player> turnOrder = createTurnOrder();
