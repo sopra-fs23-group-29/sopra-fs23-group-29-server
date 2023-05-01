@@ -152,6 +152,10 @@ public class UserController {
     // update the user
     User updatedUser = userService.updateUser(id, newUsername, newBirthday);
 
+    // update the flag if the provided cioc is valid
+    String newCIOC = userInput.getCioc();
+    userService.replaceFlagWithChosen(id, newCIOC);
+
     // Send a message to all WebSocket subscribers in channel /users
     userService.greetUsers();
 
@@ -188,5 +192,17 @@ public class UserController {
     userService.greetUsers();
   }
 
+  @DeleteMapping("/users/{userId}/flag")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  @ResponseBody
+  public void deleteFlag(@PathVariable("userId") Long userId,
+                         @RequestHeader(value="Authorization") String token) {
+    // check if token was provided
+    if (token == null) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+              "A token is required for deleting a user!");
+    }
 
+    userService.replaceFlagRandomly(userId);
+  }
 }

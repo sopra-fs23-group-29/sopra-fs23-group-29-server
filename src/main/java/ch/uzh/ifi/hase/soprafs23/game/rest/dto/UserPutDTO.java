@@ -5,7 +5,7 @@ public class UserPutDTO {
   private String username;
   private String birthday;
   private String password;
-
+  private String cioc;
 
 
   public String getUsername() {
@@ -23,4 +23,8 @@ public class UserPutDTO {
   public String getPassword() {return password;}
 
   public void setPassword(String password) {this.password = password;}
+
+  public String getCioc() {return cioc;}
+
+  public void setCioc(String cioc) {this.cioc = cioc;}
 }

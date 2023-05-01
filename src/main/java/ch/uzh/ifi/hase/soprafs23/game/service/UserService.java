@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.UserListDTO;
 import com.google.gson.Gson;
@@ -21,6 +23,8 @@ import java.util.UUID;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 
+import static ch.uzh.ifi.hase.soprafs23.game.service.QuestionServiceRestcountries.CIOC_CODES;
+
 /**
  * User Service
  * This class is the "worker" and responsible for all functionality related to
@@ -37,6 +41,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final WebSocketService webSocketService;
     private final UserListDTO userListDTO;
+    private final CountryService countryService = new CountryService();
 
     @Autowired
     public UserService(@Qualifier("userRepository") UserRepository userRepository, WebSocketService webSocketService) {
@@ -265,6 +270,7 @@ public class UserService {
         newUser.setStatus(UserStatus.ONLINE); // set a new user online by default
         newUser.setCreationDate(dtf.format(now));
         newUser.setBirthday(""); // set the birthday for new user to an empty string
+        newUser.setFlagURL(this.getRandomFlagURL());
 
         checkIfUserDuplicated(newUser);
         // saves the given entity but data is only persisted in the database once
@@ -354,5 +360,48 @@ public class UserService {
 
         String tmpUserListAsString = new Gson().toJson(tmpUsers);
         webSocketService.sendMessageToClients("/topic/users", tmpUserListAsString);
+    }
+
+    public void replaceFlagRandomly(Long id) {
+        // get user
+        User userToChangeFlag = this.getUserById(id);
+
+        // replace flag with a new random one
+        userToChangeFlag.setFlagURL(this.getRandomFlagURL());
+    }
+
+    public void replaceFlagWithChosen(Long id, String iocCode) {
+        // get user
+        User userToChangeFlag = this.getUserById(id);
+
+        // get new flagURl
+        Country chosenCountry = countryService.getCountryData(iocCode);
+        if (chosenCountry == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    String.format("IOC code does not correspond to a country. \nIOC code %s", iocCode));
+        }
+
+        userToChangeFlag.setFlagURL((chosenCountry.getFlagUrl()));
+    }
+
+    public String getRandomFlagURL() {
+        while (true) {
+            // get random country cioc
+            int index = (int) (Math.random() * CIOC_CODES.length);
+            String ciocCode = CIOC_CODES[index];
+
+            // get flag of that country
+            Country tempCountry = countryService.getCountryData(ciocCode);
+            if (tempCountry == null) {
+                // there seems to be a problem where sometimes tempCountry is null, not sure why
+                continue;
+            }
+            String url = tempCountry.getFlagUrl();
+
+            // check that we got a url
+            if (url != null) {
+                return url;
+            }
+        }
     }
 }
