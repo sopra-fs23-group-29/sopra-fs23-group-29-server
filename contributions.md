@@ -71,6 +71,9 @@
 - Mark
   - Client 49, 51
 
+- Nils
+  - Client 60, 98, 99
+
 ### Week 17
 
 - Dominik
@@ -85,6 +88,8 @@
   - Client 52, 54, 56
 - Thalia
   - Client 95, 103
+- Nils
+  - Client 107, 108
 
 ### Week 18
 
