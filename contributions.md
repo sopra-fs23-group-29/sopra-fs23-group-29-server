@@ -96,6 +96,9 @@
 - Dominik
   - Client 77, 113
 
+- Mark
+  - Client 5, 18, 20  
+
 ### Week 19
 
 ### Week 20
