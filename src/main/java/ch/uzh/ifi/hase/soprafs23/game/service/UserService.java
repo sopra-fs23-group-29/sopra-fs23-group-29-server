@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.UserListDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,21 +39,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final WebSocketService webSocketService;
-    private final UserListDTO userListDTO;
     private final CountryService countryService = new CountryService();
 
     @Autowired
     public UserService(@Qualifier("userRepository") UserRepository userRepository, WebSocketService webSocketService) {
         this.userRepository = userRepository;
         this.webSocketService = webSocketService;
-        this.userListDTO = new UserListDTO();
-    }
-
-    /**
-     *
-     */
-    public String getUserListAsString() {
-        return userListDTO.buildUserList(userRepository.findAll());
     }
 
     /**
