@@ -2,12 +2,10 @@ package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
 
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.game.entity.BarrierLeaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
-import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 
 import java.util.List;
 
