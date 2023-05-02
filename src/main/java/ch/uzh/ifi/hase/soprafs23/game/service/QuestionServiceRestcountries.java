@@ -118,7 +118,6 @@ public class QuestionServiceRestcountries implements IQuestionService {
         case NBORDERS:
           if (tempCountry.getNBorders() == null) {continue;}
       }
-
       countryChosen = tempCountry;
       listOptions.add(countryChosen);
       break;
@@ -145,7 +144,6 @@ public class QuestionServiceRestcountries implements IQuestionService {
             if (tempCountry.getNBorders() == null) {continue;}
             int tempCountryNBorders = tempCountry.getNBorders();
             // don't keep the country if the answer would be the same as one already chosen
-            log.info("{}", listOptions.stream().map(Country::getNBorders).toList());
             if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {
               continue;
             }

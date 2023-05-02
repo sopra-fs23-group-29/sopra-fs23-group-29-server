@@ -101,4 +101,8 @@
 
 ### Week 19
 
+- Dominik
+  - Client 117, 118, 125 (Scoreboard button "Next Round")
+  - Server 67
+
 ### Week 20
