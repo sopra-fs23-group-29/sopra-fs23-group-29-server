@@ -154,7 +154,9 @@ public class UserController {
 
     // update the flag if the provided cioc is valid
     String newCIOC = userInput.getCioc();
-    userService.replaceFlagWithChosen(id, newCIOC);
+    if (!newCIOC.equals(null)) {
+      userService.replaceFlagWithChosen(id, newCIOC);
+    }
 
     // Send a message to all WebSocket subscribers in channel /users
     userService.greetUsers();

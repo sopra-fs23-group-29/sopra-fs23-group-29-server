@@ -293,6 +293,7 @@ public class WebSocketController {
         log.info("Game {} move Player {}", gameId, playerId);
         // Ask the game service to move playerId in gameId by one field
         boolean barrierHit = gameService.movePlayerByOne(gameId, playerId);
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/barrierHit", barrierHit);
 
         // If a barrier is hit, create a new barrier question, update the game with it and send it
         if (barrierHit) {
