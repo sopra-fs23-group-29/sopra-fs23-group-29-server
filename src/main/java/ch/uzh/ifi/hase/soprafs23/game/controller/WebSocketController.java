@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.MovePlayers;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.BarrierQuestionOutgoingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.LeaderboardDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
@@ -293,9 +294,13 @@ public class WebSocketController {
         if (barrierHit) {
             BarrierQuestion barrierQuestion = questionService.generateBarrierQuestion();
             gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
-            String barrierQuestionAsString = new Gson().toJson(barrierQuestion);
-            // send the barrierQuestion
-            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/barrierquestion", barrierQuestionAsString);
+
+            // Create a new BarrierQuestionOutgoingDTO
+            BarrierQuestionOutgoingDTO barrierQuestionOutgoing = new BarrierQuestionOutgoingDTO(barrierQuestion, playerId);
+            // make string to send
+            String barrierQuestionOutgoingAsString = new Gson().toJson(barrierQuestionOutgoing);
+            // send the barrierQuestion together with the player ID answering
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/barrierquestion", barrierQuestionOutgoingAsString);
 
         } else {
             // If no barrier is hit, just send the updated game

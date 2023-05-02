@@ -103,7 +103,6 @@ public class QuestionServiceRestcountries implements IQuestionService {
     // Generate random barrierCategory
     BarrierQuestionEnum randomBarrierQuestionEnum = BarrierQuestionEnum.getRandom();
 
-
     // first find the chosen country with the correct answer
     while (true) {
       int index = (int) (Math.random() * CIOC_CODES.length);
@@ -125,7 +124,7 @@ public class QuestionServiceRestcountries implements IQuestionService {
       break;
     }
 
-    // then, find the other options, which have to come from countries different then country with the answer option different from the correct one
+    // then, find the other options, which have to come from countries different than country with the answer option different from the correct one
 
     for (int i = 0; i < BarrierQuestion.NOPTIONS-1; i++) {
       while (true) {
@@ -142,8 +141,14 @@ public class QuestionServiceRestcountries implements IQuestionService {
 
         switch(randomBarrierQuestionEnum) {
           case NBORDERS:
-            // don't keep the country if the answer would be the same as the correct one
-            if (tempCountry.getNBorders() == null || tempCountry.getNBorders() == countryChosen.getNBorders()) {continue;}
+            // continue if nBorders is null
+            if (tempCountry.getNBorders() == null) {continue;}
+            int tempCountryNBorders = tempCountry.getNBorders();
+            // don't keep the country if the answer would be the same as one already chosen
+            log.info("{}", listOptions.stream().map(Country::getNBorders).toList());
+            if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {
+              continue;
+            }
         }
 
         listOptions.add(tempCountry);
