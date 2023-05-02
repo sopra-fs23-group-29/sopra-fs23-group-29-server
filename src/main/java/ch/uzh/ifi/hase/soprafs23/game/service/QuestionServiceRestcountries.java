@@ -117,13 +117,15 @@ public class QuestionServiceRestcountries implements IQuestionService {
       switch(randomBarrierQuestionEnum) {
         case NBORDERS:
           if (tempCountry.getNBorders() == null) {continue;}
+        case LANDLOCKED:
+          if (tempCountry.getLandlocked() == null) {continue;}
       }
       countryChosen = tempCountry;
       listOptions.add(countryChosen);
       break;
     }
 
-    // then, find the other options, which have to come from countries different than country with the answer option different from the correct one
+    // then, find the other options, which have to come from countries different from the country with the answer option different from the correct one
 
     for (int i = 0; i < BarrierQuestion.NOPTIONS-1; i++) {
       while (true) {
@@ -140,13 +142,14 @@ public class QuestionServiceRestcountries implements IQuestionService {
 
         switch(randomBarrierQuestionEnum) {
           case NBORDERS:
-            // continue if nBorders is null
+            // continue if target property is null
             if (tempCountry.getNBorders() == null) {continue;}
             int tempCountryNBorders = tempCountry.getNBorders();
             // don't keep the country if the answer would be the same as one already chosen
-            if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {
-              continue;
-            }
+            if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {continue;}
+          case LANDLOCKED:
+            // LANDLOCKED is a true/false question, don't find any other options
+            break;
         }
 
         listOptions.add(tempCountry);

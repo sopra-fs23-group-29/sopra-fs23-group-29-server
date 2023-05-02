@@ -4,11 +4,12 @@ import ch.uzh.ifi.hase.soprafs23.constant.BarrierQuestionEnum;
 import ch.uzh.ifi.hase.soprafs23.constant.QuestionType;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class BarrierQuestion {
 
-    public static final int NOPTIONS = 5; // always give 5 DIFFERENT options, one of the the correct one
+    public static final int NOPTIONS = 5; // For not true/false questions, always give 5 options, one of them correct
 
     private final QuestionType questionType;
     private final BarrierQuestionEnum barrierQuestionEnum;
@@ -45,6 +46,12 @@ public class BarrierQuestion {
             case NBORDERS:
                 correctResult = country.getNBorders();
                 answerOptions = countryOptions.stream().map(Country::getNBorders).toList();
+                break;
+            case LANDLOCKED:
+                // LANDLOCKED is a true/false question, just send 1 (yes) or 0 (no)
+                correctResult = country.getLandlocked() ? 1 : 0;
+                answerOptions = Arrays.asList(0,1);
+                break;
         }
     }
 }
