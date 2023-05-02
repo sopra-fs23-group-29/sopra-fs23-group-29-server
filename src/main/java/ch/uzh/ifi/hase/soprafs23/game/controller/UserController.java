@@ -154,7 +154,7 @@ public class UserController {
 
     // update the flag if the provided cioc is valid
     String newCIOC = userInput.getCioc();
-    if (!newCIOC.equals(null)) {
+    if (newCIOC != null) {
       userService.replaceFlagWithChosen(id, newCIOC);
     }
 
