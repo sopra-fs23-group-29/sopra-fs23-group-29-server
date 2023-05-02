@@ -10,6 +10,7 @@ public class UserGetDTO {
   private UserStatus status;
   private String creationDate;
   private String birthday;
+  private String flagURL;
 
   public Long getId() {
     return id;
@@ -52,4 +53,12 @@ public class UserGetDTO {
   }
 
   public void setBirthday(String birthday) {this.birthday = birthday;}
+
+  public String getFlagURL() {
+    return this.flagURL;
+  }
+
+  public void setFlagURL(String flagURL) {
+    this.flagURL = flagURL;
+  }
 }

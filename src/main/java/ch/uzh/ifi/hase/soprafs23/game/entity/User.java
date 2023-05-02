@@ -43,6 +43,12 @@ public class User implements Serializable {
   @Column(nullable = true) // is nullable
   private String birthday;
 
+  @Column(nullable = true)
+  private String flagURL;
+
+  @Column(nullable = true)
+  private String cioc;
+
   public Long getId() {
     return id;
   }
@@ -93,6 +99,21 @@ public class User implements Serializable {
 
   public void setBirthday(String birthday) {this.birthday = birthday;}
 
+  public String getFlagURL() {
+    return flagURL;
+  }
+
+  public void setFlagURL(String flagURL) {
+    this.flagURL = flagURL;
+  }
+
+  public String getCioc() {
+    return cioc;
+  }
+
+  public void setCioc(String cioc) {
+    this.cioc = cioc;
+  }
   @Override
   public String toString() {
     return "{\"id\": \"" + id+ "\"" +
@@ -100,6 +121,7 @@ public class User implements Serializable {
             "\"status\": \"" + status + "\"" +
             "\"creation date\": \"" + creationDate + "\"" +
             "\"birthday\": \"" + birthday + "\"" +
+            "\"flagURL\": \"" + flagURL + "\"" +
             "}";
   }
 }

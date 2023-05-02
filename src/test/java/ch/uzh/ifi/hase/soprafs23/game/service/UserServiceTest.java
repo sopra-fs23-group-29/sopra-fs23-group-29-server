@@ -55,6 +55,7 @@ public class UserServiceTest {
         assertEquals(testUser.getUsername(), createdUser.getUsername());
         assertNotNull(createdUser.getToken());
         assertEquals(UserStatus.ONLINE, createdUser.getStatus());
+        assertNotNull(createdUser.getFlagURL());
     }
 
     @Test
