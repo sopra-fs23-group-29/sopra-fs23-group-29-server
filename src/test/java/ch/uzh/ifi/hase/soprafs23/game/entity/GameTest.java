@@ -71,8 +71,10 @@ class GameTest {
     void playersNull() {
         // given the game without any players
         // assert players is an empty list
+        // assert playerIdReadyToMove is an empty list
         Game g1 = gameService.getGameById(gameId);
         assertTrue(g1.getPlayersView().isEmpty());
+        assertFalse(g1.readyToMovePlayers());
     }
 
     @Test
@@ -118,8 +120,9 @@ class GameTest {
         g1.setGameStatus(GameStatus.INPROGRESS);
         g1.endGame();
 
-        // assert not joinable no more
+        // assert not joinable no more, also not ready to move
         assertFalse(g1.getJoinable());
+        assertFalse(g1.readyToMovePlayers());
     }
 
     @Test
@@ -150,8 +153,41 @@ class GameTest {
         // assert not joinable
         assertFalse(g1.getJoinable());
 
+        // assert not ready to move
+        assertFalse(g1.readyToMovePlayers());
+
         // assert not over
         assertFalse(g1.gameOver());
+    }
+
+    @Test
+    void readyToMove() {
+        // given - add player to game
+        Game g1 = gameService.getGameById(gameId);
+        playerService.joinPlayer(userToken, g1.getGameId().intValue());
+
+        // then - init the game
+        g1.initGame();
+
+        // then - start a turn
+        g1.nextTurn();
+
+        // assert that we cannot move on yet
+        assertFalse(g1.readyToMovePlayers());
+
+        // add the one player to the playerIdReadyToMove
+        Player p1 = playerService.getPlayerByUserToken(userToken);
+        g1.addPlayerIdReadyToMove(p1.getId());
+
+        // assert that we can move on now
+        assertTrue(g1.readyToMovePlayers());
+
+        // start new turn
+        g1.nextTurn();
+
+        // assert that we cannot move on yet
+        assertFalse(g1.readyToMovePlayers());
+
     }
 
 }

@@ -11,6 +11,7 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.MovePlayers;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -211,6 +212,33 @@ public class GameService {
 
     return gameToUpdate;
 
+  }
+
+  /**
+   * Given a message from the client to be ready to hide the scoreboard and move the players.
+   * Check the token, if it's a player in the game set the playersReadyToMove and check if all players have answered
+   * @param movePlayers Incoming object when agreeing to move on after the scoreboard containing a userToken
+   * @param gameId The game id the movePlayers message is for
+   * @return True if all players have answered, false otherwise
+   */
+  public boolean processMovePlayers(MovePlayers movePlayers, Long gameId) throws ResponseStatusException {
+    String userToken = movePlayers.getUserToken();
+    // Fetch player from userToken in movePlayers. Throw NOT_FOUND if the userToken does not belong to a player
+    Player playerFromToken = playerService.getPlayerByUserToken(userToken);
+    if (playerFromToken == null) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "UserToken %s is not linked to a Player".formatted(userToken));
+    }
+    // Throw UNAUTHORIZED if the userToken Player isn't part of the gameId Game
+    if (!playerFromToken.getGameId().equals(gameId)) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Player with UserToken is not part of the game");
+    }
+
+    // Fetch the game, GameRepository throws NOT_FOUND if gameId is not a game
+    Game gameToMove = GameRepository.findByGameId(gameId);
+    // Add the Player to the List of playersReadyToMove
+    gameToMove.addPlayerIdReadyToMove(playerFromToken.getId());
+    // Then ask the game to check if all players are ready to move on
+    return gameToMove.readyToMovePlayers();
   }
 
   /**
