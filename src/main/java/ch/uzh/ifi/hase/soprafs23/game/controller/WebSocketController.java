@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
+import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
@@ -31,18 +32,21 @@ public class WebSocketController {
     private final GameService gameService;
     private final UserService userService;
     private final IQuestionService questionService;
+    private final PlayerService playerService;
     Logger log = LoggerFactory.getLogger(WebSocketController.class);
 
     public WebSocketController(
       WebSocketService webSocketService,
       GameService gameService,
       UserService userService,
-      IQuestionService questionService
+      IQuestionService questionService,
+      PlayerService playerService
     ) {
         this.webSocketService = webSocketService;
         this.gameService = gameService;
         this.userService = userService;
         this.questionService = questionService;
+        this.playerService = playerService;
     }
 
 
@@ -286,7 +290,7 @@ public class WebSocketController {
             return;
         }
 
-        log.info("Game {} move players", gameId);
+        log.info("Game {} move Player {}", gameId, playerId);
         // Ask the game service to move playerId in gameId by one field
         boolean barrierHit = gameService.movePlayerByOne(gameId, playerId);
 
@@ -295,11 +299,13 @@ public class WebSocketController {
             BarrierQuestion barrierQuestion = questionService.generateBarrierQuestion();
             gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
 
+            // Fetch the player ID color, throws HTTP Error NOT_FOUND if playerId is not found in PlayerRepository
+            Player playerAnswering = playerService.getPlayerById(playerId);
             // Create a new BarrierQuestionOutgoingDTO
-            BarrierQuestionOutgoingDTO barrierQuestionOutgoing = new BarrierQuestionOutgoingDTO(barrierQuestion, playerId);
+            BarrierQuestionOutgoingDTO barrierQuestionOutgoing = new BarrierQuestionOutgoingDTO(barrierQuestion, playerAnswering);
             // make string to send
             String barrierQuestionOutgoingAsString = new Gson().toJson(barrierQuestionOutgoing);
-            // send the barrierQuestion together with the player ID answering
+            // send the barrierQuestion together with the player ID answering and his color
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/barrierquestion", barrierQuestionOutgoingAsString);
 
         } else {

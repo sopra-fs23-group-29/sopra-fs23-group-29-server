@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
 
+import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 
 /**
@@ -8,10 +10,10 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 public class BarrierQuestionOutgoingDTO {
 
     private final BarrierQuestion barrierQuestion;
-    private final Long playerIdAnswering;
+    private final Player playerAnswering;
 
-    public BarrierQuestionOutgoingDTO(BarrierQuestion barrierQuestion, Long playerIdAnswering) {
+    public BarrierQuestionOutgoingDTO(BarrierQuestion barrierQuestion, Player playerAnswering) {
         this.barrierQuestion = barrierQuestion;
-        this.playerIdAnswering = playerIdAnswering;
+        this.playerAnswering = playerAnswering;
     }
 }
