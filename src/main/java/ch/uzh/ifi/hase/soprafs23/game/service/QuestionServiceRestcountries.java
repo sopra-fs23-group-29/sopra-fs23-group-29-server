@@ -100,8 +100,10 @@ public class QuestionServiceRestcountries implements IQuestionService {
     // List to hold all countries the answers are chosen from, including the correct one
     List<Country> listOptions = new ArrayList<>();
 
-    // Generate random barrierCategory
+    // Generate random barrier category
     BarrierQuestionEnum randomBarrierQuestionEnum = BarrierQuestionEnum.getRandom();
+    // Check if the fetched random barrier category is a true/false question or not
+    boolean randomBarrierIsBoolean = randomBarrierQuestionEnum.getIsBoolean();
 
     // first find the chosen country with the correct answer
     while (true) {
@@ -125,38 +127,39 @@ public class QuestionServiceRestcountries implements IQuestionService {
       break;
     }
 
-    // then, find the other options, which have to come from countries different from the country with the answer option different from the correct one
+    // next, if we need other answer options from random countries, search for countries with different answer options
+    // if the question ist true/false, don't fetch other countries
 
-    for (int i = 0; i < BarrierQuestion.NOPTIONS-1; i++) {
-      while (true) {
-        int index = (int) (Math.random() * CIOC_CODES.length);
-        String ciocCode = CIOC_CODES[index];
+    if (!randomBarrierIsBoolean) {
+      for (int i = 0; i < BarrierQuestion.NOPTIONS-1; i++) {
+        while (true) {
+          int index = (int) (Math.random() * CIOC_CODES.length);
+          String ciocCode = CIOC_CODES[index];
 
-        if (ciocCode.equals(countryChosen.getCioc())){continue;}
+          if (ciocCode.equals(countryChosen.getCioc())){continue;}
 
-        Country tempCountry = countryService.getCountryData(ciocCode);
+          Country tempCountry = countryService.getCountryData(ciocCode);
 
-        if (tempCountry == null || tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
-          continue;
+          if (tempCountry == null || tempCountry.getCioc() == null || tempCountry.getName() == null || tempCountry.getFlagUrl() == null) {
+            continue;
+          }
+
+          switch(randomBarrierQuestionEnum) {
+            case NBORDERS:
+              // continue if target property is null
+              if (tempCountry.getNBorders() == null) {continue;}
+              int tempCountryNBorders = tempCountry.getNBorders();
+              // don't keep the country if the answer would be the same as one already chosen
+              if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {continue;}
+          }
+
+          listOptions.add(tempCountry);
+          break;
         }
-
-        switch(randomBarrierQuestionEnum) {
-          case NBORDERS:
-            // continue if target property is null
-            if (tempCountry.getNBorders() == null) {continue;}
-            int tempCountryNBorders = tempCountry.getNBorders();
-            // don't keep the country if the answer would be the same as one already chosen
-            if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {continue;}
-          case LANDLOCKED:
-            // LANDLOCKED is a true/false question, don't find any other options
-            break;
-        }
-
-        listOptions.add(tempCountry);
-        break;
       }
     }
 
+    // finally, create the barrier question and return it
     return new BarrierQuestion(randomBarrierQuestionEnum, countryChosen, listOptions);
 
   }

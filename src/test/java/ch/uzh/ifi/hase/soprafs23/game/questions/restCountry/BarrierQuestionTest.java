@@ -92,16 +92,16 @@ class BarrierQuestionTest {
 
   @Test
   void evaluateGuess_nBorders() {
-    assertFalse(barrierQuestion.evaluateGuess(4));
-    assertTrue(barrierQuestion.evaluateGuess(5));
+    assertFalse(barrierQuestion.evaluateGuess("4"));
+    assertTrue(barrierQuestion.evaluateGuess("5"));
   }
 
   @Test
   void landlocked() {
     BarrierQuestion barrierQuestionLandlocked = this.dummyQuestionService.generateBarrierQuestion_landlocked();
     // only accept 1 as true, everything else as false
-    assertTrue(barrierQuestionLandlocked.evaluateGuess(1));
-    assertFalse(barrierQuestionLandlocked.evaluateGuess(0));
-    assertFalse(barrierQuestionLandlocked.evaluateGuess(2));
+    assertTrue(barrierQuestionLandlocked.evaluateGuess("yes"));
+    assertFalse(barrierQuestionLandlocked.evaluateGuess("no"));
+    assertFalse(barrierQuestionLandlocked.evaluateGuess("asdflkajsdf"));
   }
 }

@@ -15,9 +15,9 @@ public class BarrierQuestion {
     private final BarrierQuestionEnum barrierQuestionEnum;
     private final String questionText;
     private final Country country;
-    private List<Integer> answerOptions;
+    private String correctResult; // The options and the results are always done in strings
+    private List<String> answerOptions;
     private List<Country> countryOptions;
-    private int correctResult;
 
     public BarrierQuestion(BarrierQuestionEnum barrierQuestionEnum, Country country, List<Country> countryOptions) {
         this.questionType = QuestionType.BARRIER;
@@ -34,8 +34,8 @@ public class BarrierQuestion {
      * @param guess The guess to evaluate against the question
      * @return True if guess is correct, False otherwise
      */
-    public boolean evaluateGuess(int guess) {
-        return correctResult == guess;
+    public boolean evaluateGuess(String guess) {
+        return correctResult.equals(guess);
     }
     public Country getCountry() {
         return country;
@@ -44,13 +44,15 @@ public class BarrierQuestion {
     private void setCorrectResultAndOptions() {
         switch (this.barrierQuestionEnum) {
             case NBORDERS:
-                correctResult = country.getNBorders();
-                answerOptions = countryOptions.stream().map(Country::getNBorders).toList();
+                correctResult = Integer.toString(country.getNBorders());
+                // Get all the possible answer options as strings. getNBorders comes as Integer
+                List<Integer> optionsInt = countryOptions.stream().map(Country::getNBorders).toList();
+                answerOptions = optionsInt.stream().map(Object::toString).toList();
                 break;
             case LANDLOCKED:
                 // LANDLOCKED is a true/false question, just send 1 (yes) or 0 (no)
-                correctResult = country.getLandlocked() ? 1 : 0;
-                answerOptions = Arrays.asList(0,1);
+                correctResult = country.getLandlocked() ? "yes" : "no";
+                answerOptions = Arrays.asList("yes","no");
                 break;
         }
     }
