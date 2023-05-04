@@ -307,7 +307,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void LoginUser_validInput_thenReturnJsonArray() throws Exception {
+  public void loginUser_validInput_thenReturnJsonArray() throws Exception {
 
     // given
     User user = new User();
@@ -340,6 +340,42 @@ public class UserControllerTest {
             .andExpect(jsonPath("$.birthday", is(user.getBirthday())));
 
   }
+
+  @Test
+  public void logoutUser_validInput_thenReturnJsonArray() throws Exception {
+
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setPassword("testPassword");
+    user.setUsername("testUsername");
+    user.setToken("1");
+    user.setStatus(UserStatus.ONLINE);
+    user.setCreationDate(currentDate);
+    user.setBirthday("testBirthday");
+
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setPassword("testPassword");
+
+    // given
+    given(userService.getUserByToken(Mockito.any())).willReturn(user);
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder putRequest = put("/users/logout")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization","1");
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isOk());
+  }
+
+  // todo: deleteUser
+  @Test
+  public void deleteUser_validInput_userDeleted() {
+  }
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

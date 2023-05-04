@@ -181,7 +181,6 @@ public class UserController {
               "Username is required for deleting a user!");
     }
 
-
     if (password == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               "Password is required for deleting a user!");
