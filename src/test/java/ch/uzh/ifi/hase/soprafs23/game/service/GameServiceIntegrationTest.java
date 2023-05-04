@@ -258,6 +258,42 @@ class GameServiceIntegrationTest {
     }
 
     @Test
+    void endTurn() {
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP);
+
+        // given - add two players and start the game
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+        gameService.startGame(gameIdCreated);
+
+        // given - start next turn
+        gameService.startNextTurn(gameIdCreated);
+
+        // assert that the taken guesses so far are empty, and the leaderboard of the turn as well
+        Turn currentTurn = gameService.getGameById(gameIdCreated).getTurn();
+        assertTrue(currentTurn.getTakenGuesses().isEmpty());
+
+        // then - process a correct answer by p1_added
+        Answer answer_correct = new Answer();
+        answer_correct.setGuess(1);
+        answer_correct.setCountryCode("GER");
+        answer_correct.setUserToken(p1_added.getUserToken());
+        int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
+        Turn turnWithAnswer = gameService.processAnswer(answer_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+
+        // then - end the turn and fetch the turn leaderboard
+        gameService.endTurn(gameIdCreated, turnWithAnswer.getTurnNumber());
+        Leaderboard turnLeaderboardAfterUpdate = gameService.getGameById(gameIdCreated).getTurn().getTurnResult();
+
+        // assert the leaderboard has two entries
+        assertEquals(turnLeaderboardAfterUpdate.getEntries().size(), 2);
+        // assert p1_added has 3 points, and p2_added 0 because he did not answer
+        assertEquals(turnLeaderboardAfterUpdate.getEntry(p1_added.getId()).getCurrentScore(), 3);
+        assertEquals(turnLeaderboardAfterUpdate.getEntry(p2_added.getId()).getCurrentScore(), 0);
+    }
+
+    @Test
     void updateGame() {
         // given - adding a game via the service
         Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());

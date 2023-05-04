@@ -16,15 +16,6 @@ public class Leaderboard {
     this.entries = new ArrayList<>();
   }
 
-  /**
-   * Copy constructor to copy an existing leaderboard
-   * @param leaderboardToCopy Leaderboard to copy from
-   */
-  public Leaderboard(Leaderboard leaderboardToCopy) {
-    this.entries = new ArrayList<>();
-    this.entries.addAll(leaderboardToCopy.entries);
-  }
-
   public List<LeaderboardEntry> getEntries() {
     return entries;
   }

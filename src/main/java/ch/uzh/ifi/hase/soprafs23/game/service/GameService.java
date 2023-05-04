@@ -137,7 +137,7 @@ public class GameService {
   }
 
   /**
-   * Given an answer from a player, update the corresponding turn in the
+   * Given an answer from a player, update the corresponding turn in the game
    * @param answer Answer object with the answer of the player
    * @param playerId Player ID of the player the answer is from
    * @return Turn object with the updated Turn

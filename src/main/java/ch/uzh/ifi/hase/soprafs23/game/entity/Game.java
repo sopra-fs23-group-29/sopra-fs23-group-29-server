@@ -96,9 +96,6 @@ public class Game {
   public BarrierQuestion getCurrentBarrierQuestion() {
     return currentBarrierQuestion;
   }
-  public void setResolvedBarriers(List<Integer> resolvedBarriers) {
-    this.resolvedBarriers = resolvedBarriers;
-  }
   public List<Integer> getResolvedBarriers() {
     return resolvedBarriers;
   }
@@ -127,20 +124,11 @@ public class Game {
   public int getTurnNumber() {
     return turnNumber;
   }
-  public void setTurnNumber(int turnNumber) {
-    this.turnNumber = turnNumber;
-  }
   public Leaderboard getLeaderboard() {
     return leaderboard;
   }
-  public void setLeaderboard(Leaderboard leaderboard) {
-    this.leaderboard = leaderboard;
-  }
   public Leaderboard getBarrierLeaderboard() {
     return barrierLeaderboard;
-  }
-  public void setBarrierLeaderboard(Leaderboard barrierLeaderboard) {
-    this.barrierLeaderboard = barrierLeaderboard;
   }
   public int getBoardSize() {
     return boardSize;
@@ -151,14 +139,8 @@ public class Game {
   public int getMaxDuration() {
     return maxDuration;
   }
-  public void setMaxDuration(int maxDuration) {
-    this.maxDuration = maxDuration;
-  }
   public int getMaxTurns() {
     return maxTurns;
-  }
-  public void setMaxTurns(int maxTurns) {
-    this.maxTurns = maxTurns;
   }
   public Turn getTurn() {
     return turn;

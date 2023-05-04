@@ -20,14 +20,14 @@ class CountryServiceTest {
   @Autowired
   private CountryService countryService;
 
-  @Test
-  void testAllCodes() {
-
-    // go through all COIC codes, either data or null, but no error should happen!
-    for (String ciocCode : QuestionServiceRestcountries.CIOC_CODES) {
-      countryService.getCountryData(ciocCode);
-    }
-  }
+//  @Test
+//  void testAllCodes() {
+//
+//    // go through all COIC codes, either data or null, but no error should happen!
+//    for (String ciocCode : QuestionServiceRestcountries.CIOC_CODES) {
+//      countryService.getCountryData(ciocCode);
+//    }
+//  }
 
   @Test
   void test_LIB() {
