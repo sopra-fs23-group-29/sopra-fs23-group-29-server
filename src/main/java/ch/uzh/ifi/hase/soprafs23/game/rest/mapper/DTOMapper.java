@@ -50,10 +50,6 @@ public interface DTOMapper {
     @Mapping(source = "gameId", target = "gameId")
     PlayerGetDTO convertEntityToPlayerGetDTO(Player player);
 
-    @Mapping(source = "gameName", target = "gameName")
-    @Mapping(source = "gameMode", target = "gameMode")
-    Game convertGamePostDTOToEntity(GamePostDTO gamePostDTO);
-
     @Mapping(source = "gameId", target = "gameId")
     GameGetDTO convertEntityToGameGetDTO(Game game);
 

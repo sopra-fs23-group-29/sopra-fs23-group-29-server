@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
@@ -52,8 +49,8 @@ class GameTest {
         playerRepository.deleteAll();
         userRepository.deleteAll();
 
-        gameId = gameService.createNewGame("g1", GameMode.PVP);
-        gameIdSingle = gameService.createNewGame("g2", GameMode.HOWFAST);
+        gameId = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+        gameIdSingle = gameService.createNewGame("g2", GameMode.HOWFAST, BoardSize.SMALL, MaxDuration.NA);
 
         // create a player from dummy user
         User u1;
@@ -98,7 +95,7 @@ class GameTest {
         // given the game without any players
         Game g1 = gameService.getGameById(gameId);
         // set boardsize = 0
-        g1.setBoardSize(0);
+        g1.setBoardSize(BoardSize.DUMMY_TEST);
         // assert not over, because GameStatus.INLOBBY
         assertFalse(g1.gameOver());
 
@@ -126,12 +123,19 @@ class GameTest {
     }
 
     @Test
-    void singleNeverJoinable() {
+    void singleNeverJoinableAfterJoin() {
         // given the game without any players
         // assert players is an empty list
         Game g2_single = gameService.getGameById(gameIdSingle);
 
-        // assert not joinable
+        // assert joinable
+        assertTrue(g2_single.getJoinable());
+
+        // then join player and update the players
+        playerService.joinPlayer(userToken, g2_single.getGameId().intValue());
+        g2_single.updatePlayers();
+
+        // assert not joinable anymore
         assertFalse(g2_single.getJoinable());
     }
 

@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
@@ -121,7 +118,7 @@ class PlayerServiceIntegrationTest {
         Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
 
         // create a game
-        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // add a player to the game
         Player player_joined = playerService.joinPlayer(u1.getToken(), gameId1.intValue());
@@ -150,7 +147,7 @@ class PlayerServiceIntegrationTest {
         assertEquals(playerService.getPlayers().size(), 0);
 
         // given game without players
-        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // then - fetching all players
         List<Player> players_fetched = playerService.getPlayersByGameId(gameId1);
@@ -290,8 +287,8 @@ class PlayerServiceIntegrationTest {
         assertNull(player_persisted.getGameId());
 
         // create two games
-        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
-        Long gameId2 = gameService.createNewGame("g2", GameMode.PVP);
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+        Long gameId2 = gameService.createNewGame("g2", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // add a player to the game
         Player player_joined = playerService.joinPlayer(u1.getToken(), gameId1.intValue());
@@ -324,7 +321,7 @@ class PlayerServiceIntegrationTest {
         Player player_created = playerService.createPlayerFromUserToken(u1_created.getToken());
 
         // create a game
-        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // change GameStatus to GameStatus.INPROGRESS
         Game g1 = gameService.getGameById(gameId1);
@@ -391,7 +388,7 @@ class PlayerServiceIntegrationTest {
         Player player7_created = playerService.createPlayerFromUserToken(u7_created.getToken());
 
         // create a game
-        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP);
+        Long gameId1 = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // add 6 players
         playerService.joinPlayer(u1.getToken(), gameId1.intValue());

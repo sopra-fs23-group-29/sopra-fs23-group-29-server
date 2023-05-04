@@ -78,7 +78,7 @@ class GameServiceIntegrationTest {
         playerRepository.deleteAll();
         userRepository.deleteAll();
 
-        g1 = new Game(1L, "g1", GameMode.PVP, playerService, questionService);
+        g1 = new Game(1L, "g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA, playerService, questionService);
 
         u1 = new User();
         u1.setUsername("u1");
@@ -122,7 +122,7 @@ class GameServiceIntegrationTest {
     @Test
     void createNewGame() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // then - assert one game exists
         assertEquals(GameRepository.getSize(), 1);
@@ -138,7 +138,7 @@ class GameServiceIntegrationTest {
     @Test
     void startGame() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // then - add two players and start the game
         playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
@@ -173,7 +173,7 @@ class GameServiceIntegrationTest {
     @Test
     void startGame_errorAlreadyStarted() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // then - start the game and try to start again
         gameService.startGame(gameIdCreated);
@@ -184,7 +184,7 @@ class GameServiceIntegrationTest {
     @Test
     void startNextTurn() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // given - add two players and start the game
         Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
@@ -218,7 +218,7 @@ class GameServiceIntegrationTest {
     @Test
     void processAnswer() {
         // given - adding a game with a dummy questionService via the service
-        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP);
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // given - add two players and start the game
         Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
@@ -260,7 +260,7 @@ class GameServiceIntegrationTest {
     @Test
     void endTurn() {
         // given - adding a game with a dummy questionService via the service
-        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP);
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
 
         // given - add two players and start the game
         Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
@@ -296,7 +296,7 @@ class GameServiceIntegrationTest {
     @Test
     void updateGame() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // then - call updateGame
         gameService.updateGame(gameIdCreated);
@@ -314,7 +314,7 @@ class GameServiceIntegrationTest {
     @Test
     void greetGames() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // then - call updateGame
         gameService.greetGames();
@@ -332,7 +332,7 @@ class GameServiceIntegrationTest {
     @Test
     void deleteGame_inLobbyIsDeleted() {
         // given - adding a game via the service
-        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode());
+        Long gameIdCreated = gameService.createNewGame(g1.getGameName(), g1.getGameMode(), g1.getBoardSize(), g1.getMaxDuration());
 
         // give - add two players
         Player p1_joined = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());

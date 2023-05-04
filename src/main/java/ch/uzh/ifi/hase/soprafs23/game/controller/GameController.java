@@ -89,7 +89,12 @@ public class GameController {
 
         // GameService creates the game and writes to the gameRepository
         // get the gameId
-        Long newGameId = gameService.createNewGame(gamePostDTO.getGameName(), gamePostDTO.getGameMode());
+        Long newGameId = gameService.createNewGame(
+            gamePostDTO.getGameName(),
+            gamePostDTO.getGameMode(),
+            gamePostDTO.getBoardSize(),
+            gamePostDTO.getMaxDuration()
+        );
 
         // Add the creator of the game as a player
         Player playerJoined = playerService.joinPlayer(auth_token, newGameId.intValue());

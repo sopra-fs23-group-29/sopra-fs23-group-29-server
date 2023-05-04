@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.entity;
 
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
+import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
@@ -22,8 +20,7 @@ public class Game {
 
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
-  public static final int BARRIERPOSITION = 3; // todo: could be dynamic
-  public static final int BOARDSIZE = 48; // todo: could be dynamic, must match Board.js
+  public static final int BARRIERPOSITION = 3; // todo: could be dynamic, static must match Client side!
 
   private List<Player> players;
   // Which players have agreed to hide the scoreboard and move on to moving the players? Is reset with each new turn
@@ -41,9 +38,9 @@ public class Game {
   private Leaderboard barrierLeaderboard;
   private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
   private boolean joinable;
-  private int boardSize;
-  private int maxDuration;
-  private int maxTurns;
+  private BoardSize boardSize;
+  private MaxDuration maxDuration;
+  private int maxTurns; // currently not in use
 
   /**
    * The constructor always needs a playerRepository to fetch its current players
@@ -51,22 +48,22 @@ public class Game {
    * @param gameId id of the game
    * @param gameName name of the game
    * @param gameMode Which mode to play
+   * @param boardSize BoardSize specifying the size of the board
+   * @param maxDuration Number of minutes maximum allowed to play. Not relevant if PVP
    * @param playerService PlayerService instance
    */
   public Game(
-    Long gameId,String gameName,GameMode gameMode
+    Long gameId,String gameName,GameMode gameMode, BoardSize boardSize, MaxDuration maxDuration
     ,PlayerService playerService
     ,IQuestionService questionService
     ) {
     this.gameId = gameId;
     this.gameName = gameName;
     this.gameMode = gameMode;
+    this.boardSize = boardSize;
+    this.maxDuration = maxDuration;
     this.playerService = playerService;
     this.questionService = questionService;
-
-    // todo: boardSize/maxTurns/maxDuration depending on constructor?
-    // currently static
-    this.boardSize = BOARDSIZE;
 
     // upon creation, set gameStatus to INLOBBY
     this.gameStatus = GameStatus.INLOBBY;
@@ -78,13 +75,14 @@ public class Game {
     // create empty list of resovled BarrierQuestions
     // create empty list of players ready to move
     // set currentBarrierQuestion to null
-    // set joinable to true if PVP, false otherwise
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
     this.playerIdReadyToMove = new ArrayList<>();
-    this.joinable = gameMode.equals(GameMode.PVP);
+
+    // set joinable to true
+    this.joinable = true;
   }
 
   // default no args constructor - needed for mapper
@@ -130,15 +128,19 @@ public class Game {
   public Leaderboard getBarrierLeaderboard() {
     return barrierLeaderboard;
   }
-  public int getBoardSize() {
+  public void setBarrierLeaderboard(Leaderboard barrierLeaderboard) {
+    this.barrierLeaderboard = barrierLeaderboard;
+  }
+  public BoardSize getBoardSize() {
     return boardSize;
   }
-  public void setBoardSize(int boardSize) {
+  public void setBoardSize(BoardSize boardSize) {
     this.boardSize = boardSize;
   }
-  public int getMaxDuration() {
+  public MaxDuration getMaxDuration() {
     return maxDuration;
   }
+  public void setMaxDuration(MaxDuration maxDuration) {this.maxDuration = maxDuration;}
   public int getMaxTurns() {
     return maxTurns;
   }
@@ -231,17 +233,21 @@ public class Game {
    */
   private boolean isJoinable() {
 
-    // If not PVP, no game is ever joinable
-    if (!(getGameMode().equals(GameMode.PVP))) {
-      return false;
-    }
-
+    // if a game is not INLOBBY, it cannot be joined
     if (getGameStatus() != GameStatus.INLOBBY) {
       return false;
     }
+
+    // if the game is empty, it is joinable
     if (this.players == null) {
       return true;
     }
+
+    // If not PVP, game is Singleplayer and only 1 player is allowed
+    if (!(getGameMode().equals(GameMode.PVP))) {
+      return players.size() == 0;
+    }
+
     return players.size() < MAXPLAYERS && this.getGameStatus() == GameStatus.INLOBBY;
    }
 
@@ -257,13 +263,16 @@ public class Game {
     // check winning conditions PVP
     if (gameMode.equals(GameMode.PVP)) {
       for (LeaderboardEntry entry : leaderboard.getEntries()) {
-        if (entry.getCurrentScore() >= this.boardSize) {
+        if (entry.getCurrentScore() >= this.boardSize.getBoardSize()) {
           return true;
         }
       }
 
     // default for GameMode not covered yet
     } else {
+
+      // gameMode.HOWFAST using maxDuration?
+
       System.out.println("ONLY PVP gameOver implemented!");
       throw new RuntimeException();
     }

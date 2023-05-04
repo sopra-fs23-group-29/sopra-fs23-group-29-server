@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
 
+import ch.uzh.ifi.hase.soprafs23.constant.BoardSize;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.MaxDuration;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
@@ -26,8 +28,10 @@ public class GameUpdateDTO {
     private Leaderboard leaderboard;
     private Leaderboard barrierLeaderboard;
     private boolean joinable;
-    private int boardSize;
-    private int maxDuration;
+    private BoardSize boardSize;
+    private int boardSizeInt;
+    private MaxDuration maxDuration;
+    private int maxDurationInt;
     private int maxTurns;
 
     public GameUpdateDTO(Game game) {
@@ -42,7 +46,9 @@ public class GameUpdateDTO {
         this.leaderboard = game.getLeaderboard();
         this.barrierLeaderboard = game.getBarrierLeaderboard();
         this.boardSize = game.getBoardSize();
+        this.boardSizeInt = game.getBoardSize().getBoardSize();
         this.maxDuration = game.getMaxDuration();
+        this.maxDurationInt = game.getMaxDuration().getMaxDuration();
         this.maxTurns = game.getMaxTurns();
         this.joinable = game.getJoinable();
     }
@@ -97,17 +103,29 @@ public class GameUpdateDTO {
     public void setResolvedBarriers(List<Integer> resolvedBarriers) {
         this.resolvedBarriers = resolvedBarriers;
     }
-    public int getBoardSize() {
+    public BoardSize getBoardSize() {
         return boardSize;
     }
-    public void setBoardSize(int boardSize) {
+    public void setBoardSize(BoardSize boardSize) {
         this.boardSize = boardSize;
     }
-    public int getMaxDuration() {
+    public int getBoardSizeInt() {
+        return boardSizeInt;
+    }
+    public void setBoardSizeInt(int boardSizeInt) {
+        this.boardSizeInt = boardSizeInt;
+    }
+    public MaxDuration getMaxDuration() {
         return maxDuration;
     }
-    public void setMaxDuration(int maxDuration) {
+    public void setMaxDuration(MaxDuration maxDuration) {
         this.maxDuration = maxDuration;
+    }
+    public int getMaxDurationInt() {
+        return maxDurationInt;
+    }
+    public void setMaxDurationInt(int maxDurationInt) {
+        this.maxDurationInt = maxDurationInt;
     }
     public int getMaxTurns() {
         return maxTurns;

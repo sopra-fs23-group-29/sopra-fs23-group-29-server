@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
-import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
@@ -80,6 +77,8 @@ class GameControllerTest {
         game.setGameId(1L);
         game.setGameName("game1");
         game.setGameMode(GameMode.PVP);
+        game.setBoardSize(BoardSize.SMALL);
+        game.setMaxDuration(MaxDuration.NA);
         game.setGameStatus(GameStatus.INLOBBY);
 
         // given - add the game to the GameRepository
@@ -88,8 +87,10 @@ class GameControllerTest {
         GamePostDTO gamePostDTO = new GamePostDTO();
         gamePostDTO.setGameName("game1");
         gamePostDTO.setGameMode(GameMode.PVP);
+        gamePostDTO.setBoardSize(BoardSize.SMALL);
+        gamePostDTO.setMaxDuration(MaxDuration.NA);
 
-        given(gameService.createNewGame("game1", GameMode.PVP)).willReturn(game.getGameId());
+        given(gameService.createNewGame("game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA)).willReturn(game.getGameId());
         given(playerService.joinPlayer("dummy", game.getGameId().intValue())).willReturn(p1);
 
         // when
@@ -137,7 +138,7 @@ class GameControllerTest {
         userService.createUser(user);
 
         // mock the services
-        given(gameService.createNewGame("game1", GameMode.PVP)).willReturn(game.getGameId());
+        given(gameService.createNewGame("game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA)).willReturn(game.getGameId());
         given(userService.getUserByToken("dummy")).willReturn(user);
         given(playerService.joinPlayer("dummy", game.getGameId().intValue())).willReturn(player);
         // when

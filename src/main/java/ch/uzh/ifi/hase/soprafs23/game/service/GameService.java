@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.BoardSize;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.MaxDuration;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
@@ -75,10 +77,18 @@ public class GameService {
    * Create a new game and return the corresponding int
    * @return gameId of the created game
    */
-  public Long createNewGame(String gameName, GameMode gameMode) {
+  public Long createNewGame(String gameName, GameMode gameMode, BoardSize boardSize, MaxDuration maxDuration) {
     gameCounter++;
     removeAllPlayersFromGame((long) gameCounter);
-    Game newGame = new Game((long) gameCounter, gameName, gameMode, playerService, questionService);
+    Game newGame = new Game(
+      (long) gameCounter,
+      gameName,
+      gameMode,
+      boardSize,
+      maxDuration,
+      playerService,
+      questionService
+    );
     GameRepository.addGame((long) gameCounter, newGame);
     return (long) gameCounter;
   }
