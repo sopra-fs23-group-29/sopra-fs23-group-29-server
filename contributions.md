@@ -69,6 +69,7 @@
   - Client 76, 53
 
 - Mark
+
   - Client 49, 51
 
 - Nils
@@ -94,18 +95,26 @@
 ### Week 18
 
 - Dominik
+
   - Client 77, 113
 
 - Mark
+
   - Client 5, 18, 20
- 
+
 - Mona
-  - Client 19, 21  
+  - Client 19, 21
+- Thalia
+  - Client 32, 127
 
 ### Week 19
 
 - Dominik
+
   - Client 117, 118, 125 (Scoreboard button "Next Round")
   - Server 67
+
+- Thalia
+  - Client 31, 37
 
 ### Week 20
