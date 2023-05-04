@@ -28,6 +28,8 @@ public class Country {
     private String cioc;
     @JsonProperty("borders")
     private List<String> bordersList;
+    @JsonProperty("landlocked")
+    private Boolean landlocked;
 
     private Double gini;
     private String giniYear;
@@ -85,6 +87,11 @@ public class Country {
     public Integer getNBorders() {
         if (bordersList == null) {return null;}
         return bordersList.size();
+    }
+
+    public Boolean getLandlocked() {
+        if (landlocked == null) {return null;}
+        return landlocked;
     }
 
     public void refreshDataFromNestedObjects() {
