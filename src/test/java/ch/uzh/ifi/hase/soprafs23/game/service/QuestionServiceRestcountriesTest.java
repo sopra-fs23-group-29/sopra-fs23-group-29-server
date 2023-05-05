@@ -44,7 +44,6 @@ class QuestionServiceRestcountriesTest {
     }
 
     // todo: tests for generateBarrierQuestion
-    // todo: test generateRankingQuestion not ordered
 
 
 }
