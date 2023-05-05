@@ -273,7 +273,7 @@ public class Game {
 
       // gameMode.HOWFAST using maxDuration?
 
-      System.out.println("ONLY PVP gameOver implemented!");
+      System.out.println("GAMEOVER : ONLY PVP gameOver implemented!");
       throw new RuntimeException();
     }
 
