@@ -437,6 +437,52 @@ class GameServiceIntegrationTest {
     }
 
     @Test
+    void processBarrierAnswer_resolvedBarrierQuestions() {
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+
+        // Add a player
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+
+        // Start the game
+        gameService.startGame(gameIdCreated);
+        gameService.startNextTurn(gameIdCreated);
+
+        // Add a barrierQuestion
+        Game gameCreated = gameService.getGameById(gameIdCreated);
+        gameCreated.setCurrentBarrierQuestion(dummyQuestionService.generateBarrierQuestion());
+
+        // create correct barrier answer
+        BarrierAnswer answer_correct = new BarrierAnswer();
+        answer_correct.setGuess("no");
+        answer_correct.setUserToken(p1_added.getUserToken());
+
+        // assert that there is a barrier question
+        BarrierQuestion bq = gameService.getGameById(gameIdCreated).getCurrentBarrierQuestion();
+        assertNotNull(bq);
+
+        // assert the player has no barrier questions answered
+        assertEquals(gameService.getGameById(gameIdCreated).getBarrierLeaderboard().getEntry(p1_added.getId()).getCurrentScore(), 0);
+        // assert no resolved barrier questions yes
+        assertTrue(gameService.getGameById(gameIdCreated).getResolvedBarriers().isEmpty());
+
+        // given - The leaderboard of the player answering correct before the answer
+        int scoreBefore = gameService.getGameById(gameIdCreated).getLeaderboard().getEntry(p1_added.getId()).getCurrentScore();
+
+        // then - process the correct answer
+        gameService.processBarrierAnswer(answer_correct, p1_added.getId(), gameIdCreated);
+
+        // assert - Leaderboard entry of player answering raised by 1
+        int scoreAfter = gameService.getGameById(gameIdCreated).getLeaderboard().getEntry(p1_added.getId()).getCurrentScore();
+        assertEquals(scoreBefore, scoreAfter-1);
+
+        // assert - resolved barrier answers should have an entry at the scoreAfter
+        assertEquals(gameService.getGameById(gameIdCreated).getResolvedBarriers().size(), 1);
+        assertEquals(gameService.getGameById(gameIdCreated).getResolvedBarriers().get(0).intValue(), 1);
+
+    }
+
+    @Test
     void processBarrierAnswer_tokensNotMatching_throwsUnauthorized() {
         // given - adding a game with a dummy questionService via the service
         Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
@@ -535,9 +581,34 @@ class GameServiceIntegrationTest {
 
         // given - moving player eventually leads to hit in barrier
         int FIRSTBARRIER = Game.BARRIERPOSITION;
-        IntStream.range(0, FIRSTBARRIER-1).forEachOrdered(n -> {
+        IntStream.range(0, FIRSTBARRIER).forEachOrdered(n -> {
             gameService.movePlayerByOne(gameIdCreated, p1_added.getId());
         });
+        assertTrue(gameService.movePlayerByOne(gameIdCreated, p1_added.getId()));
+
+    }
+
+    @Test
+    void movePlayerByOne_hitBarrierMultiple() {
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+
+        // given - add two players and start the game
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+        gameService.startGame(gameIdCreated);
+
+        // given - start next turn
+        gameService.startNextTurn(gameIdCreated);
+
+        // first barrier at position 3:
+        // set leaderboard and check
+        gameService.getGameById(gameIdCreated).getLeaderboard().getEntry(p1_added.getId()).replaceScore(3);
+        assertTrue(gameService.movePlayerByOne(gameIdCreated, p1_added.getId()));
+
+        // second barrier at position 6:
+        // set leaderboard and check
+        gameService.getGameById(gameIdCreated).getLeaderboard().getEntry(p1_added.getId()).replaceScore(6);
         assertTrue(gameService.movePlayerByOne(gameIdCreated, p1_added.getId()));
 
     }
