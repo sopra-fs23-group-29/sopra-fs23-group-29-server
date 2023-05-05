@@ -11,6 +11,7 @@ import ch.uzh.ifi.hase.soprafs23.game.repository.PlayerRepository;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.MovePlayers;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.TurnOutgoingDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -469,6 +470,32 @@ class GameServiceIntegrationTest {
         assertThrows(ResponseStatusException.class, () -> gameService.processBarrierAnswer(answer_wrong_token, p1_added.getId(), gameIdCreated));
         assertThrows(ResponseStatusException.class, () -> gameService.processBarrierAnswer(answer_correct, p2.getId(), gameIdCreated));
 
+    }
+
+    @Test
+    void processMovePlayers() {
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+
+        // Add two players
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+
+        // Start the game
+        gameService.startGame(gameIdCreated);
+        gameService.startNextTurn(gameIdCreated);
+
+        // create MovePlayers objects for all players in the game
+        MovePlayers mp1 = new MovePlayers();
+        mp1.setUserToken(p1_added.getUserToken());
+        MovePlayers mp2 = new MovePlayers();
+        mp2.setUserToken(p2_added.getUserToken());
+
+        // assert - when not all players are ready, returns false
+        assertFalse(gameService.processMovePlayers(mp1, gameIdCreated));
+
+        // assert - when all players are ready, returns true
+        assertTrue(gameService.processMovePlayers(mp2, gameIdCreated));
     }
 
     @Test
