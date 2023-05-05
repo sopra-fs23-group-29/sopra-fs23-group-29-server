@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,10 @@ class QuestionServiceRestcountriesTest {
         assertEquals(q_codes.size(), new HashSet<>(q_codes).size());
     }
 
-    // todo: tests for generateBarrierQuestion
+    @Test
+    void generateBarrierQuestion() {
+        BarrierQuestion bq = questionService.generateBarrierQuestion();
+    }
 
 
 }
