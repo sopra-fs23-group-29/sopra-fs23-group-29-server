@@ -128,6 +128,10 @@ public class WebSocketController {
                 if (gameService.processTurnResults(gameId)) {
                     break;
                 }
+
+                // Add delay to not bombard the system
+                Thread.sleep(1000);
+
             }
 
             log.info("Game {} next turn", gameId);
