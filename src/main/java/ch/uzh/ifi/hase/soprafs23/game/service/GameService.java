@@ -288,10 +288,11 @@ public class GameService {
       // fetch the player belonging to the entry
       Player playerToProcess = playerService.getPlayerById(e.getPlayerId());
       Long pId = playerToProcess.getId();
-      int pCurrentScore = e.getCurrentScore();
+      int pTurnScoreLeft = e.getCurrentScore();
+      int pCurrentScore = getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).getCurrentScore();
 
       // skip if positive score left, meaning the result has been processed for this turn
-      if (pCurrentScore <= 0) {
+      if (pTurnScoreLeft <= 0) {
         continue;
       }
 

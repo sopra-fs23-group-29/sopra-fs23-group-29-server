@@ -81,7 +81,7 @@ public class WebSocketController {
 
         // send an update to all players in the lobby to change the route
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamestart", nextTurnDTOasString);
-        Thread.sleep(5000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
+        Thread.sleep(3000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
         // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
         // inform the GameHeader client separately
@@ -123,9 +123,6 @@ public class WebSocketController {
             // True : We have processed all results from the current turn and can move on to the next turn
             // False : We keep on processing current turn results
             while (true) {
-
-                // Add delay to not bombard the system
-                Thread.sleep(1000);
 
                 // As soon as this function returns TRUE, we have processed all results
                 if (gameService.processTurnResults(gameId)) {
