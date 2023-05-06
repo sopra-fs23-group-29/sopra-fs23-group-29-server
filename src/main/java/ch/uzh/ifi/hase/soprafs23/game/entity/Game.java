@@ -30,6 +30,7 @@ public class Game {
   private PlayerService playerService;
   private IQuestionService questionService;
   private BarrierQuestion currentBarrierQuestion;
+  private boolean waitingForBarrierAnswer; // this lock determines if we can keep on processing or should wait
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -72,14 +73,16 @@ public class Game {
     this.turnNumber = 0;
 
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
-    // create empty list of resovled BarrierQuestions
+    // create empty list of resolved BarrierQuestions
     // create empty list of players ready to move
     // set currentBarrierQuestion to null
+    // set waitingForBarrierAnswer to false
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
     this.playerIdReadyToMove = new ArrayList<>();
+    this.waitingForBarrierAnswer = false;
 
     // set joinable to true
     this.joinable = true;
@@ -119,6 +122,8 @@ public class Game {
   public void setGameMode(GameMode gameMode) {
     this.gameMode = gameMode;
   }
+  public void setWaitingForBarrierAnswer(boolean waitingForBarrierAnswer) {this.waitingForBarrierAnswer = waitingForBarrierAnswer;}
+  public boolean getWaitingForBarrierAnswer() {return this.waitingForBarrierAnswer;}
   public int getTurnNumber() {
     return turnNumber;
   }
@@ -404,7 +409,8 @@ public class Game {
   }
 
   /**
-   * Process the barrier answer, update the game, leaderboards and the currentBarrierQuestion
+   * Process the barrier answer, update the game, leaderboards and the currentBarrierQuestion and the waiting lock
+   * If the answer was wrong, set the players current turn score to 0
    * @param barrierAnswer The answer given
    */
   public void processBarrierAnswer(BarrierAnswer barrierAnswer) {
@@ -414,18 +420,28 @@ public class Game {
     // Evaluate the guess
     boolean guessCorrect = currentBarrierQuestion.evaluateGuess(barrierAnswer.getGuess());
 
+    // set currentBarrierQuestion to null since the question has been answered
+    this.currentBarrierQuestion = null;
+    // set the waitingForBarrierAnswer to false since we have received an answer
+    this.waitingForBarrierAnswer = false;
+
     // if the guess was correct, update the leaderboards
     if (guessCorrect) {
       // add to the resolved barriers. It should be where the playerGuessed is in the leaderboard, plus 1
       this.resolvedBarriers.add(this.leaderboard.getEntry(playerIdGuessed).getCurrentScore() + 1);
 
-      // update the leaderboards
+      // update the leaderboards and current turn results (decrease by 1)
       this.leaderboard.addToEntry(playerIdGuessed,1);
       this.barrierLeaderboard.addToEntry(playerIdGuessed, 1);
+      this.turn.getTurnResult().getEntry(playerIdGuessed).addScore(-1);
+
+      // if the guess was wrong, set the turn score of the player to 0, he cannot move anymore
+    } else {
+      this.turn.getTurnResult().getEntry(playerIdGuessed).replaceScore(0);
     }
 
-    // set currentBarrierQuestion to null since the question has been answered
-    this.currentBarrierQuestion = null;
+
+
 
   }
 

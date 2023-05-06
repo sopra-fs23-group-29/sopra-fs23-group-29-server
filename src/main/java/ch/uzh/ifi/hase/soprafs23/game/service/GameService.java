@@ -4,17 +4,16 @@ import ch.uzh.ifi.hase.soprafs23.constant.BoardSize;
 import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
 import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.MaxDuration;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Leaderboard;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
+import ch.uzh.ifi.hase.soprafs23.game.entity.*;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.MovePlayers;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.BarrierQuestionOutgoingDTO;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.GameUpdateDTO;
+import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing.MovePlayerDTO;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional
@@ -198,14 +195,14 @@ public class GameService {
   }
 
   /**
-   * Given a barrier answer from a player, update the corresponding game
+   * Given a barrier answer from a player, update the corresponding game and its current turn results
    * Either the game is updated by advancing the playerId by one or not
+   * After evaluating
    * @param barrierAnswer Answer object with the answer of the player
    * @param playerId Player ID of the player the answer is from
    * @param gameId Game ID the barrier question is for
-   * @return Game object with the updated game
    */
-  public Game processBarrierAnswer(BarrierAnswer barrierAnswer, Long playerId, Long gameId) {
+  public void processBarrierAnswer(BarrierAnswer barrierAnswer, Long playerId, Long gameId) {
     // Fetch/Check the Player at playerId. Throws NOT_FOUND if playerId is not existent
     Player player = playerService.getPlayerById(playerId);
     // Compare to the player from the userToken from answer, should match
@@ -220,7 +217,26 @@ public class GameService {
     // Evaluate the answer, done by the game
     gameToUpdate.processBarrierAnswer(barrierAnswer);
 
-    return gameToUpdate;
+  }
+
+  /**
+   * End the current turn, returning a new leaderboard with the updated scores
+   * @return A Leaderboard object containing the TURN RESULTS
+   */
+  public Leaderboard endTurn(Long gameId, int turnNumber) {
+    // Fetch the game
+    Game gameToEndRound = GameRepository.findByGameId(gameId);
+
+    // throw error if turnNumber is not the current Turn
+    if (gameToEndRound.getTurnNumber() != turnNumber) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game %s is currently not at Turn %s".formatted(gameId, turnNumber));
+    }
+
+    // Evaluate all the guesses from the current turn object, update the leaderboard and the turnResult
+    gameToEndRound.endTurn();
+
+    // return that new Leaderboard
+    return gameToEndRound.getTurn().getTurnResult();
 
   }
 
@@ -252,36 +268,88 @@ public class GameService {
   }
 
   /**
-   * End the current turn, returning a new leaderboard with the updated scores
-   * @return A Leaderboard object containing the TURN RESULTS
+   * Given the turn is over and all players have agreed to move on
+   * Try to process a step by fetching the results and finding the first current turn entry with scores left
+   * Process that, return True only if no more results to process are found
+   * If the game has a waitingForBarrierAnswer lock, we always return False
+   * @return True if all current turn results in gameIdToProcess have been processed, false otherwise
    */
-  public Leaderboard endTurn(Long gameId, int turnNumber) {
-    // Fetch the game
-    Game gameToEndRound = GameRepository.findByGameId(gameId);
+  public boolean processTurnResults(Long gameIdToProcess) {
 
-    // throw error if turnNumber is not the current Turn
-    if (gameToEndRound.getTurnNumber() != turnNumber) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game %s is currently not at Turn %s".formatted(gameId, turnNumber));
+    if (getGameById(gameIdToProcess).getWaitingForBarrierAnswer()) {
+      return false;
     }
 
-    // Evaluate all the guesses from the current turn object, update the leaderboard and the turnResult
-    gameToEndRound.endTurn();
+    List<LeaderboardEntry> resultsToProcess  = getGameById(gameIdToProcess).getTurn().getTurnResult().getEntries();
 
-    // return that new Leaderboard
-    return gameToEndRound.getTurn().getTurnResult();
+    // Loop through each result, try to move the player
+    for (LeaderboardEntry e : resultsToProcess) {
 
+      // fetch the player belonging to the entry
+      Player playerToProcess = playerService.getPlayerById(e.getPlayerId());
+      Long pId = playerToProcess.getId();
+      int pCurrentScore = e.getCurrentScore();
+
+      // skip if positive score left, meaning the result has been processed for this turn
+      if (pCurrentScore <= 0) {
+        continue;
+      }
+
+      // Try to move the player by one
+      boolean hitsBarrier = tryMovePlayerByOne(gameIdToProcess, pId);
+
+      // If no barrier is hit, we can process a field, send a message to the client and deduct one field from that entry
+      // then also update the GAME LEADERBOARD by one
+      if (!hitsBarrier) {
+        log.info("Game {} move Player {} no barrier hit, send message to move by one", gameIdToProcess, pId);
+        MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCurrentScore);
+        String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
+        webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/moveByOne", playerToMoveAsString);
+        // finally, deduct one field from that player in the TURN RESULT
+        e.addScore(-1);
+        getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).addScore(1);
+      }
+
+      // If a barrier is hit, we send the barrier question and do not move the player until we get notice from the frontend
+      // via /resolveBarrierAnswer
+      // We set a lock on the game
+      if (hitsBarrier) {
+        log.info("Game {} move Player {} barrier is hit, sending barrierQuestion to /barrierquestion", gameIdToProcess, pId);
+
+        // set the lock on the game while we wait for an answer
+        getGameById(gameIdToProcess).setWaitingForBarrierAnswer(true);
+
+        BarrierQuestion barrierQuestion = questionService.generateBarrierQuestion();
+        getGameById(gameIdToProcess).setCurrentBarrierQuestion(barrierQuestion);
+
+        // Create a new BarrierQuestionOutgoingDTO with pId as the ID of the player having to answer the question
+        BarrierQuestionOutgoingDTO barrierQuestionOutgoing = new BarrierQuestionOutgoingDTO(barrierQuestion, playerToProcess);
+        // make string to send
+        String barrierQuestionOutgoingAsString = new Gson().toJson(barrierQuestionOutgoing);
+        // send the barrierQuestion together with the player ID answering and his color
+        webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/barrierquestion", barrierQuestionOutgoingAsString);
+
+      }
+
+      // since we had a result to process, we return false
+      return false;
+
+    }
+
+    // if we reach this part, this means we have no more results processed
+    return true;
   }
 
   /**
-   * Move the player with playerId in gameId by one field.
+   * Check if we can move the player with playerId in gameId by one field.
    * No authentication with a user token is done, no body is sent.
-   * If no barrier question is hit, the game is updated / the leaderboard entry increased by one
+   * If no barrier question is hit, return false, true otherwise
    * @return True if a barrier question is hit with the move, False otherwise
    * Throw
    * - NOT_FOUND if playerId is not found or if the gameId is not found
    * - BAD_REQUEST if playerId is not participating in gameId
    */
-  public boolean movePlayerByOne(Long gameId, Long playerId) {
+  public boolean tryMovePlayerByOne(Long gameId, Long playerId) {
     // Fetch/Check the Player at playerId. Throws NOT_FOUND if playerId is not existent
     Player player = playerService.getPlayerById(playerId);
 
@@ -295,16 +363,8 @@ public class GameService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player ID %s is not part of Game %s".formatted(playerId, gameId));
     }
 
-    // Check with the game leaderboard if moving by 1 place hits a barrier
-    boolean hitsBarrier = game.hitsBarrier(playerId);
-
-    // if no barrier was hit, update the leaderboard
-    if (!hitsBarrier) {
-      System.out.println("GameService.movePlayerByOne : Adding 1 to playerId %s".formatted(playerId));
-      game.getLeaderboard().addToEntry(playerId, 1);
-    }
-
-    return hitsBarrier;
+    // Check with the game leaderboard if moving by 1 place hits a barrier, return that
+    return game.hitsBarrier(playerId);
   }
 
   private void removeAllPlayersFromGame(Long gameId) {
