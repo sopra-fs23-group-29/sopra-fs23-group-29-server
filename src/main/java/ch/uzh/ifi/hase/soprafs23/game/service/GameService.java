@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.BoardSize;
-import ch.uzh.ifi.hase.soprafs23.constant.GameMode;
-import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
-import ch.uzh.ifi.hase.soprafs23.constant.MaxDuration;
+import ch.uzh.ifi.hase.soprafs23.constant.*;
 import ch.uzh.ifi.hase.soprafs23.game.entity.*;
 import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
@@ -288,6 +285,7 @@ public class GameService {
       // fetch the player belonging to the entry
       Player playerToProcess = playerService.getPlayerById(e.getPlayerId());
       Long pId = playerToProcess.getId();
+      PlayerColor pCol = playerToProcess.getPlayerColor();
       int pTurnScoreLeft = e.getCurrentScore();
       int pCurrentScore = getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).getCurrentScore();
 
@@ -303,7 +301,7 @@ public class GameService {
       // then also update the GAME LEADERBOARD by one
       if (!hitsBarrier) {
         log.info("Game {} move Player {} no barrier hit, send message to move by one", gameIdToProcess, pId);
-        MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCurrentScore);
+        MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCol, pCurrentScore);
         String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
         webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/moveByOne", playerToMoveAsString);
         // finally, deduct one field from that player in the TURN RESULT and add one to the GAME LEADERBOARD
