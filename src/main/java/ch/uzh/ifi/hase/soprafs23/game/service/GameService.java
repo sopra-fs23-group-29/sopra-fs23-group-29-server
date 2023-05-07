@@ -210,8 +210,19 @@ public class GameService {
     // Fetch the game
     Game gameToUpdate = GameRepository.findByGameId(gameId);
 
-    // Evaluate the answer, done by the game
-    gameToUpdate.processBarrierAnswer(barrierAnswer);
+    // Evaluate the answer, done by the game. Adding to leaderboard and barrierLeaderboard is done by the Game
+    // If true the answer was correct, send a message to /moveByOne
+    boolean answerWasCorrect = gameToUpdate.processBarrierAnswer(barrierAnswer);
+
+    // if answerWasCorrect, fetch the entry from the player, and send /moveByOne with the score before
+    if (answerWasCorrect) {
+      int pScoreBefore = gameToUpdate.getLeaderboard().getEntry(playerId).getCurrentScore()-1;
+      PlayerColor playerToMoveColor = player.getPlayerColor();
+      log.info("Game {} barrier answer was correct, move Player {} to the barrier field {}", gameId, playerId, pScoreBefore);
+      MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(playerId, playerToMoveColor, pScoreBefore);
+      String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
+      webSocketService.sendMessageToClients("/topic/games/" + gameId + "/moveByOne", playerToMoveAsString);
+    }
 
   }
 

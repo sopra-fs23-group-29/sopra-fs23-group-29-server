@@ -438,8 +438,9 @@ public class Game {
    * DO NOT decrease the turn result by 1 if correct, the player does not use a moving point by answering correctly
    * If the answer was wrong, set the players current turn score to 0
    * @param barrierAnswer The answer given
+   * @return True if barrier was answered correct, false otherwise
    */
-  public void processBarrierAnswer(BarrierAnswer barrierAnswer) {
+  public boolean processBarrierAnswer(BarrierAnswer barrierAnswer) {
     // Extract the player that gave the answer
     Player playerGuessed = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
     Long playerIdGuessed = playerGuessed.getId();
@@ -461,9 +462,12 @@ public class Game {
       this.barrierLeaderboard.addToEntry(playerIdGuessed, 1);
       // DO NOT decrease the turn results by 1, answering a barrier does not use up moving points
 
+      return true;
+
       // if the guess was wrong, set the turn score of the player to 0, he cannot move anymore
     } else {
       this.turn.getTurnResult().getEntry(playerIdGuessed).replaceScore(0);
+      return false;
     }
 
 
