@@ -151,6 +151,8 @@ public class WebSocketController {
             Game gameNextTurn = gameService.getGameById(gameId);
             log.info("Game {} current leaderboard:", gameId);
             log.info("{}", gameNextTurn.getLeaderboard());
+            log.info("Game {} current barrier leaderboard:", gameId);
+            log.info("{}", gameNextTurn.getBarrierLeaderboard());
             if (gameNextTurn.gameOver()) {
                 log.info("Game {} is over", gameId);
                 GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);

@@ -432,11 +432,11 @@ class GameServiceIntegrationTest {
 
         // assert - Leaderboard entry of player answering raised by 1
         int scoreAfter = gameService.getGameById(gameIdCreated).getLeaderboard().getEntry(p1_added.getId()).getCurrentScore();
-        // assert - the current turn score is decreased by one
+        // assert - the current turn score is NOT decreased by one
         int turnScoreAfter = gameService.getGameById(gameIdCreated).getTurn().getTurnResult().getEntry(p1_added.getId()).getCurrentScore();
 
         assertEquals(scoreBefore, scoreAfter-1);
-        assertEquals(turnScoreBefore-1, turnScoreAfter);
+        assertEquals(turnScoreBefore, turnScoreAfter);
 
     }
 

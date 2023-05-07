@@ -194,7 +194,6 @@ public class GameService {
   /**
    * Given a barrier answer from a player, update the corresponding game and its current turn results
    * Either the game is updated by advancing the playerId by one or not
-   * After evaluating
    * @param barrierAnswer Answer object with the answer of the player
    * @param playerId Player ID of the player the answer is from
    * @param gameId Game ID the barrier question is for
@@ -296,17 +295,34 @@ public class GameService {
 
       // Try to move the player by one
       boolean hitsBarrier = tryMovePlayerByOne(gameIdToProcess, pId);
+      boolean hitsResolvedBarrier = getGameById(gameIdToProcess).hitsResolvedBarrier(pId);
 
-      // If no barrier is hit, we can process a field, send a message to the client and deduct one field from that entry
-      // then also update the GAME LEADERBOARD by one
+      // If no barrier is hit, we have to check if a resolved barrier is hit
+      // if yes, add one to the global leaderboard and move the player by one field, WITHOUT decreasing his turn score by 1
+      // if no, add one to the global leaderboard and move the player by one field, DECREASING his turn score by 1
       if (!hitsBarrier) {
-        log.info("Game {} move Player {} no barrier hit, send message to move by one", gameIdToProcess, pId);
-        MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCol, pCurrentScore);
-        String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
-        webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/moveByOne", playerToMoveAsString);
-        // finally, deduct one field from that player in the TURN RESULT and add one to the GAME LEADERBOARD
-        e.addScore(-1);
-        getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).addScore(1);
+
+        if (!hitsResolvedBarrier) {
+          // case no resolved barrier hit
+          log.info("Game {} move Player {} no barrier hit, send message to move by one", gameIdToProcess, pId);
+          MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCol, pCurrentScore);
+          String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
+          webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/moveByOne", playerToMoveAsString);
+          // finally, deduct one field from that player in the TURN RESULT and add one to the GAME LEADERBOARD
+          e.addScore(-1);
+          getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).addScore(1);
+
+        } else {
+          // case resolved barrier hit
+          // case no resolved barrier hit
+          log.info("Game {} move Player {} resolved barrier hit, send message to move by one without using turn score", gameIdToProcess, pId);
+          MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCol, pCurrentScore);
+          String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
+          webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/moveByOne", playerToMoveAsString);
+          // finally, only add one to the GAME LEADERBOARD
+          getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).addScore(1);
+        }
+
       }
 
       // If a barrier is hit, we send the barrier question and do not move the player until we get notice from the frontend
