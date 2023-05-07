@@ -306,7 +306,7 @@ public class GameService {
         MovePlayerDTO playerToMoveDTO = new MovePlayerDTO(pId, pCurrentScore);
         String playerToMoveAsString = new Gson().toJson(playerToMoveDTO);
         webSocketService.sendMessageToClients("/topic/games/" + gameIdToProcess + "/moveByOne", playerToMoveAsString);
-        // finally, deduct one field from that player in the TURN RESULT
+        // finally, deduct one field from that player in the TURN RESULT and add one to the GAME LEADERBOARD
         e.addScore(-1);
         getGameById(gameIdToProcess).getLeaderboard().getEntry(pId).addScore(1);
       }
