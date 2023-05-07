@@ -252,6 +252,28 @@ public class GameController {
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamedeleted", "Game %s deleted".formatted(gameId));
         }
 
+        // todo: Option 1) Just end the game right away as soon as a player leaves
+        /*
+        // If the game is INPROGRESS force gameover
+        else if (gameToLeave.getGameStatus().equals(GameStatus.INPROGRESS)) {
+            log.info("Game {} in progress, end game", gameId);
+            // Otherwise, just remove that player that left
+            // Tell the player repo that a player left
+            // NOT_FOUND if gameId does not exist
+            playerService.deletePlayerById(playerLeaving.getId());
+            // in this case, let the game know that one player left
+            gameService.updatePlayers(gameId);
+
+            // Get game and set status to FINISHED, leading to game being over
+            Game gameToEnd = gameService.getGameById(gameId);
+            gameToEnd.setGameStatus(GameStatus.FINISHED);
+            GameUpdateDTO gameToEndDTO = new GameUpdateDTO(gameToEnd);
+            String gameToEndAsString = new Gson().toJson(gameToEndDTO);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameToEndAsString);
+        }
+        */
+
+        // todo: Option 2) Let game INPROGRESS continue, needs correction in frontend CountryRanking.js
         // If the game is INPROGRESS force the next turn in the game
         else if (gameToLeave.getGameStatus().equals(GameStatus.INPROGRESS)) {
             log.info("Game {} in progress, force next turn", gameId);
@@ -290,7 +312,10 @@ public class GameController {
             // inform the GameHeader client separately
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
 
-        } else {
+        }
+
+        // default fallback
+        else {
             // Otherwise, just remove that player that left
             // Tell the player repo that a player left
             // NOT_FOUND if gameId does not exist
