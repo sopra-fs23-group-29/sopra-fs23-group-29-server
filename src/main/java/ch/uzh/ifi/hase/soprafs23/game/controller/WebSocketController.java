@@ -65,6 +65,7 @@ public class WebSocketController {
     /**
      * Start a game
      * Returns a Turn object for the client to work with
+     * Also send the newly created Game for the first time
      */
     @MessageMapping("/games/{gameId}/startGame")
     public void startGame(@DestinationVariable long gameId) throws InterruptedException {
@@ -72,21 +73,30 @@ public class WebSocketController {
         gameService.startGame(gameId);
         log.info("Create Turn");
         gameService.startNextTurn(gameId);
-        Turn nextTurn = gameService.getGameById(gameId).getTurn();
+        Game gameCreated = gameService.getGameById(gameId);
+        Turn nextTurn = gameCreated.getTurn();
         log.info("Created Turn {}", nextTurn.getTurnNumber());
 
+        GameUpdateDTO gameCreatedDTO = new GameUpdateDTO(gameCreated);
+        String gameCreatedAsString = new Gson().toJson(gameCreatedDTO);
         TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
-
         String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
 
         // send an update to all players in the lobby to change the route
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamestart", nextTurnDTOasString);
         Thread.sleep(3000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
+
+        // send the new game object upon start to let the frontend know about the game parameters
+        log.info("Sending message to /newgame");
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newgame", gameCreatedAsString);
+
         // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
+
         // inform the GameHeader client separately
         log.info("Send message seperate to newturn_gameheader");
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
+
         // also send to /games to remove games not joinable anymore
         gameService.greetGames();
     }
