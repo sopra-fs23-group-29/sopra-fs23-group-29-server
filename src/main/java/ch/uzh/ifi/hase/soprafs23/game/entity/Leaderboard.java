@@ -122,5 +122,22 @@ public class Leaderboard {
     this.entries = newPlayers;
   }
 
+  @Override
+  public String toString() {
+
+    if (this.entries.isEmpty()) {
+      return "{}";
+    }
+
+    String result = "";
+
+    for (LeaderboardEntry e : entries) {
+      result = result + String.format("{PlayerID: %s PlayerName: %s CurrentScore: %s}\n", e.getPlayerId(), e.getPlayerName(), e.getCurrentScore());
+    }
+
+    return result;
+
+  }
+
 
 }

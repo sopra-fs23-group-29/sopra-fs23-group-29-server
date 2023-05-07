@@ -152,6 +152,8 @@ public class Game {
 
   /**
    * Check if moving playerId by one field hits a barrier on the board
+   * If current position is 0, always return false
+   * If boardSize - current position is smaller than BARRIERPOSITION - 1 also return false
    * @param playerId Player ID
    * @return True if barrier is hit, false otherwise
    */
@@ -162,9 +164,16 @@ public class Game {
     int currentPosition = playerLeaderboardEntry.getCurrentScore();
     int newPosition = currentPosition+1;
 
+    if (currentPosition == 0) {
+      return false;
+    }
+
+    if ((boardSize.getBoardSize() - currentPosition) < BARRIERPOSITION) {
+      return false;
+    }
+
     // Check if by adding one, player hits a barrier which is not resolved yet
-    // Ever BARRIERPOSITION field is a barrier, if modulo equals 0, we hit one of those
-    if (newPosition%BARRIERPOSITION == 0) {
+    if (currentPosition%BARRIERPOSITION == 0) {
       return !resolvedBarriers.contains(newPosition);
     }
 
@@ -273,7 +282,7 @@ public class Game {
 
       // gameMode.HOWFAST using maxDuration?
 
-      System.out.println("ONLY PVP gameOver implemented!");
+      System.out.println("GAMEOVER : ONLY PVP gameOver implemented!");
       throw new RuntimeException();
     }
 

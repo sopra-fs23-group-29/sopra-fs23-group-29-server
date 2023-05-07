@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.game.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.game.entity.Country;
 import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
 import ch.uzh.ifi.hase.soprafs23.game.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +36,9 @@ public class UserServiceIntegrationTest {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CountryService countryService;
+
     @BeforeEach
     public void setup() {
         userRepository.deleteAll();
@@ -43,6 +48,78 @@ public class UserServiceIntegrationTest {
     private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private LocalDateTime now = LocalDateTime.now();
     private String currentDate = dtf.format(now);
+
+    @Test
+    void setOnlineOffline() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
+
+        User testUser = new User();
+        testUser.setPassword("testPassword");
+        testUser.setUsername("testUsername");
+        testUser.setFlagURL("abc");
+
+        // given - create user
+        User createdUser = userService.createUser(testUser);
+
+        // set online
+        userService.setUserOnline(createdUser.getId());
+        assertEquals(userService.getUserByToken(testUser.getToken()).getStatus(), UserStatus.ONLINE);
+
+        // set offline
+        userService.setUserOffline(createdUser.getId());
+        assertEquals(userService.getUserByToken(testUser.getToken()).getStatus(), UserStatus.OFFLINE);
+    }
+
+    @Test
+    void replaceFlagWithChosen() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
+
+        User testUser = new User();
+        testUser.setPassword("testPassword");
+        testUser.setUsername("testUsername");
+        testUser.setFlagURL("abc");
+
+        // when
+        User createdUser = userService.createUser(testUser);
+
+        // assert flag URL
+        assertEquals(createdUser.getFlagURL(), testUser.getFlagURL());
+
+        // assert - Invalid CICO Code throws error
+        assertThrows(ResponseStatusException.class, () -> userService.replaceFlagWithChosen(createdUser.getId(), "invalidCode"));
+
+        // then - set valid CICO code flag
+        Country testCountry = countryService.getCountryData("GER");
+        userService.replaceFlagWithChosen(createdUser.getId(), testCountry.getCioc());
+        // assert flag URL
+        User userWithChangedFlag = userService.getUserByToken(testUser.getToken());
+        assertEquals(userWithChangedFlag.getFlagURL(), testCountry.getFlagUrl());
+    }
+
+    @Test
+    void replaceFlagRandomly() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
+
+        User testUser = new User();
+        testUser.setPassword("testPassword");
+        testUser.setUsername("testUsername");
+        testUser.setFlagURL("abc");
+
+        // when
+        User createdUser = userService.createUser(testUser);
+
+        // assert flag URL
+        assertEquals(createdUser.getFlagURL(), testUser.getFlagURL());
+
+        // then - set valid CICO code flag by random
+        userService.replaceFlagRandomly(createdUser.getId());
+        // assert flag URL
+        User userWithChangedFlag = userService.getUserByToken(testUser.getToken());
+        assertNotEquals(userWithChangedFlag.getFlagURL(), testUser.getFlagURL());
+    }
 
     @Test
     public void createUser_validInputs_success() {

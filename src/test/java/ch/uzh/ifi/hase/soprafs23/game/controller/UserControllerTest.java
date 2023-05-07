@@ -26,12 +26,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -206,6 +204,7 @@ public class UserControllerTest {
     // then
     mockMvc.perform(postRequest)
             .andExpect(status().isConflict());
+
   }
 
   @Test
@@ -307,7 +306,7 @@ public class UserControllerTest {
   }
 
   @Test
-  public void LoginUser_validInput_thenReturnJsonArray() throws Exception {
+  public void loginUser_validInput_thenReturnJsonArray() throws Exception {
 
     // given
     User user = new User();
@@ -340,6 +339,165 @@ public class UserControllerTest {
             .andExpect(jsonPath("$.birthday", is(user.getBirthday())));
 
   }
+
+  @Test
+  public void logoutUser_validInput_thenReturnJsonArray() throws Exception {
+
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setPassword("testPassword");
+    user.setUsername("testUsername");
+    user.setToken("1");
+    user.setStatus(UserStatus.ONLINE);
+    user.setCreationDate(currentDate);
+    user.setBirthday("testBirthday");
+
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setPassword("testPassword");
+
+    // given
+    given(userService.getUserByToken(Mockito.any())).willReturn(user);
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder putRequest = put("/users/logout")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header("Authorization","1");
+
+    // then
+    mockMvc.perform(putRequest)
+        .andExpect(status().isOk());
+  }
+
+  // todo: deleteUser
+  @Test
+  public void deleteUser_validInput_userDeleted() throws Exception {
+
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setPassword("testPassword");
+    user.setUsername("testUsername");
+    user.setToken("1");
+    user.setStatus(UserStatus.ONLINE);
+    user.setCreationDate(currentDate);
+    user.setBirthday("testBirthday");
+
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setBirthday("testBirthday");
+
+//    given(userService.deleteUser(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).willReturn();
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/1")
+      .contentType(MediaType.APPLICATION_JSON)
+      .header("Authorization", "1")
+      .header("Password", "1")
+      .header("Username", "1");
+
+    // then
+    mockMvc.perform(deleteRequest)
+      .andExpect(status().isAccepted());
+
+  }
+
+  @Test
+  public void deleteUser_missingToken_Authorization_thenThrowBadRequest() throws Exception {
+
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setPassword("testPassword");
+    user.setUsername("testUsername");
+    user.setToken("1");
+    user.setStatus(UserStatus.ONLINE);
+    user.setCreationDate(currentDate);
+    user.setBirthday("testBirthday");
+
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setBirthday("testBirthday");
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/1")
+      .contentType(MediaType.APPLICATION_JSON)
+//      .header("Authorization", "")
+      .header("Password", "1")
+      .header("Username", "1");
+
+    // then
+    mockMvc.perform(deleteRequest)
+      .andExpect(status().isBadRequest());
+
+
+  }
+
+  @Test
+  public void deleteUser_missingToken_Username_thenThrowBadRequest() throws Exception {
+
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setPassword("testPassword");
+    user.setUsername("testUsername");
+    user.setToken("1");
+    user.setStatus(UserStatus.ONLINE);
+    user.setCreationDate(currentDate);
+    user.setBirthday("testBirthday");
+
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setBirthday("testBirthday");
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/1")
+      .contentType(MediaType.APPLICATION_JSON)
+      .header("Authorization", "1")
+      .header("Password", "1");
+//      .header("Username", "1");
+
+    // then
+    mockMvc.perform(deleteRequest)
+      .andExpect(status().isBadRequest());
+
+  }
+
+  @Test
+  public void deleteUser_missingToken_Password_thenThrowBadRequest() throws Exception {
+
+    // given
+    User user = new User();
+    user.setId(1L);
+    user.setPassword("testPassword");
+    user.setUsername("testUsername");
+    user.setToken("1");
+    user.setStatus(UserStatus.ONLINE);
+    user.setCreationDate(currentDate);
+    user.setBirthday("testBirthday");
+
+    UserPutDTO userPutDTO = new UserPutDTO();
+    userPutDTO.setUsername("testUsername");
+    userPutDTO.setBirthday("testBirthday");
+
+    // when/then -> do the request + validate the result
+    MockHttpServletRequestBuilder deleteRequest = delete("/users/1")
+      .contentType(MediaType.APPLICATION_JSON)
+      .header("Authorization", "1")
+//      .header("Password", "1")
+      .header("Username", "1");
+
+    // then
+    mockMvc.perform(deleteRequest)
+      .andExpect(status().isBadRequest());
+
+  }
+
+
+
+
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

@@ -300,6 +300,7 @@ public class GameService {
 
     // if no barrier was hit, update the leaderboard
     if (!hitsBarrier) {
+      System.out.println("GameService.movePlayerByOne : Adding 1 to playerId %s".formatted(playerId));
       game.getLeaderboard().addToEntry(playerId, 1);
     }
 

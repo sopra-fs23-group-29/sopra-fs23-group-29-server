@@ -126,6 +126,7 @@ public class WebSocketController {
 
         // If the game says we are ready to move on, send a message to /scoreboardOver, same content as /scoreboard from saveAnswer
         if (moveOn) {
+            log.info("Move Game {} on ...", gameId);
             Turn currentTurn = gameService.getGameById(gameId).getTurn();
             Leaderboard turnResults = currentTurn.getTurnResult();
             // Make a DTO
@@ -150,6 +151,8 @@ public class WebSocketController {
 
         // check if the game is over, if so, just send the game object to the gameover topic
         Game gameNextTurn = gameService.getGameById(gameId);
+        log.info("Game {} current leaderboard:", gameId);
+        log.info("{}", gameNextTurn.getLeaderboard());
         if (gameNextTurn.gameOver()) {
             log.info("Game {} is over", gameId);
             GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
@@ -293,10 +296,14 @@ public class WebSocketController {
         log.info("Game {} move Player {}", gameId, playerId);
         // Ask the game service to move playerId in gameId by one field
         boolean barrierHit = gameService.movePlayerByOne(gameId, playerId);
+        log.info("Game {} move Player {} barrierHit {}", gameId, playerId, barrierHit);
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/barrierHit", barrierHit);
 
         // If a barrier is hit, create a new barrier question, update the game with it and send it
         if (barrierHit) {
+
+            log.info("Game {} move Player {} barrier is hit, sending barrierQuestion to /barrierquestion", gameId, playerId);
+
             BarrierQuestion barrierQuestion = questionService.generateBarrierQuestion();
             gameService.getGameById(gameId).setCurrentBarrierQuestion(barrierQuestion);
 

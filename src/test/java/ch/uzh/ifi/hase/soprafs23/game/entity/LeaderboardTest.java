@@ -126,4 +126,17 @@ class LeaderboardTest {
     lb.sync(playerIdsToKeep3);
     assertTrue(lb.getEntries().isEmpty());
   }
+
+  @Test
+  void testToString() {
+    System.out.println(lb);
+
+    // Add two entries
+    lb.putNewPlayer(lbe1.getPlayerId(), lbe1.getPlayerName(), lbe1.getPlayerColor());
+    lb.putNewPlayer(lbe2.getPlayerId(), lbe2.getPlayerName(), lbe2.getPlayerColor());
+    lb.addToEntry(lbe1.getPlayerId(), 3);
+
+    System.out.println(lb);
+
+  }
 }
