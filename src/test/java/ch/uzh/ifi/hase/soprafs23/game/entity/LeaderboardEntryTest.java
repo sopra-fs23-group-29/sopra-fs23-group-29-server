@@ -35,6 +35,10 @@ class LeaderboardEntryTest {
     assertEquals(lbe.getCurrentScore(), 0);
     lbe.addScore(100);
     assertEquals(lbe.getCurrentScore(), 100);
+    lbe.addScore(-5);
+    assertEquals(lbe.getCurrentScore(), 95);
+    lbe.addScore(-100);
+    assertEquals(lbe.getCurrentScore(), -5);
   }
 
   @Test

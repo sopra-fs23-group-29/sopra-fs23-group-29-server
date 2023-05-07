@@ -1,12 +1,10 @@
 package ch.uzh.ifi.hase.soprafs23.game.websockets.dto.outgoing;
 
-import ch.uzh.ifi.hase.soprafs23.constant.PlayerColor;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Guess;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
 import ch.uzh.ifi.hase.soprafs23.game.entity.Turn;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class TurnOutgoingDTO {

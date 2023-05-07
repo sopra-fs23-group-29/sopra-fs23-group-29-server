@@ -5,8 +5,11 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
+import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -17,7 +20,7 @@ import java.util.*;
  */
 
 public class Game {
-
+  
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
   public static final int BARRIERPOSITION = 3; // todo: could be dynamic, static must match Client side!
@@ -30,6 +33,7 @@ public class Game {
   private PlayerService playerService;
   private IQuestionService questionService;
   private BarrierQuestion currentBarrierQuestion;
+  private boolean waitingForBarrierAnswer; // this lock determines if we can keep on processing or should wait
   private Long gameId;
   private String gameName;
   private GameStatus gameStatus;
@@ -72,14 +76,16 @@ public class Game {
     this.turnNumber = 0;
 
     // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
-    // create empty list of resovled BarrierQuestions
+    // create empty list of resolved BarrierQuestions
     // create empty list of players ready to move
     // set currentBarrierQuestion to null
+    // set waitingForBarrierAnswer to false
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
     this.resolvedBarriers = new ArrayList<>();
     this.playerIdReadyToMove = new ArrayList<>();
+    this.waitingForBarrierAnswer = false;
 
     // set joinable to true
     this.joinable = true;
@@ -119,6 +125,8 @@ public class Game {
   public void setGameMode(GameMode gameMode) {
     this.gameMode = gameMode;
   }
+  public void setWaitingForBarrierAnswer(boolean waitingForBarrierAnswer) {this.waitingForBarrierAnswer = waitingForBarrierAnswer;}
+  public boolean getWaitingForBarrierAnswer() {return this.waitingForBarrierAnswer;}
   public int getTurnNumber() {
     return turnNumber;
   }
@@ -168,13 +176,34 @@ public class Game {
       return false;
     }
 
-    if ((boardSize.getBoardSize() - currentPosition) < BARRIERPOSITION) {
+    if ((boardSize.getBoardSize() - currentPosition) <= BARRIERPOSITION) {
       return false;
     }
 
     // Check if by adding one, player hits a barrier which is not resolved yet
     if (currentPosition%BARRIERPOSITION == 0) {
       return !resolvedBarriers.contains(newPosition);
+    }
+
+    return false;
+
+  }
+
+  /**
+   * Check if moving playerId by one field hits an already resolved barrier on the board
+   * @param playerId Player ID
+   * @return True if a resolved barrier is hit, false otherwise
+   */
+  public boolean hitsResolvedBarrier(Long playerId) {
+    // Get the playerId leaderboard entry
+    LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
+    // Get the current score/position of the player
+    int currentPosition = playerLeaderboardEntry.getCurrentScore();
+    int newPosition = currentPosition+1;
+
+    // Check if by adding one, player hits an already resolved barrier
+    if (currentPosition%BARRIERPOSITION == 0) {
+      return resolvedBarriers.contains(newPosition);
     }
 
     return false;
@@ -262,6 +291,7 @@ public class Game {
 
   /**
    * Check if the conditions for a game over are fulfilled
+   * The final field is on boardSize - 1
    * @return True if game is over, false otherwise.
    */
   public boolean gameOver() {
@@ -272,7 +302,7 @@ public class Game {
     // check winning conditions PVP
     if (gameMode.equals(GameMode.PVP)) {
       for (LeaderboardEntry entry : leaderboard.getEntries()) {
-        if (entry.getCurrentScore() >= this.boardSize.getBoardSize()) {
+        if (entry.getCurrentScore() >= this.boardSize.getBoardSize()-1) {
           return true;
         }
       }
@@ -404,15 +434,23 @@ public class Game {
   }
 
   /**
-   * Process the barrier answer, update the game, leaderboards and the currentBarrierQuestion
+   * Process the barrier answer, update the game, leaderboards and the currentBarrierQuestion and the waiting lock
+   * DO NOT decrease the turn result by 1 if correct, the player does not use a moving point by answering correctly
+   * If the answer was wrong, set the players current turn score to 0
    * @param barrierAnswer The answer given
+   * @return True if barrier was answered correct, false otherwise
    */
-  public void processBarrierAnswer(BarrierAnswer barrierAnswer) {
+  public boolean processBarrierAnswer(BarrierAnswer barrierAnswer) {
     // Extract the player that gave the answer
     Player playerGuessed = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
     Long playerIdGuessed = playerGuessed.getId();
     // Evaluate the guess
     boolean guessCorrect = currentBarrierQuestion.evaluateGuess(barrierAnswer.getGuess());
+
+    // set currentBarrierQuestion to null since the question has been answered
+    this.currentBarrierQuestion = null;
+    // set the waitingForBarrierAnswer to false since we have received an answer
+    this.waitingForBarrierAnswer = false;
 
     // if the guess was correct, update the leaderboards
     if (guessCorrect) {
@@ -422,10 +460,18 @@ public class Game {
       // update the leaderboards
       this.leaderboard.addToEntry(playerIdGuessed,1);
       this.barrierLeaderboard.addToEntry(playerIdGuessed, 1);
+      // DO NOT decrease the turn results by 1, answering a barrier does not use up moving points
+
+      return true;
+
+      // if the guess was wrong, set the turn score of the player to 0, he cannot move anymore
+    } else {
+      this.turn.getTurnResult().getEntry(playerIdGuessed).replaceScore(0);
+      return false;
     }
 
-    // set currentBarrierQuestion to null since the question has been answered
-    this.currentBarrierQuestion = null;
+
+
 
   }
 
