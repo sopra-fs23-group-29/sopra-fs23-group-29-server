@@ -174,12 +174,15 @@ public class UserServiceIntegrationTest {
         testUser.setUsername("testUsername");
         User createdUser = userService.createUser(testUser);
 
+        // get user
+        User retrievedUser = userService.checkLogin(testUser);
+
         // then
-        assertEquals(testUser.getId(), createdUser.getId());
-        assertEquals(testUser.getUsername(), createdUser.getUsername());
-        assertNotNull(createdUser.getToken());
-        assertEquals("", createdUser.getBirthday());
-        assertEquals(UserStatus.ONLINE, createdUser.getStatus());
+        assertEquals(testUser.getId(), retrievedUser.getId());
+        assertEquals(testUser.getUsername(), retrievedUser.getUsername());
+        assertNotNull(retrievedUser.getToken());
+        assertEquals("", retrievedUser.getBirthday());
+        assertEquals(UserStatus.ONLINE, retrievedUser.getStatus());
         assertEquals(currentDate, createdUser.getCreationDate());
 
     }
@@ -213,24 +216,6 @@ public class UserServiceIntegrationTest {
 
         // fail because of nonexistent username
         assertThrows(ResponseStatusException.class, () -> userService.checkLogin(testUser_wrongPassword));
-
-    }
-
-    @Test
-    public void checkLogin_alreadyLoggedIn_throwsException() {
-
-        // user created in db
-        User testUser = new User();
-        testUser.setPassword("testPassword");
-        testUser.setUsername("testUsername");
-        User createdUser = userService.createUser(testUser);
-
-        // set status to ONLINE
-        userService.setUserOnline(createdUser.getId());
-        assertEquals(createdUser.getStatus(), UserStatus.ONLINE);
-
-        // fail because user is already ONLINE
-        assertThrows(ResponseStatusException.class, () -> userService.checkLogin(createdUser));
 
     }
 

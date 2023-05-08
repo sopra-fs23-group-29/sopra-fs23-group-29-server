@@ -89,8 +89,6 @@ public class UserService {
 
     /**
      * Check if a user exists and if his password is correct
-     * Then Check if he is already logged in, throw FORBIDDEN if so
-     *
      * Check for existence is based on
      * username
      *
@@ -99,7 +97,8 @@ public class UserService {
      *
      * Return the user if found
      *
-     * @param userToCheck User to log in
+     * @param userToCheck
+     * @throws org.springframework.web.server.ResponseStatusException
      * @return User
      */
     public User checkLogin(User userToCheck) {
@@ -125,15 +124,9 @@ public class UserService {
             );
         }
 
-        // check if the user is already logged in
-        if (userSearched.getStatus().equals(UserStatus.ONLINE)) {
-            throw new ResponseStatusException(
-              HttpStatus.FORBIDDEN,
-              "User %s is currently already logged in".formatted(userSearched.getUsername())
-            );
-        }
+        User userToReturn = setUserOnline(userSearched.getId());
 
-        return setUserOnline(userSearched.getId());
+        return userToReturn;
 
     }
 
