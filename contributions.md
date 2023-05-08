@@ -107,6 +107,9 @@
 - Thalia
   - Client 32, 127
 
+- Nils
+  - Client 71, 100, 115, 116, 64, 65
+
 ### Week 19
 
 - Dominik
