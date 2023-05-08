@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
@@ -60,6 +61,28 @@ public class WebSocketController {
     public void getGame(@DestinationVariable long gameId) {
         log.info("Sending getGame message to game {}", gameId);
         gameService.updateGame((long) gameId);
+    }
+
+    /**
+     * Get the message from the frontend to set a game to gameOver
+     * NO CHECKS FOR AUTHORIZATION ARE DONE
+     */
+    @MessageMapping("/games/{gameId}/endGame")
+    public void endGame(@DestinationVariable long gameId) {
+        log.info("/endGame called, setting GameStatus to FINISHED and therefore ending game {}", gameId);
+        Game gameToEnd = gameService.getGameById(gameId);
+        gameToEnd.setGameStatus(GameStatus.FINISHED);
+
+        if (gameToEnd.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameToEnd);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+        } else {
+            log.error("Game {} should be over after /endGame, something went wrong!", gameId);
+        }
+        
     }
 
     /**
