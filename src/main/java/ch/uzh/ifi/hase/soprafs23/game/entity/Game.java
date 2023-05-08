@@ -5,13 +5,12 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
-import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import java.time.LocalDateTime; // import the LocalDateTime class
 
 
 /**
@@ -44,6 +43,7 @@ public class Game {
   private boolean joinable;
   private BoardSize boardSize;
   private MaxDuration maxDuration;
+  private LocalDateTime startDatetime; // used to time the duration of the game
   private int maxTurns; // currently not in use
 
   /**
@@ -75,11 +75,14 @@ public class Game {
     // upon creation, set turnNumber to 0
     this.turnNumber = 0;
 
-    // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
+    // upon creation ...
+    // set the startDatetime
+    // create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resolved BarrierQuestions
     // create empty list of players ready to move
     // set currentBarrierQuestion to null
     // set waitingForBarrierAnswer to false
+    this.startDatetime = LocalDateTime.now();
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
@@ -156,7 +159,8 @@ public class Game {
     return turn;
   }
   public boolean getJoinable() {return this.joinable;}
-
+  public LocalDateTime getStartDatetime() {return startDatetime;}
+  public void setStartDatetime(LocalDateTime startDatetime) {this.startDatetime = startDatetime;}
 
   /**
    * Check if moving playerId by one field hits a barrier on the board
@@ -307,12 +311,14 @@ public class Game {
         }
       }
 
+    // checking winning conditions HOWFAR
+    } else if (gameMode.equals(GameMode.HOWFAR)) {
+      // no limit on boardsize or fields covered
+
+
     // default for GameMode not covered yet
     } else {
-
-      // gameMode.HOWFAST using maxDuration?
-
-      System.out.println("GAMEOVER : ONLY PVP gameOver implemented!");
+      System.out.println("GAMEOVER : ONLY PVP and HOWFAR gameOver() implemented!");
       throw new RuntimeException();
     }
 
