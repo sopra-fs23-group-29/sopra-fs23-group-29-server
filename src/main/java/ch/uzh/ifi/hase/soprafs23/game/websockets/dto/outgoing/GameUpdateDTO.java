@@ -33,7 +33,6 @@ public class GameUpdateDTO {
     private int boardSizeInt;
     private MaxDuration maxDuration;
     private int maxDurationInt;
-    private int maxTurns;
 
     public GameUpdateDTO(Game game) {
         this.players = game.getPlayersView();
@@ -51,7 +50,6 @@ public class GameUpdateDTO {
         this.boardSizeInt = game.getBoardSize().getBoardSize();
         this.maxDuration = game.getMaxDuration();
         this.maxDurationInt = game.getMaxDuration().getMaxDuration();
-        this.maxTurns = game.getMaxTurns();
         this.joinable = game.getJoinable();
     }
 

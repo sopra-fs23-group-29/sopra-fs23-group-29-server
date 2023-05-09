@@ -50,7 +50,6 @@ public class Game {
   private BoardSize boardSize;
   private MaxDuration maxDuration;
   private LocalDateTime startDatetime; // used to time the duration of the game
-  private int maxTurns; // currently not in use
 
   /**
    * The constructor always needs a playerRepository to fetch its current players
@@ -167,9 +166,6 @@ public class Game {
     return maxDuration;
   }
   public void setMaxDuration(MaxDuration maxDuration) {this.maxDuration = maxDuration;}
-  public int getMaxTurns() {
-    return maxTurns;
-  }
   public Turn getTurn() {
     return turn;
   }
