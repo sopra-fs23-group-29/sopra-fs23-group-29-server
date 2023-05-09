@@ -5,8 +5,11 @@ import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.service.PlayerService;
+import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.Answer;
 import ch.uzh.ifi.hase.soprafs23.game.websockets.dto.incoming.BarrierAnswer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -19,6 +22,8 @@ import java.time.LocalDateTime; // import the LocalDateTime class
  */
 
 public class Game {
+
+  private final Logger log = LoggerFactory.getLogger(UserService.class);
   
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
@@ -37,6 +42,7 @@ public class Game {
   private String gameName;
   private GameStatus gameStatus;
   private GameMode gameMode;
+  private boolean barriersEnabled; // are barriers enabled or not? if not hitsBarrier and hitsResolvedBarrier never return true;
   private Leaderboard leaderboard;
   private Leaderboard barrierLeaderboard;
   private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
@@ -55,6 +61,7 @@ public class Game {
    * @param boardSize BoardSize specifying the size of the board
    * @param maxDuration Number of minutes maximum allowed to play. Not relevant if PVP
    * @param playerService PlayerService instance
+   * @param questionService IQuestionService instance
    */
   public Game(
     Long gameId,String gameName,GameMode gameMode, BoardSize boardSize, MaxDuration maxDuration
@@ -92,6 +99,13 @@ public class Game {
 
     // set joinable to true
     this.joinable = true;
+
+    // disable barriers in barriersDisabled for certain game modes
+    this.barriersEnabled = true;
+    if (this.gameMode.equals(GameMode.HOWFAR)) {
+      log.info("Gamemode HOWFAR : Barriers are disabled");
+      this.barriersEnabled = false;
+    }
   }
 
   // default no args constructor - needed for mapper
@@ -128,6 +142,7 @@ public class Game {
   public void setGameMode(GameMode gameMode) {
     this.gameMode = gameMode;
   }
+  public boolean getBarriersEnabled() {return this.barriersEnabled;}
   public void setWaitingForBarrierAnswer(boolean waitingForBarrierAnswer) {this.waitingForBarrierAnswer = waitingForBarrierAnswer;}
   public boolean getWaitingForBarrierAnswer() {return this.waitingForBarrierAnswer;}
   public int getTurnNumber() {
@@ -170,6 +185,12 @@ public class Game {
    * @return True if barrier is hit, false otherwise
    */
   public boolean hitsBarrier(Long playerId) {
+
+    // if barriers are not enabled, always return false
+    if (!this.barriersEnabled) {
+      return false;
+    }
+
     // Get the playerId leaderboard entry
     LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
     // Get the current score/position of the player
@@ -199,6 +220,12 @@ public class Game {
    * @return True if a resolved barrier is hit, false otherwise
    */
   public boolean hitsResolvedBarrier(Long playerId) {
+
+    // if barriers are not enabled, always return false
+    if (!this.barriersEnabled) {
+      return false;
+    }
+
     // Get the playerId leaderboard entry
     LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
     // Get the current score/position of the player
@@ -313,12 +340,20 @@ public class Game {
 
     // checking winning conditions HOWFAR
     } else if (gameMode.equals(GameMode.HOWFAR)) {
-      // no limit on boardsize or fields covered
+      // no limit on boardsize or fields covered, frontend handles call to /endgame through countdown
 
+    // checking winning conditions HOWFAST
+    } else if (gameMode.equals(GameMode.HOWFAST)) {
+      // basically same as PVP, as soon as a player reaches the end of the board
+      for (LeaderboardEntry entry : leaderboard.getEntries()) {
+        if (entry.getCurrentScore() >= this.boardSize.getBoardSize()-1) {
+          return true;
+        }
+      }
 
     // default for GameMode not covered yet
     } else {
-      System.out.println("GAMEOVER : ONLY PVP and HOWFAR gameOver() implemented!");
+      System.out.println("GAMEOVER : Convered gameModes: PVP, HOWFAR, HOWFAST. Anything else is not covered yet!");
       throw new RuntimeException();
     }
 
@@ -447,6 +482,13 @@ public class Game {
    * @return True if barrier was answered correct, false otherwise
    */
   public boolean processBarrierAnswer(BarrierAnswer barrierAnswer) {
+
+    // this should never be called on a game with barriersEnabled == false
+    if (!this.barriersEnabled) {
+      log.error("Game {} with gameMode {} has no barriers enabled, this function should never be called!", this.gameId, this.gameMode);
+      throw new RuntimeException();
+    }
+
     // Extract the player that gave the answer
     Player playerGuessed = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
     Long playerIdGuessed = playerGuessed.getId();

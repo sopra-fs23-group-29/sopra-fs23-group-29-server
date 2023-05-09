@@ -25,6 +25,7 @@ public class GameUpdateDTO {
     private String gameName;
     private GameStatus gameStatus;
     private GameMode gameMode;
+    private boolean barriersEnabled; // are barriers enabled or not? if not hitsBarrier and hitsResolvedBarrier never return true;
     private Leaderboard leaderboard;
     private Leaderboard barrierLeaderboard;
     private boolean joinable;
@@ -43,6 +44,7 @@ public class GameUpdateDTO {
         this.gameName = game.getGameName();
         this.gameStatus = game.getGameStatus();
         this.gameMode = game.getGameMode();
+        this.barriersEnabled = game.getBarriersEnabled();
         this.leaderboard = game.getLeaderboard();
         this.barrierLeaderboard = game.getBarrierLeaderboard();
         this.boardSize = game.getBoardSize();
