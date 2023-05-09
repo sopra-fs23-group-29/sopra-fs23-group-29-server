@@ -112,12 +112,15 @@ public class WebSocketController {
         // send the new game object upon start to let the frontend know about the game parameters
         log.info("Sending message to /newgame");
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newgame", gameCreatedAsString);
+        // inform the GameHeader client separately
+        log.info("Send message separate to newgame_gameheader");
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newgame_gameheader", gameCreatedAsString);
 
         // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
 
         // inform the GameHeader client separately
-        log.info("Send message seperate to newturn_gameheader");
+        log.info("Send message separate to newturn_gameheader");
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
 
         // also send to /games to remove games not joinable anymore
