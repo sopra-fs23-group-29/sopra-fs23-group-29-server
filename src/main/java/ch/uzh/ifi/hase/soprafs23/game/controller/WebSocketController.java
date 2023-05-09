@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GameStatus;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
 import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
@@ -63,6 +64,28 @@ public class WebSocketController {
     }
 
     /**
+     * Get the message from the frontend to set a game to gameOver
+     * NO CHECKS FOR AUTHORIZATION ARE DONE
+     */
+    @MessageMapping("/games/{gameId}/endGame")
+    public void endGame(@DestinationVariable long gameId) {
+        log.info("/endGame called, setting GameStatus to FINISHED and therefore ending game {}", gameId);
+        Game gameToEnd = gameService.getGameById(gameId);
+        gameToEnd.setGameStatus(GameStatus.FINISHED);
+
+        if (gameToEnd.gameOver()) {
+            log.info("Game {} is over", gameId);
+            GameUpdateDTO gameOver = new GameUpdateDTO(gameToEnd);
+            String gameOverAsString = new Gson().toJson(gameOver);
+            // send the game over to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+        } else {
+            log.error("Game {} should be over after /endGame, something went wrong!", gameId);
+        }
+        
+    }
+
+    /**
      * Start a game
      * Returns a Turn object for the client to work with
      * Also send the newly created Game for the first time
@@ -89,12 +112,15 @@ public class WebSocketController {
         // send the new game object upon start to let the frontend know about the game parameters
         log.info("Sending message to /newgame");
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newgame", gameCreatedAsString);
+        // inform the GameHeader client separately
+        log.info("Send message separate to newgame_gameheader");
+        webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newgame_gameheader", gameCreatedAsString);
 
         // send the new Turn to all subscribers of the running game
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn", nextTurnDTOasString);
 
         // inform the GameHeader client separately
-        log.info("Send message seperate to newturn_gameheader");
+        log.info("Send message separate to newturn_gameheader");
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/newturn_gameheader", nextTurnDTOasString);
 
         // also send to /games to remove games not joinable anymore

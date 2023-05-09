@@ -25,6 +25,7 @@ public class GameUpdateDTO {
     private String gameName;
     private GameStatus gameStatus;
     private GameMode gameMode;
+    private boolean barriersEnabled; // are barriers enabled or not? if not hitsBarrier and hitsResolvedBarrier never return true;
     private Leaderboard leaderboard;
     private Leaderboard barrierLeaderboard;
     private boolean joinable;
@@ -32,7 +33,7 @@ public class GameUpdateDTO {
     private int boardSizeInt;
     private MaxDuration maxDuration;
     private int maxDurationInt;
-    private int maxTurns;
+    private int playingTimeInSeconds;
 
     public GameUpdateDTO(Game game) {
         this.players = game.getPlayersView();
@@ -43,14 +44,15 @@ public class GameUpdateDTO {
         this.gameName = game.getGameName();
         this.gameStatus = game.getGameStatus();
         this.gameMode = game.getGameMode();
+        this.barriersEnabled = game.getBarriersEnabled();
         this.leaderboard = game.getLeaderboard();
         this.barrierLeaderboard = game.getBarrierLeaderboard();
         this.boardSize = game.getBoardSize();
         this.boardSizeInt = game.getBoardSize().getBoardSize();
         this.maxDuration = game.getMaxDuration();
         this.maxDurationInt = game.getMaxDuration().getMaxDuration();
-        this.maxTurns = game.getMaxTurns();
         this.joinable = game.getJoinable();
+        this.playingTimeInSeconds = game.getPlayingTimeInSeconds();
     }
 
     public void setGameId(Long gameId) {this.gameId = gameId;}

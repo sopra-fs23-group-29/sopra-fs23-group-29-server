@@ -13,6 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import java.time.LocalDateTime; // import the LocalDateTime class
+import java.time.temporal.ChronoUnit; // for time differences between two datetimes
+import java.time.format.DateTimeFormatter; // formatting dates
+
 
 /**
  * Internal Game Representation
@@ -20,10 +24,14 @@ import java.util.*;
  */
 
 public class Game {
+
+  private final Logger log = LoggerFactory.getLogger(UserService.class);
   
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
   public static final int BARRIERPOSITION = 3; // todo: could be dynamic, static must match Client side!
+
+  private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   private List<Player> players;
   // Which players have agreed to hide the scoreboard and move on to moving the players? Is reset with each new turn
@@ -38,13 +46,15 @@ public class Game {
   private String gameName;
   private GameStatus gameStatus;
   private GameMode gameMode;
+  private boolean barriersEnabled; // are barriers enabled or not? if not hitsBarrier and hitsResolvedBarrier never return true;
   private Leaderboard leaderboard;
   private Leaderboard barrierLeaderboard;
   private List<Integer> resolvedBarriers; // keep track of which barriers have been resolved already
   private boolean joinable;
   private BoardSize boardSize;
   private MaxDuration maxDuration;
-  private int maxTurns; // currently not in use
+  private LocalDateTime startDatetime; // used to time the duration of the game
+  private int playingTimeInSeconds; // used to time the duration of the game
 
   /**
    * The constructor always needs a playerRepository to fetch its current players
@@ -55,6 +65,7 @@ public class Game {
    * @param boardSize BoardSize specifying the size of the board
    * @param maxDuration Number of minutes maximum allowed to play. Not relevant if PVP
    * @param playerService PlayerService instance
+   * @param questionService IQuestionService instance
    */
   public Game(
     Long gameId,String gameName,GameMode gameMode, BoardSize boardSize, MaxDuration maxDuration
@@ -75,11 +86,16 @@ public class Game {
     // upon creation, set turnNumber to 0
     this.turnNumber = 0;
 
-    // upon creation, create empty leaderboard and barrierLeaderboard, both Leaderboard class
+    // upon creation ...
+    // set the startDatetime
+    // set the playingTimeInSeconds to 0
+    // create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resolved BarrierQuestions
     // create empty list of players ready to move
     // set currentBarrierQuestion to null
     // set waitingForBarrierAnswer to false
+    this.startDatetime = LocalDateTime.now();
+    this.playingTimeInSeconds = 0;
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
@@ -89,6 +105,13 @@ public class Game {
 
     // set joinable to true
     this.joinable = true;
+
+    // disable barriers in barriersDisabled for certain game modes
+    this.barriersEnabled = true;
+    if (this.gameMode.equals(GameMode.HOWFAR)) {
+      log.info("Gamemode HOWFAR : Barriers are disabled");
+      this.barriersEnabled = false;
+    }
   }
 
   // default no args constructor - needed for mapper
@@ -125,6 +148,7 @@ public class Game {
   public void setGameMode(GameMode gameMode) {
     this.gameMode = gameMode;
   }
+  public boolean getBarriersEnabled() {return this.barriersEnabled;}
   public void setWaitingForBarrierAnswer(boolean waitingForBarrierAnswer) {this.waitingForBarrierAnswer = waitingForBarrierAnswer;}
   public boolean getWaitingForBarrierAnswer() {return this.waitingForBarrierAnswer;}
   public int getTurnNumber() {
@@ -149,14 +173,11 @@ public class Game {
     return maxDuration;
   }
   public void setMaxDuration(MaxDuration maxDuration) {this.maxDuration = maxDuration;}
-  public int getMaxTurns() {
-    return maxTurns;
-  }
   public Turn getTurn() {
     return turn;
   }
   public boolean getJoinable() {return this.joinable;}
-
+  public int getPlayingTimeInSeconds() {return playingTimeInSeconds;}
 
   /**
    * Check if moving playerId by one field hits a barrier on the board
@@ -166,6 +187,12 @@ public class Game {
    * @return True if barrier is hit, false otherwise
    */
   public boolean hitsBarrier(Long playerId) {
+
+    // if barriers are not enabled, always return false
+    if (!this.barriersEnabled) {
+      return false;
+    }
+
     // Get the playerId leaderboard entry
     LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
     // Get the current score/position of the player
@@ -195,6 +222,12 @@ public class Game {
    * @return True if a resolved barrier is hit, false otherwise
    */
   public boolean hitsResolvedBarrier(Long playerId) {
+
+    // if barriers are not enabled, always return false
+    if (!this.barriersEnabled) {
+      return false;
+    }
+
     // Get the playerId leaderboard entry
     LeaderboardEntry playerLeaderboardEntry = leaderboard.getEntry(playerId);
     // Get the current score/position of the player
@@ -219,6 +252,18 @@ public class Game {
     players = playerService.getPlayersByGameId(this.gameId);
     // Update if joinable
     this.joinable = isJoinable();
+  }
+
+  /**
+   * Get the current datetime and update the playingTimeInSeconds by subtracting the startDatetime from it
+   */
+  public void updateTime() {
+    LocalDateTime currentDatetime = LocalDateTime.now();
+    if (currentDatetime.compareTo(this.startDatetime) < 0) {
+      log.error("Game {} updateTime : currentDatetime {} smaller than startDatetime {}, something is off!", this.gameId, currentDatetime.format(dtf), this.startDatetime.format(dtf));
+      throw new RuntimeException();
+    }
+    this.playingTimeInSeconds = (int) ChronoUnit.SECONDS.between(this.startDatetime, currentDatetime);
   }
 
   /**
@@ -299,6 +344,9 @@ public class Game {
     if (gameStatus.equals(GameStatus.FINISHED)) {return true;}
     if (gameStatus.equals(GameStatus.INLOBBY)) {return false;}
 
+    // update the time played in seconds
+    updateTime();
+
     // check winning conditions PVP
     if (gameMode.equals(GameMode.PVP)) {
       for (LeaderboardEntry entry : leaderboard.getEntries()) {
@@ -307,12 +355,22 @@ public class Game {
         }
       }
 
+    // checking winning conditions HOWFAR
+    } else if (gameMode.equals(GameMode.HOWFAR)) {
+      // no limit on boardsize or fields covered, frontend handles call to /endgame through countdown
+
+    // checking winning conditions HOWFAST
+    } else if (gameMode.equals(GameMode.HOWFAST)) {
+      // basically same as PVP, as soon as a player reaches the end of the board
+      for (LeaderboardEntry entry : leaderboard.getEntries()) {
+        if (entry.getCurrentScore() >= this.boardSize.getBoardSize()-1) {
+          return true;
+        }
+      }
+
     // default for GameMode not covered yet
     } else {
-
-      // gameMode.HOWFAST using maxDuration?
-
-      System.out.println("GAMEOVER : ONLY PVP gameOver implemented!");
+      System.out.println("GAMEOVER : Convered gameModes: PVP, HOWFAR, HOWFAST. Anything else is not covered yet!");
       throw new RuntimeException();
     }
 
@@ -441,6 +499,13 @@ public class Game {
    * @return True if barrier was answered correct, false otherwise
    */
   public boolean processBarrierAnswer(BarrierAnswer barrierAnswer) {
+
+    // this should never be called on a game with barriersEnabled == false
+    if (!this.barriersEnabled) {
+      log.error("Game {} with gameMode {} has no barriers enabled, this function should never be called!", this.gameId, this.gameMode);
+      throw new RuntimeException();
+    }
+
     // Extract the player that gave the answer
     Player playerGuessed = playerService.getPlayerByUserToken(barrierAnswer.getUserToken());
     Long playerIdGuessed = playerGuessed.getId();
