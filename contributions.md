@@ -119,5 +119,10 @@
 
 - Thalia
   - Client 31, 37
+- Mona
+  - Client 68, 69
+
+- Nils
+  - client 70, server 78
 
 ### Week 20
