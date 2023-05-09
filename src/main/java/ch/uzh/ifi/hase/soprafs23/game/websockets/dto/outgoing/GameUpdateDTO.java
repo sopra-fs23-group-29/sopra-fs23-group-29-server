@@ -33,6 +33,7 @@ public class GameUpdateDTO {
     private int boardSizeInt;
     private MaxDuration maxDuration;
     private int maxDurationInt;
+    private int playingTimeInSeconds;
 
     public GameUpdateDTO(Game game) {
         this.players = game.getPlayersView();
@@ -51,6 +52,7 @@ public class GameUpdateDTO {
         this.maxDuration = game.getMaxDuration();
         this.maxDurationInt = game.getMaxDuration().getMaxDuration();
         this.joinable = game.getJoinable();
+        this.playingTimeInSeconds = game.getPlayingTimeInSeconds();
     }
 
     public void setGameId(Long gameId) {this.gameId = gameId;}

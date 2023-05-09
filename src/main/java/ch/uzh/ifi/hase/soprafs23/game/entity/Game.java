@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 import java.time.LocalDateTime; // import the LocalDateTime class
+import java.time.temporal.ChronoUnit; // for time differences between two datetimes
+import java.time.format.DateTimeFormatter; // formatting dates
 
 
 /**
@@ -28,6 +30,8 @@ public class Game {
   public static final int MAXPLAYERS = 6;
   // every 3rd field is a barrier question
   public static final int BARRIERPOSITION = 3; // todo: could be dynamic, static must match Client side!
+
+  private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
   private List<Player> players;
   // Which players have agreed to hide the scoreboard and move on to moving the players? Is reset with each new turn
@@ -50,6 +54,7 @@ public class Game {
   private BoardSize boardSize;
   private MaxDuration maxDuration;
   private LocalDateTime startDatetime; // used to time the duration of the game
+  private int playingTimeInSeconds; // used to time the duration of the game
 
   /**
    * The constructor always needs a playerRepository to fetch its current players
@@ -83,12 +88,14 @@ public class Game {
 
     // upon creation ...
     // set the startDatetime
+    // set the playingTimeInSeconds to 0
     // create empty leaderboard and barrierLeaderboard, both Leaderboard class
     // create empty list of resolved BarrierQuestions
     // create empty list of players ready to move
     // set currentBarrierQuestion to null
     // set waitingForBarrierAnswer to false
     this.startDatetime = LocalDateTime.now();
+    this.playingTimeInSeconds = 0;
     this.currentBarrierQuestion = null;
     this.leaderboard = new Leaderboard();
     this.barrierLeaderboard = new Leaderboard();
@@ -170,8 +177,7 @@ public class Game {
     return turn;
   }
   public boolean getJoinable() {return this.joinable;}
-  public LocalDateTime getStartDatetime() {return startDatetime;}
-  public void setStartDatetime(LocalDateTime startDatetime) {this.startDatetime = startDatetime;}
+  public int getPlayingTimeInSeconds() {return playingTimeInSeconds;}
 
   /**
    * Check if moving playerId by one field hits a barrier on the board
@@ -246,6 +252,18 @@ public class Game {
     players = playerService.getPlayersByGameId(this.gameId);
     // Update if joinable
     this.joinable = isJoinable();
+  }
+
+  /**
+   * Get the current datetime and update the playingTimeInSeconds by subtracting the startDatetime from it
+   */
+  public void updateTime() {
+    LocalDateTime currentDatetime = LocalDateTime.now();
+    if (currentDatetime.compareTo(this.startDatetime) < 0) {
+      log.error("Game {} updateTime : currentDatetime {} smaller than startDatetime {}, something is off!", this.gameId, currentDatetime.format(dtf), this.startDatetime.format(dtf));
+      throw new RuntimeException();
+    }
+    this.playingTimeInSeconds = (int) ChronoUnit.SECONDS.between(this.startDatetime, currentDatetime);
   }
 
   /**
@@ -325,6 +343,9 @@ public class Game {
     // if FINISHED, its always true, if INLOBBY always false
     if (gameStatus.equals(GameStatus.FINISHED)) {return true;}
     if (gameStatus.equals(GameStatus.INLOBBY)) {return false;}
+
+    // update the time played in seconds
+    updateTime();
 
     // check winning conditions PVP
     if (gameMode.equals(GameMode.PVP)) {
