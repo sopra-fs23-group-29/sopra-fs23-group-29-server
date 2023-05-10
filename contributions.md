@@ -130,3 +130,6 @@
   - Client 65,  34 (only client)
 
 ### Week 20
+
+- Dominik
+  - Client 34, 35, 36, 133, 134 (Sologames including Timer&Countdown)
