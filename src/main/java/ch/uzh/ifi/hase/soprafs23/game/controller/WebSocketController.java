@@ -77,8 +77,9 @@ public class WebSocketController {
             log.info("Game {} is over", gameId);
             GameUpdateDTO gameOver = new GameUpdateDTO(gameToEnd);
             String gameOverAsString = new Gson().toJson(gameOver);
-            // send the game over to all subscribers
+            // send the game over to all subscribers, and separate to gameover_gameheader
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover_gameheader", gameOverAsString);
         } else {
             log.error("Game {} should be over after /endGame, something went wrong!", gameId);
         }
@@ -142,6 +143,7 @@ public class WebSocketController {
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover_gameheader", gameOverAsString);
             return;
         }
 
@@ -185,6 +187,7 @@ public class WebSocketController {
                 String gameOverAsString = new Gson().toJson(gameOver);
                 // send the game over to all subscribers
                 webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+                webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover_gameheader", gameOverAsString);
                 return;
             }
 
@@ -223,6 +226,7 @@ public class WebSocketController {
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover_gameheader", gameOverAsString);
             return;
         }
 
@@ -241,6 +245,7 @@ public class WebSocketController {
                 String gameOverAsString = new Gson().toJson(gameOver);
                 // send the game over to all subscribers
                 webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+                webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover_gameheader", gameOverAsString);
                 return;
             }
 
@@ -282,6 +287,7 @@ public class WebSocketController {
             String gameOverAsString = new Gson().toJson(gameOver);
             // send the game over to all subscribers
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameOverAsString);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover_gameheader", gameOverAsString);
             return;
         }
 
