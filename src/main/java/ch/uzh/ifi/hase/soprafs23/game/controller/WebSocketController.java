@@ -108,7 +108,7 @@ public class WebSocketController {
 
         // send an update to all players in the lobby to change the route
         webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamestart", nextTurnDTOasString);
-        Thread.sleep(3000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
+        Thread.sleep(1000); // artifical delay to make sure all participants of the lobby have rerouted before receiving the new newturn object
 
         // send the new game object upon start to let the frontend know about the game parameters
         log.info("Sending message to /newgame");
