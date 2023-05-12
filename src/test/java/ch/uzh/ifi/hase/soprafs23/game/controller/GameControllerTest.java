@@ -12,10 +12,8 @@ import ch.uzh.ifi.hase.soprafs23.game.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.game.service.WebSocketService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,6 +29,7 @@ import org.junit.jupiter.api.Assertions.*;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -492,6 +491,53 @@ class GameControllerTest {
         ;
     }
 
+    @Test
+    void leaveGame_playerIsHostAndLast_closeGame_ok() throws Exception {
+        // given
+        Player p1 = new Player();
+        p1.setIsHost(true);
+        p1.setGameId(1L);
+        p1.setPlayerColor(PlayerColor.INDIANRED);
+        p1.setToken("p1token");
+        p1.setUserToken("dummy");
+        p1.setId(1L);
+        p1.setPlayerName("p1");
+
+        // given
+        User u1 = new User();
+        u1.setPassword("password");
+        u1.setUsername("p1");
+        u1.setStatus(UserStatus.OFFLINE);
+        u1.setToken("dummy");
+
+        // given
+        Game game = new Game();
+        game.setGameId(1L);
+        game.setGameName("game1");
+        game.setGameMode(GameMode.PVP);
+        game.setBoardSize(BoardSize.SMALL);
+        game.setMaxDuration(MaxDuration.NA);
+        game.setGameStatus(GameStatus.INLOBBY);
+
+        // given - add the game to the GameRepository
+        GameRepository.addGame(game.getGameId(), game);
+        // given - add the player to the Game
+        gameService.createNewGame("game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+        playerService.joinPlayer("dummy", 1);
+
+        given(userService.getUserByToken("dummy")).willReturn(u1);
+        given(gameService.getGameById(1L)).willReturn(game);
+        given(playerService.getPlayerByUserToken("dummy")).willReturn(p1);
+
+        // when
+        MockHttpServletRequestBuilder postRequest = delete("/games/1")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header("Authorization", "dummy")
+          ;
+
+        // then
+        mockMvc.perform(postRequest).andExpect(status().isOk());
+    }
 
 
     /**

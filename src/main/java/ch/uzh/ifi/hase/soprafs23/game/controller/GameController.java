@@ -252,7 +252,7 @@ public class GameController {
             webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gamedeleted", "Game %s deleted".formatted(gameId));
         }
 
-        // todo: Option 1) Just end the game right away as soon as a player leaves
+        // Option 1) Just end the game right away as soon as a player leaves
         /*
         // If the game is INPROGRESS force gameover
         else if (gameToLeave.getGameStatus().equals(GameStatus.INPROGRESS)) {
@@ -273,7 +273,7 @@ public class GameController {
         }
         */
 
-        // todo: Option 2) Let game INPROGRESS continue, needs correction in frontend CountryRanking.js
+        // Option 2) Let game INPROGRESS continue
         // If the game is INPROGRESS force the next turn in the game
         else if (gameToLeave.getGameStatus().equals(GameStatus.INPROGRESS)) {
             log.info("Game {} in progress, force next turn", gameId);

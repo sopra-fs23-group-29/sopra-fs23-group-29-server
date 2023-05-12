@@ -659,6 +659,136 @@ class GameServiceIntegrationTest {
     }
 
     @Test
+    void processTurnResults_PVP() {
+
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+
+        // given - add two players and start the game
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+        gameService.startGame(gameIdCreated);
+
+        // given - start next turn
+        gameService.startNextTurn(gameIdCreated);
+
+        // assert that the taken guesses so far are empty
+        Turn currentTurn = gameService.getGameById(gameIdCreated).getTurn();
+        assertTrue(currentTurn.getTakenGuesses().isEmpty());
+
+        // then - set up a correct answer by p1_added and p2_added
+        Answer answer_p1_correct = new Answer();
+        answer_p1_correct.setGuess(1);
+        answer_p1_correct.setCountryCode("GER");
+        answer_p1_correct.setUserToken(p1_added.getUserToken());
+
+        Answer answer_p2_correct = new Answer();
+        answer_p2_correct.setGuess(1);
+        answer_p2_correct.setCountryCode("GER");
+        answer_p2_correct.setUserToken(p2_added.getUserToken());
+
+        // process answers
+        int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
+        gameService.processAnswer(answer_p1_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+        gameService.processAnswer(answer_p2_correct, p2_added.getId(), currentTurnNumber, gameIdCreated);
+
+        // assert the leaderboard is 0 for both players
+        for (LeaderboardEntry lbe : gameService.getGameById(gameIdCreated).getLeaderboard().getEntries()) {
+            assertEquals(lbe.getCurrentScore(), 0);
+        }
+
+        // end turn
+        gameService.endTurn(gameIdCreated, currentTurnNumber);
+
+        // assert the turn turnResult is 3 for both players
+        for (LeaderboardEntry lbe : gameService.getGameById(gameIdCreated).getTurn().getTurnResult().getEntries()) {
+            assertEquals(lbe.getCurrentScore(), 3);
+        }
+
+        // process turn results - no barrier should be hit
+        while (true) {
+            boolean turnProcessed = gameService.processTurnResults(gameIdCreated);
+            if (turnProcessed) {
+                break;
+            }
+        }
+
+        // assert turn turnResults are 0
+        for (LeaderboardEntry lbe : gameService.getGameById(gameIdCreated).getTurn().getTurnResult().getEntries()) {
+            assertEquals(lbe.getCurrentScore(), 0);
+        }
+
+        // assert game leaderboard are 3
+        for (LeaderboardEntry lbe : gameService.getGameById(gameIdCreated).getLeaderboard().getEntries()) {
+            assertEquals(lbe.getCurrentScore(), 3);
+        }
+
+        // assert no resolved barriers, no barrier points
+        for (LeaderboardEntry lbe : gameService.getGameById(gameIdCreated).getBarrierLeaderboard().getEntries()) {
+            assertEquals(lbe.getCurrentScore(), 0);
+        }
+        assertTrue(gameService.getGameById(gameIdCreated).getResolvedBarriers().isEmpty());
+    }
+
+    @Test
+    void processTurnResults_PVP_hitsBarrier_barrierQuestionGenerated() {
+
+        // given - adding a game with a dummy questionService via the service
+        Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+
+        // given - add two players and start the game
+        Player p1_added = playerService.joinPlayer(p1.getUserToken(), gameIdCreated.intValue());
+        Player p2_added = playerService.joinPlayer(p2.getUserToken(), gameIdCreated.intValue());
+        gameService.startGame(gameIdCreated);
+
+        // given - start next turn
+        gameService.startNextTurn(gameIdCreated);
+
+        // assert that no barrier question has been set up so far
+        assertNull(gameService.getGameById(gameIdCreated).getCurrentBarrierQuestion());
+
+        // then - set up a correct answer by p1_added and p2_added
+        Answer answer_p1_correct = new Answer();
+        answer_p1_correct.setGuess(1);
+        answer_p1_correct.setCountryCode("GER");
+        answer_p1_correct.setUserToken(p1_added.getUserToken());
+
+        Answer answer_p2_correct = new Answer();
+        answer_p2_correct.setGuess(1);
+        answer_p2_correct.setCountryCode("GER");
+        answer_p2_correct.setUserToken(p2_added.getUserToken());
+
+        // process answers and end turn
+        int currentTurnNumber = gameService.getGameById(gameIdCreated).getTurnNumber();
+        gameService.processAnswer(answer_p1_correct, p1_added.getId(), currentTurnNumber, gameIdCreated);
+        gameService.processAnswer(answer_p2_correct, p2_added.getId(), currentTurnNumber, gameIdCreated);
+        gameService.endTurn(gameIdCreated, currentTurnNumber);
+
+        // process turn results - no barrier should be hit
+        while (true) {
+            boolean turnProcessed = gameService.processTurnResults(gameIdCreated);
+            if (turnProcessed) {
+                break;
+            }
+        }
+
+        // start new turn
+        gameService.startNextTurn(gameIdCreated);
+        // fetch new turnNumber
+        int newTurnNumber = gameService.getGameById(gameIdCreated).getTurn().getTurnNumber();
+
+        // process answer by player 1 again, end turn
+        gameService.processAnswer(answer_p1_correct, p1_added.getId(), newTurnNumber, gameIdCreated);
+        gameService.endTurn(gameIdCreated, newTurnNumber);
+
+        // processTurnResults once, p1 should hit a barrier
+        gameService.processTurnResults(gameIdCreated);
+
+        // assert a barrierQuestion for the game has been generated
+        assertNotNull(gameService.getGameById(gameIdCreated).getCurrentBarrierQuestion());
+    }
+
+    @Test
     void endTurn() {
         // given - adding a game with a dummy questionService via the service
         Long gameIdCreated = dummyGameService.createNewGame("g_dummy", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);

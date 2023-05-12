@@ -201,7 +201,7 @@ public class UserController {
     // check if token was provided
     if (token == null) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-              "A token is required for deleting a user!");
+              "A token is required for deleting a flag!");
     }
 
     userService.replaceFlagRandomly(userId);

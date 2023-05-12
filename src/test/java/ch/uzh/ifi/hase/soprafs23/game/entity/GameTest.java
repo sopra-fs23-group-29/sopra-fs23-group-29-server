@@ -39,7 +39,7 @@ class GameTest {
     @Autowired
     private GameService gameService;
 
-    private Long gameId, gameIdSingle;
+    private Long gameId, gameIdHOWFAST, gameIdHOWFAR;
     private String userToken;
 
     @BeforeEach
@@ -50,7 +50,8 @@ class GameTest {
         userRepository.deleteAll();
 
         gameId = gameService.createNewGame("g1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
-        gameIdSingle = gameService.createNewGame("g2", GameMode.HOWFAST, BoardSize.SMALL, MaxDuration.NA);
+        gameIdHOWFAST = gameService.createNewGame("g2", GameMode.HOWFAST, BoardSize.SMALL, MaxDuration.NA);
+        gameIdHOWFAR = gameService.createNewGame("g3", GameMode.HOWFAR, BoardSize.LARGE, MaxDuration.SHORT);
 
         // create a player from dummy user
         User u1;
@@ -88,6 +89,10 @@ class GameTest {
         // assert game is not over
         Game g1 = gameService.getGameById(gameId);
         assertFalse(g1.gameOver());
+        Game g2 = gameService.getGameById(gameIdHOWFAST);
+        assertFalse(g2.gameOver());
+        Game g3 = gameService.getGameById(gameIdHOWFAR);
+        assertFalse(g3.gameOver());
     }
 
     @Test
@@ -126,7 +131,7 @@ class GameTest {
     void singleNeverJoinableAfterJoin() {
         // given the game without any players
         // assert players is an empty list
-        Game g2_single = gameService.getGameById(gameIdSingle);
+        Game g2_single = gameService.getGameById(gameIdHOWFAR);
 
         // assert joinable
         assertTrue(g2_single.getJoinable());

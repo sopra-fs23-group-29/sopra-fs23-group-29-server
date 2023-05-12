@@ -370,7 +370,6 @@ public class UserControllerTest {
         .andExpect(status().isOk());
   }
 
-  // todo: deleteUser
   @Test
   public void deleteUser_validInput_userDeleted() throws Exception {
 
@@ -388,7 +387,7 @@ public class UserControllerTest {
     userPutDTO.setUsername("testUsername");
     userPutDTO.setBirthday("testBirthday");
 
-//    given(userService.deleteUser(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).willReturn();
+    // given(userService.deleteUser(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).willReturn();
 
     // when/then -> do the request + validate the result
     MockHttpServletRequestBuilder deleteRequest = delete("/users/1")
@@ -494,6 +493,20 @@ public class UserControllerTest {
 
   }
 
+  @Test
+  public void deleteFlag() throws Exception {
+
+    given(userService.getRandomFlagURL()).willReturn("testURL");
+
+    MockHttpServletRequestBuilder deleteFlagRequest = delete("/users/1/flag")
+      .contentType(MediaType.APPLICATION_JSON)
+      .header("Authorization", "1");
+
+    // then
+    mockMvc.perform(deleteFlagRequest)
+      .andExpect(status().isAccepted());
+
+  }
 
 
 

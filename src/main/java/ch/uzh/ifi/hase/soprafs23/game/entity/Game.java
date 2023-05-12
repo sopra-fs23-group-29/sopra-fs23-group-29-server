@@ -370,7 +370,7 @@ public class Game {
 
     // default for GameMode not covered yet
     } else {
-      System.out.println("GAMEOVER : Convered gameModes: PVP, HOWFAR, HOWFAST. Anything else is not covered yet!");
+      System.out.println("GAMEOVER : Covered gameModes: PVP, HOWFAR, HOWFAST. Anything else is not covered yet!");
       throw new RuntimeException();
     }
 
