@@ -105,6 +105,7 @@
 - Mona
   - Client 19, 21
 - Thalia
+
   - Client 32, 127
 
 - Nils
@@ -118,18 +119,25 @@
   - Server 67
 
 - Thalia
+
   - Client 31, 37
 
 - Mona
+
   - Client 68, 69
 
 - Nils
+
   - client 70, server 78
 
-- Mark 
-  - Client 65,  34 (only client)
+- Mark
+  - Client 65, 34 (only client)
 
 ### Week 20
 
 - Dominik
+
   - Client 34, 35, 36, 133, 134 (Sologames including Timer&Countdown)
+
+- Thalia
+  - Client 136, 137
