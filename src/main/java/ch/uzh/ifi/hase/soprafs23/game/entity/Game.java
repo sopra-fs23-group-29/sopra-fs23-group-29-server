@@ -160,9 +160,6 @@ public class Game {
   public Leaderboard getBarrierLeaderboard() {
     return barrierLeaderboard;
   }
-  public void setBarrierLeaderboard(Leaderboard barrierLeaderboard) {
-    this.barrierLeaderboard = barrierLeaderboard;
-  }
   public BoardSize getBoardSize() {
     return boardSize;
   }
@@ -176,6 +173,7 @@ public class Game {
   public Turn getTurn() {
     return turn;
   }
+  public void setTurn(Turn turn) {this.turn = turn;}
   public boolean getJoinable() {return this.joinable;}
   public int getPlayingTimeInSeconds() {return playingTimeInSeconds;}
 

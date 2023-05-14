@@ -1,9 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.game.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.*;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Game;
-import ch.uzh.ifi.hase.soprafs23.game.entity.Player;
-import ch.uzh.ifi.hase.soprafs23.game.entity.User;
+import ch.uzh.ifi.hase.soprafs23.game.entity.*;
+import ch.uzh.ifi.hase.soprafs23.game.questions.IQuestionService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.BarrierQuestion;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.CountryService;
+import ch.uzh.ifi.hase.soprafs23.game.questions.restCountry.RankingQuestion;
 import ch.uzh.ifi.hase.soprafs23.game.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs23.game.rest.dto.GamePostDTO;
 import ch.uzh.ifi.hase.soprafs23.game.service.GameService;
@@ -26,6 +28,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.BDDMockito.given;
@@ -53,6 +60,37 @@ class GameControllerTest {
 
     @MockBean
     private WebSocketService webSocketService;
+
+    @MockBean
+    private IQuestionService questionService;
+    @MockBean
+    private CountryService countryService;
+
+    private IQuestionService dummyQuestionService;
+
+    class DummyQuestionService implements IQuestionService {
+        @Override
+        public RankingQuestion generateRankQuestion(int size) {
+            // always return rankingQuestion of size 1 with same countryCode
+            List<Country> dummyList = new ArrayList<>();
+            dummyList.add(countryService.getCountryData("GER"));
+            return new RankingQuestion(RankingQuestionEnum.AREA, dummyList);
+        }
+
+        @Override
+        public BarrierQuestion generateBarrierQuestion() {
+            BarrierQuestion dummyBarrierQuestion = new BarrierQuestion(
+              BarrierQuestionEnum.LANDLOCKED,
+              countryService.getCountryData("GER"),
+              new ArrayList<>()
+            );
+            return dummyBarrierQuestion;
+        }
+    }
+
+
+
+
 
     @BeforeEach
     void init() {
@@ -537,6 +575,77 @@ class GameControllerTest {
 
         // then
         mockMvc.perform(postRequest).andExpect(status().isOk());
+    }
+
+    @Test
+    void leaveGame_gameInProgress_ok() throws Exception {
+
+        // given
+        User u1 = new User();
+        u1.setPassword("password");
+        u1.setUsername("p1");
+        u1.setStatus(UserStatus.OFFLINE);
+        u1.setToken("dummy");
+
+        // given
+        Player p1 = new Player();
+        p1.setIsHost(true);
+        p1.setGameId(1L);
+        p1.setPlayerColor(PlayerColor.INDIANRED);
+        p1.setToken("p1token");
+        p1.setUserToken("dummy");
+        p1.setId(1L);
+        p1.setPlayerName("p1");
+
+        // given
+        Player p2 = new Player();
+        p2.setIsHost(true);
+        p2.setGameId(2L);
+        p2.setPlayerColor(PlayerColor.ORANGE);
+        p2.setToken("p2token");
+        p2.setUserToken("p2userToken");
+        p2.setId(2L);
+        p2.setPlayerName("p2");
+
+        // dummy question service
+        DummyQuestionService dummyQuestionService = new DummyQuestionService();
+
+        // given fake turn
+        Turn turn = new Turn(1, Arrays.asList(p1,p2), dummyQuestionService.generateRankQuestion(1));
+
+        Game game = new Game(1L, "game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA, playerService, dummyQuestionService);
+        game.setGameStatus(GameStatus.INPROGRESS);
+        game.setTurn(turn);
+
+        // setup mock answers
+        given(userService.getUserByToken("dummy")).willReturn(u1);
+        given(gameService.getGameById(1L)).willReturn(game);
+        given(playerService.getPlayerByUserToken("dummy")).willReturn(p1);
+        given(playerService.getPlayersByGameId(1L)).willReturn(Arrays.asList(p1,p2));
+
+
+        // given - add the game to the GameRepository
+        GameRepository.addGame(game.getGameId(), game);
+        // given - add the players to the Game
+//        gameService.createNewGame("game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+        playerService.joinPlayer("dummy", 1);
+        playerService.joinPlayer("p2userToken", 1);
+
+        gameService.updatePlayers(game.getGameId());
+        gameService.startGame(game.getGameId());
+        gameService.startNextTurn(game.getGameId());
+
+
+
+        // when
+        MockHttpServletRequestBuilder postRequest = delete("/games/1")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header("Authorization", "dummy")
+          ;
+
+        // then
+        mockMvc.perform(postRequest).andExpect(status().isOk());
+
     }
 
 
