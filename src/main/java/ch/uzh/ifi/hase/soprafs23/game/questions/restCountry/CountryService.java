@@ -14,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Paths;
 
 @Service
 public class CountryService {
@@ -23,6 +25,29 @@ public class CountryService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    public Country getCountryData(String COICode) {
+
+        try {
+            Country[] allCountries = objectMapper.readValue(Paths.get("src/main/resources/countriesV31.json").toFile(), Country[].class);
+
+            for (Country c : allCountries) {
+                c.refreshDataFromNestedObjects();
+                if (c.getCioc().equals(COICode)) {
+                    return c;
+                }
+            }
+
+            return null;
+
+        } catch (IOException ioException) {
+            log.warn("Reading JSON data threw IOException");
+            return null;
+        }
+
+
+    }
+
+    /* FOR OFFLINE remove that version
     public Country getCountryData(String COICode) throws ResponseStatusException {
         String url = "https://restcountries.com/v3.1/alpha/" + COICode;
         // catch any HTTP errors from the request
@@ -62,5 +87,6 @@ public class CountryService {
         }
 
     }
+    */
 
 }
