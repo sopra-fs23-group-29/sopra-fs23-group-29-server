@@ -6,6 +6,8 @@ public enum BarrierQuestionEnum {
 
   // todo: More categories need corresponding methods in Country!!
 
+  CAPITAL("What is the capital of this country?", false),
+  LANGUAGES("What are the official languages of this country?", false),
   NBORDERS("How many neighbouring countries does this country have?", false),
   LANDLOCKED("Is this country landlocked?", true);
 
