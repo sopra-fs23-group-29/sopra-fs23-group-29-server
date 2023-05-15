@@ -141,3 +141,8 @@
 
 - Thalia
   - Client 136, 137
+
+### Week 21
+
+- Thalia
+  - Client 138, M4 report and presentation slides, some work on README.md files
