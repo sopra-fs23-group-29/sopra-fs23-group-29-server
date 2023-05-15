@@ -82,7 +82,7 @@ public class GameController {
             if (playerToJoin.getGameId() != null) {
                 log.error("userToken {} with Player {} is already in game {}, cannot create a new game",
                     auth_token, playerToJoin.getId(), playerToJoin.getGameId());
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot crate game, user is in a game already, leave game first");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot crate game, user is in a game %s already, leave game first".formatted(playerToJoin.getGameId()));
             } else {
                 log.warn("userToken {} with Player {} has a player without gameId!",
                     auth_token, playerToJoin.getId());
@@ -155,7 +155,7 @@ public class GameController {
             if (playerToJoin.getGameId() != null) {
                 log.error("userToken {} with Player {} is already in game {}, cannot create a new game",
                     auth_token, playerToJoin.getId(), playerToJoin.getGameId());
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot crate game, user is in a game already, leave game first");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "cannot join game, user is in a game %s already, leave game first".formatted(playerToJoin.getGameId()));
             } else {
                 log.warn("userToken {} with Player {} has a player without gameId!",
                     auth_token, playerToJoin.getId());
