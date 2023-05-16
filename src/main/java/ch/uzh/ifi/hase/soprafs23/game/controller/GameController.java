@@ -331,4 +331,142 @@ public class GameController {
 
     }
 
+    @DeleteMapping("/games")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public GameGetDTO leaveAllGames(
+      HttpServletRequest request
+    ) throws ResponseStatusException {
+        // fetch auth_token from request
+        String auth_token = request.getHeader("Authorization");
+
+        // check if token was provided
+        if (auth_token == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              "A token is required");
+        }
+
+        // check the auth_token, the ID must match the token! idToCheck is null, it just needs to be a valid userToken
+        // if the token does not apply to a valid user, throw UNAUTHORIZED
+        userService.checkToken(auth_token, null);
+
+        // Get the user from the auth_token
+        // HTTPError is thrown if userToken is not an existing user
+        User userLeaving = userService.getUserByToken(auth_token);
+
+        // Get the player from the auth_token
+        // playerLeaving is null if there is no player from the auth_token
+        // in that case, the user leaving all games is in no game, throw CONFLICT
+        Player playerLeaving = playerService.getPlayerByUserToken(auth_token);
+        if (playerLeaving == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "The user %s is in no games".formatted(userLeaving.getUsername()));
+        }
+
+        // fetch the game the player is leaving and create a response object
+        Long gameIdToLeave = playerLeaving.getGameId();
+        Game gameToLeave = gameService.getGameById(gameIdToLeave);
+        GameGetDTO gameLeftDTO = DTOMapper.INSTANCE.convertEntityToGameGetDTO(gameToLeave);
+
+        // If the playerLeaving exists, is he currently in a game
+        // leave that game
+        log.info("User {} Player {} leaving Game {}", userLeaving.getUsername(), playerLeaving.getId(), gameIdToLeave);
+
+        // If the player is the last player in the game close the game down
+        if (gameToLeave.getPlayersView().size() == 1) {
+            log.info("Game {}: last player leaving, close game down", gameIdToLeave);
+            gameService.deleteGame(gameIdToLeave);
+            webSocketService.sendMessageToClients("/topic/games/" + gameIdToLeave + "/gamedeleted", "Game %s deleted".formatted(gameIdToLeave));
+        }
+
+        // If the user was the host and if the game is INLOBBY, delete the game, this deletes all players
+        // Send an update to everybody to gamedeleted
+        else if (playerLeaving.getIsHost() && gameToLeave.getGameStatus().equals(GameStatus.INLOBBY)) {
+            log.info("Game {}: Host left in LOBBY, delete game", gameIdToLeave);
+            gameService.deleteGame(gameIdToLeave);
+            webSocketService.sendMessageToClients("/topic/games/" + gameIdToLeave + "/gamedeleted", "Game %s deleted".formatted(gameIdToLeave));
+        }
+
+        // Option 1) Just end the game right away as soon as a player leaves
+        /*
+        // If the game is INPROGRESS force gameover
+        else if (gameToLeave.getGameStatus().equals(GameStatus.INPROGRESS)) {
+            log.info("Game {} in progress, end game", gameId);
+            // Otherwise, just remove that player that left
+            // Tell the player repo that a player left
+            // NOT_FOUND if gameId does not exist
+            playerService.deletePlayerById(playerLeaving.getId());
+            // in this case, let the game know that one player left
+            gameService.updatePlayers(gameId);
+
+            // Get game and set status to FINISHED, leading to game being over
+            Game gameToEnd = gameService.getGameById(gameId);
+            gameToEnd.setGameStatus(GameStatus.FINISHED);
+            GameUpdateDTO gameToEndDTO = new GameUpdateDTO(gameToEnd);
+            String gameToEndAsString = new Gson().toJson(gameToEndDTO);
+            webSocketService.sendMessageToClients("/topic/games/" + gameId + "/gameover", gameToEndAsString);
+        }
+        */
+
+        // Option 2) Let game INPROGRESS continue
+        // If the game is INPROGRESS force the next turn in the game
+        else if (gameToLeave.getGameStatus().equals(GameStatus.INPROGRESS)) {
+            log.info("Game {} in progress, force next turn", gameIdToLeave);
+            // Otherwise, just remove that player that left
+            // Tell the player repo that a player left
+            // NOT_FOUND if gameId does not exist
+            playerService.deletePlayerById(playerLeaving.getId());
+            // in this case, let the game know that one player left
+            gameService.updatePlayers(gameIdToLeave);
+
+
+            log.info("Game {} next turn", gameIdToLeave);
+            gameService.startNextTurn(gameIdToLeave);
+
+            // check if the game is over, if so, just send the game object to the gameover topic
+            Game gameNextTurn = gameService.getGameById(gameIdToLeave);
+            log.info("Game {} current leaderboard:", gameIdToLeave);
+            log.info("{}", gameNextTurn.getLeaderboard());
+            if (gameNextTurn.gameOver()) {
+                log.info("Game {} is over", gameIdToLeave);
+                GameUpdateDTO gameOver = new GameUpdateDTO(gameNextTurn);
+                String gameOverAsString = new Gson().toJson(gameOver);
+                // send the game over to all subscribers
+                webSocketService.sendMessageToClients("/topic/games/" + gameIdToLeave + "/gameover", gameOverAsString);
+                return gameLeftDTO;
+            }
+
+            Turn nextTurn = gameService.getGameById(gameIdToLeave).getTurn();
+            log.info("Created Turn {}", nextTurn.getTurnNumber());
+
+            TurnOutgoingDTO nextTurnDTO = new TurnOutgoingDTO(nextTurn);
+            String nextTurnDTOasString = new Gson().toJson(nextTurnDTO);
+
+            // send the new Turn to all subscribers
+            webSocketService.sendMessageToClients("/topic/games/" + gameIdToLeave + "/newturn", nextTurnDTOasString);
+            // inform the GameHeader client separately
+            webSocketService.sendMessageToClients("/topic/games/" + gameIdToLeave + "/newturn_gameheader", nextTurnDTOasString);
+
+        }
+
+        // default fallback
+        else {
+            // Otherwise, just remove that player that left
+            // Tell the player repo that a player left
+            // NOT_FOUND if gameId does not exist
+            playerService.deletePlayerById(playerLeaving.getId());
+            // in this case, let the game know that one player left
+            gameService.updatePlayers(gameIdToLeave);
+            gameService.updateGame(gameIdToLeave);
+        }
+
+
+        // let everybody know that someone left or maybe the game is deleted
+        gameService.greetGames();
+
+        // return the GameGetDTO with the gameId of the game the user left
+        return gameLeftDTO;
+
+    }
+
 }

@@ -648,6 +648,103 @@ class GameControllerTest {
 
     }
 
+    @Test
+    void leaveAllGames_isOk() throws Exception {
+        // given
+        Player p1 = new Player();
+        p1.setIsHost(true);
+        p1.setGameId(1L);
+        p1.setPlayerColor(PlayerColor.INDIANRED);
+        p1.setToken("p1token");
+        p1.setUserToken("dummy");
+        p1.setId(1L);
+        p1.setPlayerName("p1");
+
+        // given
+        User u1 = new User();
+        u1.setPassword("password");
+        u1.setUsername("p1");
+        u1.setStatus(UserStatus.OFFLINE);
+        u1.setToken("dummy");
+
+        // given
+        Game game = new Game();
+        game.setGameId(1L);
+        game.setGameName("game1");
+        game.setGameMode(GameMode.PVP);
+        game.setBoardSize(BoardSize.SMALL);
+        game.setMaxDuration(MaxDuration.NA);
+        game.setGameStatus(GameStatus.INLOBBY);
+
+        // given - add the game to the GameRepository
+        GameRepository.addGame(game.getGameId(), game);
+        // given - add the player to the Game
+        gameService.createNewGame("game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+        playerService.joinPlayer("dummy", 1);
+
+        given(userService.getUserByToken("dummy")).willReturn(u1);
+        given(gameService.getGameById(1L)).willReturn(game);
+        given(playerService.getPlayerByUserToken("dummy")).willReturn(p1);
+
+        // when
+        MockHttpServletRequestBuilder postRequest = delete("/games")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header("Authorization", "dummy")
+          ;
+
+        // then
+        mockMvc.perform(postRequest).andExpect(status().isOk())
+        ;
+    }
+
+    @Test
+    void leaveAllGames_notInGame_throwsCONFLICT() throws Exception {
+        // given
+        Player p1 = new Player();
+        p1.setIsHost(true);
+        p1.setGameId(1L);
+        p1.setPlayerColor(PlayerColor.INDIANRED);
+        p1.setToken("p1token");
+        p1.setUserToken("dummy");
+        p1.setId(1L);
+        p1.setPlayerName("p1");
+
+        // given
+        User u1 = new User();
+        u1.setPassword("password");
+        u1.setUsername("p1");
+        u1.setStatus(UserStatus.OFFLINE);
+        u1.setToken("dummy");
+
+        // given
+        Game game = new Game();
+        game.setGameId(1L);
+        game.setGameName("game1");
+        game.setGameMode(GameMode.PVP);
+        game.setBoardSize(BoardSize.SMALL);
+        game.setMaxDuration(MaxDuration.NA);
+        game.setGameStatus(GameStatus.INLOBBY);
+
+        // given - add the game to the GameRepository
+        GameRepository.addGame(game.getGameId(), game);
+        // given - DO NOT add the player to the game
+        gameService.createNewGame("game1", GameMode.PVP, BoardSize.SMALL, MaxDuration.NA);
+
+        given(userService.getUserByToken("dummy")).willReturn(u1);
+        given(gameService.getGameById(1L)).willReturn(game);
+        given(playerService.getPlayerByUserToken("dummy")).willReturn(null);
+
+        // when
+        MockHttpServletRequestBuilder postRequest = delete("/games")
+          .contentType(MediaType.APPLICATION_JSON)
+          .header("Authorization", "dummy")
+          ;
+
+        // then
+        mockMvc.perform(postRequest).andExpect(status().isConflict())
+        ;
+    }
+
 
     /**
      * Helper Method to convert userPostDTO into a JSON string such that the input
