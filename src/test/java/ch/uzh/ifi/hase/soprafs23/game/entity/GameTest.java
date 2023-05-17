@@ -145,6 +145,32 @@ class GameTest {
     }
 
     @Test
+    void howfar_hitsBarrier_false() {
+        Game g = gameService.getGameById(gameIdHOWFAR);
+        assertFalse(g.hitsBarrier(99L));
+    }
+
+    @Test
+    void player_beforeEnd_doesNotHitBarrier() {
+        // given - add player to game
+        Game g1 = gameService.getGameById(gameId);
+        playerService.joinPlayer(userToken, g1.getGameId().intValue());
+
+        g1.initGame();
+
+        // get boardsize as in
+        int g1_boardsize = g1.getBoardSize().getBoardSize();
+
+        // set player score in leaderboard to 1 before end
+        Player p = g1.getPlayersView().get(0);
+        g1.getLeaderboard().getEntry(p.getId()).replaceScore(g1_boardsize-2);
+
+        // assert player does not hit a barrier
+        assertFalse(g1.hitsBarrier(p.getId()));
+
+    }
+
+    @Test
     void initGame() {
         // given - add player to game
         Game g1 = gameService.getGameById(gameId);
