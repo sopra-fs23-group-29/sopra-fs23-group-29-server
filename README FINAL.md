@@ -14,63 +14,53 @@ Our goal is to provide a game that is not only fun to play, but also improves th
 
 ## High-Level Components
 
+TODO
+
+
 ## Launch & Deployment
 
 ### Build & Run locally
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+#### Build
 
-#### Prerequisites
+You can use the local Gradle Wrapper to build the application.
+-   macOS: `./gradlew`
+-   Linux: `./gradlew`
+-   Windows: `./gradlew.bat`
 
-What things you need to install the software and how to install them
-
+The wrapper should take care of all necessary steps to build the project. The java version is set to 17 in `build.gradle` in 
 ```
-Give examples
-```
-
-+External dependecies/databases that need to be running for this to work
-
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 ```
 
-And repeat
 
-```
-until finished
-```
+#### Run
 
-End with an example of getting some data out of the system or using it for a little demo
+To run the successfully built application, you have two options. Either use the wrapper to initiate a bootRun:
+-   macOS: `./gradlew bootRun`
+-   Linux: `./gradlew bootRun`
+-   Windows: `./gradlew.bat bootRun`
+
+or, if you're using IntelliJ IDEA, simply run the `Application.java` file in `main.java.ch.uzh.ifi.hase.soprafs23`
+
+![Run Application from IDEA](images_readme/run_application.png)
 
 ### Tests
 
-Explain how to run the automated tests for this system
+The tests are located in `src.test` and are run automatically whenever you try to build the system.
+Failing test will prevent a successful build.
 
 #### Break down into end to end tests
 
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-#### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
+TODO
 
 ### Deployment
 
-Add additional notes about how to deploy this on a live system
+TODO - Is there anything to mention at all?
 
 ## Authors and Acknoledgement
 
@@ -80,7 +70,7 @@ Add additional notes about how to deploy this on a live system
 - **Ramona Walker**
 - **Mark Woolley**
 
-Acknoledgements but to whoom? Things like code we used, inspiration, etc.
+TODO: Acknoledgements but to whoom? Things like code we used, inspiration, etc.
 
 ## License
 
