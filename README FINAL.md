@@ -22,7 +22,7 @@ To communicate with the client side, the project uses REST and websocket with a 
 ## High-Level Components
 
 All communication is received by the [controllers](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) which handle all requests. The controllers delegate the message to the [services](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/service)
-which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the restcountries API which is used to fetch country data. 
+which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the restcountries API which is used to fetch country data (https://restcountries.com/). 
 
 
 ## Launch & Deployment
@@ -64,7 +64,7 @@ Failing tests will prevent a successful build or launch.
 
 ### Deployment
 
-TODO - Is there anything to mention at all?
+The deployemnt to Google Cloud Platform is automatically triggered, when a push to the main branch is made. The process is automatied with Github Actions. The deployment only proceeds, when all tests are passed.
 
 ## Authors and Acknowledgement
 
