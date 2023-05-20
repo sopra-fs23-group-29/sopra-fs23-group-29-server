@@ -22,7 +22,7 @@ To communicate with the client side, the project uses REST and websocket with a 
 ## High-Level Components
 
 All communication is received by the [controllers](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) which handle all requests. The controllers delegate the message to the [services](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/service)
-which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the restcountries API which is used to fetch country data (https://restcountries.com/). 
+which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the [restcountries API](https://restcountries.com/) which is used to fetch country data. 
 
 
 ## Launch & Deployment
@@ -64,7 +64,11 @@ Failing tests will prevent a successful build or launch.
 
 ### Deployment
 
-The deployemnt to Google Cloud Platform is automatically triggered, when a push to the main branch is made. The process is automatied with Github Actions. The deployment only proceeds, when all tests are passed.
+The prod version of the application is deployed on the Google Cloud Platform (GCP) App Engine using a CI/CD pipeline through Github Actions. The steps upon push on the main branch are specified in this [yml file](.github/workflows/main.yml).
+
+Upon push on main, all the tests in `src.test` are run and then the workflow tries to deploy the app.
+
+This [link](https://console.cloud.google.com/appengine/services?serviceId=default&hl=de&project=sopra-fs23-group-29-server) takes you the GCP project.
 
 ## Authors and Acknowledgement
 
@@ -74,7 +78,7 @@ The deployemnt to Google Cloud Platform is automatically triggered, when a push 
 - **Ramona Walker**
 - **Mark Woolley**
 
-TODO: Acknoledgements but to whoom? Things like code we used, inspiration, etc.
+We want to thank our teaching assistant Jerome Maier for the support during the semester and [Alejandro Matos](https://github.com/amatosg) for providing the great REST Countries API free of charge.
 
 ## Roadmap
 
