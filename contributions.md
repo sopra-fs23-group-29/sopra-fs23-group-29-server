@@ -142,6 +142,9 @@
 - Thalia
   - Client 136, 137
 
+- Mona
+  - Client 144, 145
+
 ### Week 21
 
 - Thalia
