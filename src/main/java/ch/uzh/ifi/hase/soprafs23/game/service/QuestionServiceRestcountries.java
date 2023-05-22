@@ -121,6 +121,10 @@ public class QuestionServiceRestcountries implements IQuestionService {
           if (tempCountry.getNBorders() == null) {continue;}
         case LANDLOCKED:
           if (tempCountry.getLandlocked() == null) {continue;}
+        case LANGUAGES:
+          if (tempCountry.getLanguages() == null) {continue;}
+        case CAPITAL:
+          if (tempCountry.getCapital() == null) {continue;}
       }
       countryChosen = tempCountry;
       listOptions.add(countryChosen);
@@ -151,6 +155,14 @@ public class QuestionServiceRestcountries implements IQuestionService {
               int tempCountryNBorders = tempCountry.getNBorders();
               // don't keep the country if the answer would be the same as one already chosen
               if (listOptions.stream().map(Country::getNBorders).toList().contains(tempCountryNBorders)) {continue;}
+            case LANGUAGES:
+              if (tempCountry.getLanguages() == null) {continue;}
+              String tempCountryLanguages = tempCountry.getLanguages();
+              if (listOptions.stream().map(Country::getLanguages).toList().contains(tempCountryLanguages)) {continue;}
+            case CAPITAL:
+              if (tempCountry.getCapital() == null) {continue;}
+              String tempCountryCapital = tempCountry.getCapital();
+              if (listOptions.stream().map(Country::getCapital).toList().contains(tempCountryCapital)) {continue;}
           }
 
           listOptions.add(tempCountry);

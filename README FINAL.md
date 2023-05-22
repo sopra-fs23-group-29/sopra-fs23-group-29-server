@@ -4,75 +4,74 @@
 
 Our goal is to provide a game that is not only fun to play, but also improves the players' geograhpical knowledge. Users can show off their skills in multiplayer games with up to 6 players, or challenge themselves in our two solo player game modes.
 
+This repository contains the back end server side of the project. The client side can be found in [this repository](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-client)
+
 ## Technologies
 
+The project uses the following technologies
 - Spring Boot
 - JPA
-- WebSocket
+- WebSocket STOMP
 - REST API
 - Gradle
+- Google Cloud Platform App Engine
+
+The server side which is contained in this repository is written in Java with the usage of the Spring Boot framework and uses JPA for persistence.
+The build is handled by Gradle and the deployment is done via Google Cloud Platforms App Engine.
+To communicate with the client side, the project uses REST and websocket with a STOMP protocol.
 
 ## High-Level Components
+
+All communication is received by the [controllers](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) which handle all requests. The controllers delegate the message to the [services](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/service)
+which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the [restcountries API](https://restcountries.com/) which is used to fetch country data. 
+
 
 ## Launch & Deployment
 
 ### Build & Run locally
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+#### Build
 
-#### Prerequisites
+You can use the local Gradle Wrapper to build the application.
+-   macOS: `./gradlew`
+-   Linux: `./gradlew`
+-   Windows: `./gradlew.bat`
 
-What things you need to install the software and how to install them
-
+The wrapper should take care of all necessary steps to build the project. The java version is set to 17 in `build.gradle` in 
 ```
-Give examples
-```
-
-+External dependecies/databases that need to be running for this to work
-
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 ```
 
-And repeat
 
-```
-until finished
-```
+#### Run
 
-End with an example of getting some data out of the system or using it for a little demo
+To run the successfully built application, you have two options. Either use the wrapper to initiate a bootRun:
+-   macOS: `./gradlew bootRun`
+-   Linux: `./gradlew bootRun`
+-   Windows: `./gradlew.bat bootRun`
+
+or, if you're using IntelliJ IDEA, simply run the `Application.java` file in `main.java.ch.uzh.ifi.hase.soprafs23`
+
+![Run Application from IDEA](images_readme/run_application.png)
 
 ### Tests
 
-Explain how to run the automated tests for this system
-
-#### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-#### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
+The tests are located in `src.test` and are run automatically whenever you build or run the system.
+Failing tests will prevent a successful build or launch.
 
 ### Deployment
 
-Add additional notes about how to deploy this on a live system
+The prod version of the application is deployed on the Google Cloud Platform (GCP) App Engine using a CI/CD pipeline through Github Actions. The steps upon push on the main branch are specified in this [yml file](.github/workflows/main.yml).
 
-## Authors and Acknoledgement
+Upon push on main, all the test are run (using [sonarcloud](https://sonarcloud.io/projects) for test reports and metrics) and then the workflow tries to deploy the app.
+
+This [link](https://console.cloud.google.com/appengine?referrer=search&hl=de&project=sopra-fs23-group-29-server&serviceId=default) takes you the GCP project.
+
+## Authors and Acknowledgement
 
 - **Dominik Arnold**
 - **Nils Bohnenblust**
@@ -80,7 +79,14 @@ Add additional notes about how to deploy this on a live system
 - **Ramona Walker**
 - **Mark Woolley**
 
-Acknoledgements but to whoom? Things like code we used, inspiration, etc.
+We want to thank our teaching assistant Jerome Maier for the support during the semester and [Alejandro Matos](https://github.com/amatosg) for providing the great REST Countries API free of charge.
+
+## Roadmap
+
+- New question type: Find a given country on a map
+- Global solo mode leaderboard
+- Friends list and the possibility to invite friends
+
 
 ## License
 

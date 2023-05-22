@@ -54,6 +54,13 @@ public class BarrierQuestion {
                 correctResult = country.getLandlocked() ? "yes" : "no";
                 answerOptions = Arrays.asList("yes","no");
                 break;
+            case CAPITAL:
+                correctResult = country.getCapital();
+                answerOptions = countryOptions.stream().map(Country::getCapital).toList();
+                break;
+            case LANGUAGES:
+                correctResult = country.getLanguages();
+                answerOptions = countryOptions.stream().map(Country::getLanguages).toList();
         }
     }
 }

@@ -30,6 +30,10 @@ public class Country {
     private List<String> bordersList;
     @JsonProperty("landlocked")
     private Boolean landlocked;
+    @JsonProperty("languages")
+    private Map<String, Object> languagesMap;
+    @JsonProperty("capital")
+    private List<String> capitalList;
 
     private Double gini;
     private String giniYear;
@@ -37,6 +41,8 @@ public class Country {
     private String flagUrl;
     private String name;
     private Double populationDensity;
+    private String capital;
+    private String languages;
 
 
     public String getName() {
@@ -100,6 +106,26 @@ public class Country {
         return landlocked;
     }
 
+    public String getCapital() {
+        if (capitalList.size() == 0) {return null;}
+        return capitalList.get(0);
+    }
+
+    public String getLanguages() {
+        if (languagesMap == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Object lang : languagesMap.values()) {
+            sb.append(lang).append("\n");
+        }
+        // Remove the last line break if it exists
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
     public void refreshDataFromNestedObjects() {
         this.gini = getGini();
         this.giniYear = getGiniYear();
@@ -107,6 +133,8 @@ public class Country {
         this.flagUrl = getFlagUrl();
         this.name = getName();
         this.populationDensity = getPopulationDensity();
+        this.capital = getCapital();
+        this.languages = getLanguages();
     }
     
 }

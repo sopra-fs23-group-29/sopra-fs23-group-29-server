@@ -128,7 +128,7 @@
 
 - Nils
 
-  - client 70, server 78, client 72
+  - client 70, server 78
 
 - Mark
   - Client 65, 34 (only client)
@@ -142,7 +142,22 @@
 - Thalia
   - Client 136, 137
 
+- Mona
+  - Client 144, 145
+
+- Mark
+  - Client 140, 141
+
+- Nils
+  - client 72, client 139
+
 ### Week 21
 
 - Thalia
   - Client 138, M4 report and presentation slides, some work on README.md files
+
+- Dominik
+  - Client 119, 122 (Game and Lobby guard and leaving page events handling), README files
+
+- Nils
+  - some work on README files, preparing to present, testing for stability of application
