@@ -3,7 +3,8 @@
 **Test your geography knowledge in a fun board game, solo or with other players.**
 
 Our goal is to provide a game that is not only fun to play, but also improves the players' geograhpical knowledge. Users can show off their skills in multiplayer games with up to 6 players, or challenge themselves in our two solo player game modes.
-This repository contains the back end server side of the project.
+
+This repository contains the back end server side of the project. The client side can be found in [this repository](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-client)
 
 ## Technologies
 
@@ -66,9 +67,9 @@ Failing tests will prevent a successful build or launch.
 
 The prod version of the application is deployed on the Google Cloud Platform (GCP) App Engine using a CI/CD pipeline through Github Actions. The steps upon push on the main branch are specified in this [yml file](.github/workflows/main.yml).
 
-Upon push on main, all the tests in `src.test` are run and then the workflow tries to deploy the app.
+Upon push on main, all the test are run (using [sonarcloud](https://sonarcloud.io/projects) for test reports and metrics) and then the workflow tries to deploy the app.
 
-This [link](https://console.cloud.google.com/appengine/services?serviceId=default&hl=de&project=sopra-fs23-group-29-server) takes you the GCP project.
+This [link](https://console.cloud.google.com/appengine?referrer=search&hl=de&project=sopra-fs23-group-29-server&serviceId=default) takes you the GCP project.
 
 ## Authors and Acknowledgement
 
@@ -84,7 +85,7 @@ We want to thank our teaching assistant Jerome Maier for the support during the 
 
 - New question type: Find a given country on a map
 - Global solo mode leaderboard
-- Friends list and the possiblity to invite friends
+- Friends list and the possibility to invite friends
 
 
 ## License

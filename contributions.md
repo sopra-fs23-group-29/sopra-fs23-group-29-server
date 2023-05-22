@@ -149,3 +149,6 @@
 
 - Thalia
   - Client 138, M4 report and presentation slides, some work on README.md files
+
+- Dominik
+  - Client 119, 122 (Game and Lobby guard and leaving page events handling), README files
