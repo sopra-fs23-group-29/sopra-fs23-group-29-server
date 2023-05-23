@@ -46,7 +46,7 @@ public class Country {
 
 
     public String getName() {
-        if (nameMap == null) {return null;}
+        if (nameMap == null || nameMap.size() == 0) {return null;}
         return (String) nameMap.get("common");
     }
 
@@ -61,22 +61,28 @@ public class Country {
     }
 
     public Double getGini() {
-        if (giniMap == null) {return null;}
+        if (giniMap == null || giniMap.size() == 0) {return null;}
         return giniMap.values().iterator().next();
     }
 
     public String getGiniYear() {
-        if (giniMap == null) {return null;}
+        if (giniMap == null || giniMap.size() == 0) {return null;}
         return giniMap.keySet().iterator().next();
     }
 
     public Double getCapitalLatitude() {
-        if (capitalInfoMap == null) {return null;}
-        return ((List<Double>) capitalInfoMap.get("latlng")).get(0);
+        if (capitalInfoMap == null || capitalInfoMap.size() == 0 || !capitalInfoMap.containsKey("latlng")) {return null;}
+        try {
+            return ((List<Double>) capitalInfoMap.get("latlng")).get(0);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public String getFlagUrl() {
-        if (flagsMap == null) {return null;}
+        if (flagsMap == null || flagsMap.size() == 0) {return null;}
         return (String) flagsMap.get("svg");
     }
 
@@ -106,7 +112,7 @@ public class Country {
     }
 
     public String getLanguages() {
-        if (languagesMap == null) {
+        if (languagesMap == null || languagesMap.size() == 0) {
             return null;
         }
         StringBuilder sb = new StringBuilder();
