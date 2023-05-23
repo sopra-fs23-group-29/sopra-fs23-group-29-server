@@ -30,8 +30,7 @@ public class CountryService {
     private boolean useLocalData = false; // default is false, assume url works
 
     public CountryService() {
-//        this.url = "https://restcountries.com";
-        this.url = "https://httpstat.us/503";
+        this.url = "https://restcountries.com";
         boolean urlValid = testURL();
         if (!urlValid) {
             log.warn("URL not valid, try to use local data");
