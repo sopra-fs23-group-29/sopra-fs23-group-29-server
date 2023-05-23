@@ -143,7 +143,7 @@
   - Client 136, 137
 
 - Mona
-  - Client 144, 145
+  - Client 144, 145, 147, 148
 
 - Mark
   - Client 140, 141
@@ -161,3 +161,6 @@
 
 - Nils
   - some work on README files, preparing to present, testing for stability of application
+
+- Mona
+  - Client 149, 150
