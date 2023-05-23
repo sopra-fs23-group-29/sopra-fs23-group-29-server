@@ -136,4 +136,38 @@ class CountryServiceTest {
     }
 
   }
+
+  @Test
+  void server_back_online() throws InterruptedException {
+
+    // create a new countryService for this test. Invalid URL, but checks every time when fetch
+    CountryService tmp = new CountryService("https://httpstat.us/503", -1);
+
+    // !! Cannot actually test if the restcountries.com server is down !!
+    // Check that the server is actually running
+    boolean serviceCurrentlyRunning = countryService.testURL();
+    if (!serviceCurrentlyRunning) {
+      log.warn("The real service {} is actually down, tests cannot be run in full!", countryService.getUrl());
+      return;
+    }
+
+    // Assert that an url suddenly changing from valid to server error does not result in an error
+    List<String> validCodes1 = Arrays.asList("GER","SUI");
+    List<String> validCodes2 = Arrays.asList("CAN","FRA","ITA");
+
+    // Go through two codes and then switch to server error url. Make sure the rest of the list is still processed
+    for (String code : validCodes1) {
+      assertNotNull(tmp.getCountryData(code));
+    }
+
+    // set the url to a valid url
+    tmp.setUrl("https://restcountries.com");
+    Thread.sleep(1000);
+
+    // Go through the other valid codes and make sure the service is still returning not null
+    for (String code : validCodes2) {
+      assertNotNull(tmp.getCountryData(code));
+    }
+
+  }
 }
