@@ -18,9 +18,14 @@ import java.nio.file.Paths;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime; // import the LocalDateTime class
+import java.time.temporal.ChronoUnit; // for time differences between two datetimes
+
 
 @Service
 public class CountryService {
+
+    private int WAIT = 60;
 
     private final Logger log = LoggerFactory.getLogger(CountryService.class);
     @Autowired
@@ -28,6 +33,8 @@ public class CountryService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private String url;
     private boolean useLocalData = false; // default is false, assume url works
+
+    private LocalDateTime lastCheckUrl = LocalDateTime.now();
 
     public CountryService() {
         this.url = "https://restcountries.com";
@@ -41,10 +48,12 @@ public class CountryService {
     /**
      * For testing purposes only
      * Inject an invalid server response to mock server failure
+     * Inject a non waiting for the testURL in getCountryData
      * @param url The url to use for the restTemplate
      */
-    public CountryService(String url) {
+    public CountryService(String url, int waitSeconds) {
         this.url = url;
+        this.WAIT = waitSeconds;
         boolean urlValid = testURL();
         if (!urlValid) {
             log.warn("URL not valid, try to use local data");
@@ -88,12 +97,23 @@ public class CountryService {
 
     public Country getCountryData(String COICode) {
 
-        // before each request if the service hat not yet switched to local data, check the url
-        // once switched to local, there is no going back
+        // If we currently have online data, always check
         if (!this.useLocalData) {
             boolean serverResponsive = testURL();
             if (!serverResponsive) {
                 this.useLocalData = true;
+            }
+        } else {
+            // If the current status uses offline data, check every 60 seconds reevaluate the server and set useLocalData
+            LocalDateTime now = LocalDateTime.now();
+            if (ChronoUnit.SECONDS.between(this.lastCheckUrl, now) > this.WAIT) {
+                log.info("Checking status of server ...");
+                boolean serverResponsive = testURL();
+                if (serverResponsive) {
+                    log.info("Set status from offline to online");
+                    this.useLocalData = false;
+                }
+                this.lastCheckUrl = now;
             }
         }
 

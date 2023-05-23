@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.game.questions.restCountry;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +26,8 @@ class CountryServiceTest {
   @Autowired
   private CountryService countryService;
 
-  private final CountryService countryServiceInvalidURL = new CountryService("invalidURL");
-  private final CountryService countryServiceServerError = new CountryService("https://httpstat.us/503");
+  private CountryService countryServiceInvalidURL;
+  private CountryService countryServiceServerError;
 
 //  @Test
 //  void testAllCodes_validURL() {
@@ -54,6 +55,14 @@ class CountryServiceTest {
 //    }
 //    assertTrue(true);
 //  }
+
+  @BeforeEach
+  public void setup() {
+
+    countryService = new CountryService();
+    countryServiceInvalidURL = new CountryService("invalidURL", -1);
+    countryServiceServerError = new CountryService("https://httpstat.us/503", -1);
+  }
 
   @Test
   void switch_to_local() {
@@ -97,12 +106,15 @@ class CountryServiceTest {
   @Test
   void server_error_during_operation() {
 
+    // create a new countryService for this test. Valid URL, but checks everytime
+    CountryService tmp = new CountryService("https://restcountries.com", -1);
+
     // !! Cannot actually test if the restcountries.com server is down !!
     // Check that the server is actually running
-    boolean serviceCurrentlyRunning = countryService.testURL();
+    boolean serviceCurrentlyRunning = tmp.testURL();
 
     if (!serviceCurrentlyRunning) {
-      log.warn("The service {} is actually down, tests cannot be run in full!", countryService.getUrl());
+      log.warn("The service {} is actually down, tests cannot be run in full!", tmp.getUrl());
       return;
     }
 
@@ -112,15 +124,15 @@ class CountryServiceTest {
 
     // Go through two codes and then switch to server error url. Make sure the rest of the list is still processed
     for (String code : validCodes1) {
-      assertNotNull(countryService.getCountryData(code));
+      assertNotNull(tmp.getCountryData(code));
     }
 
     // set the url to a server error url
-    countryService.setUrl("https://httpstat.us/503");
+    tmp.setUrl("https://httpstat.us/503");
 
     // Go through the other valid codes and make sure the service is still returning not null
     for (String code : validCodes2) {
-      assertNotNull(countryService.getCountryData(code));
+      assertNotNull(tmp.getCountryData(code));
     }
 
   }
