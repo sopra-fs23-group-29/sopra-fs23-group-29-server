@@ -1,95 +1,115 @@
-# SoPra RESTful Service Template FS23
+# Globalissimo - SoPra Project FS23, Group 29
 
-## UML Diagramm with draw.io
-- Open draw.io
-- Change storage
-- Github
-- Open existing diagram or create a new one
-- If open existing, choose the diagram
-- Work on it
-- Save as -> automatically commits changes
+**Test your geography knowledge in a fun board game, solo or with other players.**
 
-## Getting started with Spring Boot
--   Documentation: https://docs.spring.io/spring-boot/docs/current/reference/html/index.html
--   Guides: http://spring.io/guides
-    -   Building a RESTful Web Service: http://spring.io/guides/gs/rest-service/
-    -   Building REST services with Spring: https://spring.io/guides/tutorials/rest/
+Our goal is to provide a game that is not only fun to play, but also improves the players' geograhpical knowledge. Users can show off their skills in multiplayer games with up to 6 players, or challenge themselves in our two solo player game modes.
 
-## Setup this Template with your IDE of choice
-Download your IDE of choice (e.g., [IntelliJ](https://www.jetbrains.com/idea/download/), [Visual Studio Code](https://code.visualstudio.com/), or [Eclipse](http://www.eclipse.org/downloads/)). Make sure Java 17 is installed on your system (for Windows, please make sure your `JAVA_HOME` environment variable is set to the correct version of Java).
+This repository contains the back end server side of the project. The client side can be found in [this repository](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-client)
 
-### IntelliJ
-1. File -> Open... -> SoPra server template
-2. Accept to import the project as a `gradle project`
-3. To build right click the `build.gradle` file and choose `Run Build`
+## Technologies
 
-### VS Code
-The following extensions can help you get started more easily:
--   `vmware.vscode-spring-boot`
--   `vscjava.vscode-spring-initializr`
--   `vscjava.vscode-spring-boot-dashboard`
--   `vscjava.vscode-java-pack`
+The project uses the following technologies
+- Spring Boot
+- JPA
+- WebSocket STOMP
+- REST API
+- Gradle
+- Google Cloud Platform App Engine
 
-**Note:** You'll need to build the project first with Gradle, just click on the `build` command in the _Gradle Tasks_ extension. Then check the _Spring Boot Dashboard_ extension if it already shows `soprafs23` and hit the play button to start the server. If it doesn't show up, restart VS Code and check again.
+The server side which is contained in this repository is written in Java with the usage of the Spring Boot framework and uses JPA for persistence.
+The build is handled by Gradle and the deployment is done via Google Cloud Platforms App Engine.
+To communicate with the client side, the project uses REST and websocket with a STOMP protocol.
 
-## Building with Gradle
+## High-Level Components
+
+All communication is received by the [controllers](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) which handle all requests. The controllers delegate the message to the [services](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/service)
+which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the [restcountries API](https://restcountries.com/) which is used to fetch country data.
+
+### API Stability
+Due to repeated problems with the used [API](https://restcountries.com) the [CountryService Class](/src/main/java/ch/uzh/ifi/hase/soprafs23/game/questions/restCountry/CountryService.java) is implemented with a fallback. Upon initialization of the service, it checks the responsiveness of the API. If the server is not online, the service uses static, locally stored [data](/src/main/resources/countriesV31.json) to generate questions.
+
+## Launch & Deployment
+
+### Build & Run locally
+
+#### Build
+
 You can use the local Gradle Wrapper to build the application.
 -   macOS: `./gradlew`
 -   Linux: `./gradlew`
 -   Windows: `./gradlew.bat`
 
-More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) and [Gradle](https://gradle.org/docs/).
-
-### Build
-
-```bash
-./gradlew build
+The wrapper should take care of all necessary steps to build the project. The java version is set to 17 in `build.gradle` in 
+```
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
 ```
 
-### Run
 
-```bash
-./gradlew bootRun
-```
+#### Run
 
-You can verify that the server is running by visiting `localhost:8080` in your browser.
+To run the successfully built application, you have two options. Either use the wrapper to initiate a bootRun:
+-   macOS: `./gradlew bootRun`
+-   Linux: `./gradlew bootRun`
+-   Windows: `./gradlew.bat bootRun`
 
-### Test
+or, if you're using IntelliJ IDEA, simply run the `Application.java` file in `main.java.ch.uzh.ifi.hase.soprafs23`
 
-```bash
-./gradlew test
-```
+![Run Application from IDEA](images_readme/run_application.png)
 
-### Development Mode
-You can start the backend in development mode, this will automatically trigger a new build and reload the application
-once the content of a file has been changed.
+### Tests
 
-Start two terminal windows and run:
+The tests are located in `src.test` and are run automatically whenever you build or run the system.
+Failing tests will prevent a successful build or launch.
 
-`./gradlew build --continuous`
+### Deployment
 
-and in the other one:
+The prod version of the application is deployed on the Google Cloud Platform (GCP) App Engine using a CI/CD pipeline through Github Actions. The steps upon push on the main branch are specified in this [yml file](.github/workflows/main.yml).
 
-`./gradlew bootRun`
+Upon push on main, all the test are run (using [sonarcloud](https://sonarcloud.io/projects) for test reports and metrics) and then the workflow tries to deploy the app.
 
-If you want to avoid running all tests with every change, use the following command instead:
+This [link](https://console.cloud.google.com/appengine?referrer=search&hl=de&project=sopra-fs23-group-29-server&serviceId=default) takes you the GCP project.
 
-`./gradlew build --continuous -xtest`
+## Authors and Acknowledgement
 
-## API Endpoint Testing with Postman
-We recommend using [Postman](https://www.getpostman.com) to test your API Endpoints.
+- **Dominik Arnold**
+- **Nils Bohnenblust**
+- **Thalia Lynn Fox**
+- **Ramona Walker**
+- **Mark Woolley**
 
-## Debugging
-If something is not working and/or you don't know what is going on. We recommend using a debugger and step-through the process step-by-step.
+We want to thank our teaching assistant Jerome Maier for the support during the semester and [Alejandro Matos](https://github.com/amatosg) for providing the great REST Countries API free of charge.
 
-To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you start with `./gradlew bootRun` command), do the following:
+## Roadmap
 
-1. Open Tab: **Run**/Edit Configurations
-2. Add a new Remote Configuration and name it properly
-3. Start the Server in Debug mode: `./gradlew bootRun --debug-jvm`
-4. Press `Shift + F9` or the use **Run**/Debug "Name of your task"
-5. Set breakpoints in the application where you need it
-6. Step through the process one step at a time
+- New question type: Find a given country on a map
+- Global solo mode leaderboard
+- Friends list and the possibility to invite friends
 
-## Testing
-Have a look here: https://www.baeldung.com/spring-boot-testing
+
+## License
+
+MIT License
+
+Copyright (c) [2023]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
