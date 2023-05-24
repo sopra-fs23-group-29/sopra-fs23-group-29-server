@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -48,7 +45,7 @@ public class CountryService {
     /**
      * For testing purposes only
      * Inject an invalid server response to mock server failure
-     * Inject a non waiting for the testURL in getCountryData
+     * Inject a custom waiting time for the testURL in getCountryData to recheck
      * @param url The url to use for the restTemplate
      */
     public CountryService(String url, int waitSeconds) {
@@ -65,7 +62,7 @@ public class CountryService {
 
     /**
      * Set and get the url of the CountryService. For testing purposes only
-     * @param url
+     * @param url New url string to set
      */
     public void setUrl(String url) {this.url = url;}
     public String getUrl() {return this.url;}
@@ -73,13 +70,19 @@ public class CountryService {
     /**
      * Run this function in each constructor to test the validity of the supplied url
      * If a response is not 200 switch to local data mode
-     * @return
+     *
+     * restTemplate.getForEntity(String url, Class <String>) throws a RestClientException in case something goes wrong
+     * IllegalArgument exception is thrown if URL is not in a valid url schema
+     * HttpServerErrorException is a subclass of RestClientException specifically catches server errors with response type 5xx
+     * The last expression catches all the remaining exceptions
+     *
+     * @return true if url responds with OK, false otherwise
      */
     public boolean testURL () {
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(this.url, String.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.warn("URL response non 200 status");
+                log.warn("URL response status not 200, returned {}", response.getStatusCode());
                 return false;
             }
         } catch (IllegalArgumentException e) {
@@ -88,8 +91,8 @@ public class CountryService {
         } catch (HttpServerErrorException e) {
             log.warn("URL {} reports server error with code {}", this.url, e.getStatusCode());
             return false;
-        } catch (ResourceAccessException e) {
-            log.warn("URL {} resource or connection exception", this.url);
+        } catch (RestClientException e) {
+            log.warn("URL {} general RestClientException {}", this.url, e.getClass());
             return false;
         }
         return true;
