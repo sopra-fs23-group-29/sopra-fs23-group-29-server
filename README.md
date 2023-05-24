@@ -26,7 +26,7 @@ All communication is received by the [controllers](https://github.com/sopra-fs23
 which handle all the game logic with the help of the [entity classes](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/entity). The [questions](https://github.com/sopra-fs23-group-29/sopra-fs23-group-29-server/tree/main/src/main/java/ch/uzh/ifi/hase/soprafs23/game/controller) package handles all tasks regarding fetching country data and generating the questions needed to play the game. This package contains the connection to the [restcountries API](https://restcountries.com/) which is used to fetch country data.
 
 ### API Stability
-Due to repeated problems with the used [API](https://restcountries.com) the [CountryService Class](/src/main/java/ch/uzh/ifi/hase/soprafs23/game/questions/restCountry/CountryService.java) is implemented with a fallback. Upon initialization of the service, it checks the responsiveness of the API. If the server is not online, the service uses static, locally stored [data](/src/main/resources/countriesV31.json) to generate questions.
+Due to repeated problems with the used [API](https://restcountries.com) the [CountryService Class](/src/main/java/ch/uzh/ifi/hase/soprafs23/game/questions/restCountry/CountryService.java) is implemented with a fallback. Upon initialization of the service, it checks the responsiveness of the API. If the server is not online, the service uses static, locally stored [data](/src/main/resources/countriesV31.json) to generate questions. If the service operates in "offline" mode, each 60 seconds a new try to reach the API is launched. If successful, the service switches back to the online API.
 
 ## Launch & Deployment
 
