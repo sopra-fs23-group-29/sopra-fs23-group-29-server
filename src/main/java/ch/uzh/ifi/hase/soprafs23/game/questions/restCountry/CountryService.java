@@ -95,6 +95,7 @@ public class CountryService {
             log.warn("URL {} general RestClientException {}", this.url, e.getClass());
             return false;
         }
+        log.info("URL {} test successful", this.url);
         return true;
     }
 
